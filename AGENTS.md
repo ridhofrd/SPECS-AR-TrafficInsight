@@ -91,3 +91,33 @@ The Preview Panel shows live runtime transforms; the Scene Panel shows authored 
 Verify assumptions early — a quick prototype can save hours of debugging a plan built on wrong foundations. Build incrementally: confirm each layer renders before adding the next.
 
 <!-- END Lens Studio managed AGENTS block -->
+
+## Project rules
+
+This is an entry for Learn AR with SPECS (Devpost, Round 2). Lens Studio owns
+the block above. Never edit it.
+
+### What we build
+- devpost/design-brief.md is the source of truth. Build what it says. If part
+  of it can't work, tell the user instead of changing the design.
+- Everything must run and be shown in Lens Studio's Interactive Preview. No
+  SPECS device is available.
+- Use Spectacles Interaction Kit (SIK) and UI Kit for interactions, so they
+  work with the mouse and with LEAF tests.
+- New work only: this project was created on 2026-11-18, inside the submission
+  period. Don't paste code from older projects or the web into Assets/.
+  Templates, packages and CLAD output are fine. If you reuse a sample snippet,
+  say so, so the README can credit it.
+- Don't record, identify, or follow people.
+
+### Working in Lens Studio
+- New scripts are TypeScript in Assets/Scripts/, one component per file.
+- Log with console.log, console.warn and console.error, not print().
+- After changing a script, compile it and read the Logger before saying it works.
+
+### Repository
+- Never stage, print or paste .mcp.json or the other editor connection files
+  (.cursor/mcp.json, .vscode/mcp.json, .codex/config.toml). They contain a token.
+- Screenshots and GIFs go in docs/media/ and are linked from README.md.
+- Commit messages follow Conventional Commits (feat:, fix:, docs:, test:,
+  chore:) with a short imperative subject. No co-author or "generated with" lines.
