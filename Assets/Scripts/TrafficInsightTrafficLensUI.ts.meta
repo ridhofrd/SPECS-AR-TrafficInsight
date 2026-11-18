@@ -1,0 +1,59 @@
+- !<AssetImportMetadata/cbb61233-a4ce-417c-a409-ffa053a8ec8d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> dc92af3c-bfab-4281-b041-0a0cb2b66117
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> dc92af3c-bfab-4281-b041-0a0cb2b66117
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 73b2d830-47e2-42b0-8432-233ec6b5fd9e
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/73b2d830-47e2-42b0-8432-233ec6b5fd9e>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: f8bbb4c6-e8d4-4f99-a9a0-1d8a0c0a8a2f
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    alertIconRoot: false
+    problemCardRoot: false
+    raincoatReminderRoot: false
+    routeLabelCardARoot: false
+    routeLabelCardBRoot: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - routeLabelCardARoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      routeLabelCardBRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      problemCardRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      raincoatReminderRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      alertIconRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input SceneObject routeLabelCardARoot {"hint":"RouteLabelCardARoot (falls back to a name search)"}'
+    - '// @input SceneObject routeLabelCardBRoot {"hint":"RouteLabelCardBRoot (falls back to a name search)"}'
+    - '// @input SceneObject problemCardRoot {"hint":"ProblemCardRoot (falls back to a name search)"}'
+    - '// @input SceneObject raincoatReminderRoot {"hint":"RaincoatReminderRoot (falls back to a name search)"}'
+    - '// @input SceneObject alertIconRoot {"hint":"AlertIconRoot (falls back to a name search); TrafficInsightLazyFollow moves it"}'

@@ -1,0 +1,74 @@
+- !<AssetImportMetadata/b73c8880-fb2b-42d4-8aad-cdd2ac8a1773>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 8f02db4f-6506-4005-a66d-5b7adc062ac7
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 8f02db4f-6506-4005-a66d-5b7adc062ac7
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 1662df27-2c3f-43c7-91d8-811c6397c609
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/1662df27-2c3f-43c7-91d8-811c6397c609>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: 5c4232b8-10a5-4484-bcf9-9f100e6bbde5
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    cityMap: false
+    crashHighlightColor: false
+    dotA: false
+    dotB: false
+    dotHoverScale: false
+    lineMaterial: false
+    rainHighlightColor: false
+    routeAColor: false
+    routeBColor: false
+    routeLineWidthCm: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - cityMap: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      dotA: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      dotB: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      lineMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      routeLineWidthCm: 0.600000
+      routeAColor: !<Vec4> {x: 0.494000, y: 0.784000, z: 0.949000, w: 1.000000}
+      routeBColor: !<Vec4> {x: 0.561000, y: 0.890000, z: 0.722000, w: 1.000000}
+      crashHighlightColor: !<Vec4> {x: 1.000000, y: 0.620000, z: 0.541000, w: 1.000000}
+      rainHighlightColor: !<Vec4> {x: 1.000000, y: 0.769000, z: 0.420000, w: 1.000000}
+      dotHoverScale: 1.250000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject cityMap
+    - // @input SceneObject dotA
+    - // @input SceneObject dotB
+    - // @input Asset.Material lineMaterial
+    - '// @input float routeLineWidthCm = 0.6 {"widget":"slider", "min":0.2, "max":2, "step":0.1}'
+    - '// @input vec4 routeAColor = {0.494,0.784,0.949,1} {"widget":"color"}'
+    - '// @input vec4 routeBColor = {0.561,0.89,0.722,1} {"widget":"color"}'
+    - '// @input vec4 crashHighlightColor = {1,0.62,0.541,1} {"widget":"color"}'
+    - '// @input vec4 rainHighlightColor = {1,0.769,0.42,1} {"widget":"color"}'
+    - '// @input float dotHoverScale = 1.25 {"widget":"slider", "min":1, "max":2, "step":0.05}'

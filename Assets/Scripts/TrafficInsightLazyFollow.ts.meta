@@ -1,0 +1,56 @@
+- !<AssetImportMetadata/4fa4ca92-4321-4ce9-a6fa-a679fa43b64d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> aab164ff-953f-4dd5-8393-a2a1647e7ab1
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> aab164ff-953f-4dd5-8393-a2a1647e7ab1
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 2387e021-ed67-422f-bd5d-ffaf0513d361
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/2387e021-ed67-422f-bd5d-ffaf0513d361>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: e7608d04-9c33-4621-90d4-85dc0d4f9dce
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    cameraObject: false
+    faceCamera: false
+    followSmoothing: false
+    offsetCm: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - cameraObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      offsetCm: !<Vec3> {x: 10.000000, y: -16.000000, z: -100.000000}
+      followSmoothing: !<float> 4.000000
+      faceCamera: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject cameraObject
+    - "// @input vec3 offsetCm = {10,-16,-100}"
+    - '// @input float followSmoothing = 4 {"widget":"slider", "min":0.5, "max":12, "step":0.5}'
+    - // @input bool faceCamera = true

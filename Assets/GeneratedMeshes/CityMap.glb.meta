@@ -1,0 +1,618 @@
+- !<AssetImportMetadata/e24df231-63ab-435e-81e0-a21a9fed606e>
+  ImportedAssetIds:
+    .hidden/MapBase: !<reference> fdccdd58-352d-4644-a05e-c8aafd6f15ea
+    01f45bf81d3bf24e: !<reference> d59d324f-e2d3-49da-8fd9-9c2f81dfc076
+    0954ac0cd0862064: !<reference> 38469658-7088-418b-8261-0ac2f81ffa7a
+    0f4d3865251e17ce: !<reference> 3c0e41ad-06f4-4e0b-b680-3f4768245799
+    1524c5dd3bc8bf00: !<reference> ffc279ca-a565-4fcb-a4fc-90ad42a3bb77
+    1894c078cb0d9071: !<reference> 018f69c7-c802-437c-84f0-69a160553777
+    26ba073d67b9d0dd: !<reference> caffa390-c7e5-4e10-a5aa-e96b3dd3f428
+    344ca2756bcbfdbb: !<reference> 961a0d0d-0ba4-4544-9587-ba10a18349ed
+    40991b475050d81c: !<reference> d34c7391-f5a2-40a8-979c-05151f001b73
+    431b41082435f514: !<reference> e9bfcf0c-cdba-433f-b045-8b34d0088064
+    47ecbf722cc2e3e5: !<reference> bd65d8b3-2e71-4abb-905b-395bcdafa012
+    5fa38b502b32b7c9: !<reference> 7a222e20-f942-4c83-a4ad-8360821631d1
+    5fd0606f73b0cc08: !<reference> 3f66a726-2d5e-48b5-8874-ebadf64918a8
+    657c264db4d38ac9: !<reference> ae117a1c-b143-4107-b120-6a9637d7e0e8
+    673375da0a3b670f: !<reference> 2e078867-ad77-413c-b2bd-301c6377a9fc
+    6891367481b23373: !<reference> 75e0f825-819f-4da6-8e25-b71ea4644b03
+    7bb94e1ed121230b: !<reference> 59507049-c209-45c4-822f-9a1f5e08d1c1
+    87b4ef46e7bfb3dc: !<reference> 3794a816-dbb1-454c-a07e-38d88ccf8b86
+    88ab437fd121cc69: !<reference> 6f4db01e-7333-44b5-8e5e-d88292cf07aa
+    97377dc2d3021836: !<reference> 2e282259-cf6d-4762-bc35-c5b544b3caec
+    976011aa572c615a: !<reference> 95537f70-aff1-4526-83fa-d029d3634f47
+    Materials/MapBase: !<reference> e273f51e-d355-4a46-9546-30ffa4614a75
+    Materials/MapBase|MapBase|GraphPassInfo: !<reference> 1328ef5c-2525-4aeb-9a91-87f91829e881
+    Materials/MapPark: !<reference> d6e9d564-ab41-4eca-8855-9494c03fdff3
+    Materials/MapPark|MapPark|GraphPassInfo: !<reference> 2087d81b-12f4-494f-9d26-02a099aac9cb
+    Materials/MapRiver: !<reference> b1940dd7-300f-42aa-97ed-a23316817e36
+    Materials/MapRiver|MapRiver|GraphPassInfo: !<reference> 330363c3-1316-4422-9d60-601d61581e01
+    Materials/MapStreet: !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+    Materials/MapStreet|MapStreet|GraphPassInfo: !<reference> 68bc0e89-b8cf-4e8c-87f3-31f3b62228dc
+    Meshes/MapBase: !<reference> f50c1aad-18f8-4e71-93b5-f3cb05efbde0
+    Meshes/MapPark0: !<reference> d7ece820-882b-438d-b297-202154c31e99
+    Meshes/MapPark1: !<reference> f81c2a7c-da08-4919-acf2-266c9033476d
+    Meshes/MapPark2: !<reference> b2475aed-ba62-4e83-be6a-89baf09d0ac5
+    Meshes/MapRiver: !<reference> 4a3436f4-7bb1-40df-a24a-30e64596160c
+    Meshes/StreetX+0: !<reference> d7a2c748-c266-4245-a30c-b5dbf2edbd9e
+    Meshes/StreetX+10: !<reference> 7fe659a3-a54f-4b0c-ae03-691c693a6c62
+    Meshes/StreetX+20: !<reference> 845a8e3f-2122-42a3-9cb5-5b85354a10d8
+    Meshes/StreetX-10: !<reference> 56cb1b7c-5ccd-49aa-b1dd-cba8c0f7400e
+    Meshes/StreetX-20: !<reference> 7d6450a2-3fec-4887-abe0-f8357f67bbbc
+    Meshes/StreetZ+0: !<reference> 810cc4a9-b123-4557-8470-a933728f1d05
+    Meshes/StreetZ+10: !<reference> f42abf3e-761b-4aba-9501-b850fea307a7
+    Meshes/StreetZ-10: !<reference> f150ce56-5b37-45f8-8e23-9333d106f475
+    Scene: !<reference> 35aa0ac2-8762-414c-9c52-b15404759345
+    b19612e4fbb899a9: !<reference> cf8d3b70-2a68-4699-8e64-45bdafed7b55
+    c39b7935eac1281a: !<reference> b7ad2ee5-06da-492d-8e20-905fb540ef0f
+    c7e2d3cbeb5cd353: !<reference> 9d7a3b0c-9711-481a-a822-b14dddd0d215
+    e1594a7a95649062: !<reference> 22cb827d-0316-4ab6-8c15-eb8cd6ed6f51
+    e343140e48295b4f: !<reference> 79926c46-00e3-471d-9ffa-9436b5848626
+    e5e1308a8c9a55a7: !<reference> f1e12f7d-aec5-478d-9e75-a78aadee37c2
+    ecf345becd3cda36: !<reference> e9d8b240-fe9a-4388-8f04-bc9e2e73a3f1
+    ef006dbe2631e128: !<reference> 4bafcb37-732d-4c09-9569-f5c58c11e821
+    f0423cf066069725: !<reference> 643f1104-5085-4cf1-9da8-836ae7d8b8ab
+    fab38a9cde27e601: !<reference> 4997c296-f661-4f35-916c-f19079ada010
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 35aa0ac2-8762-414c-9c52-b15404759345
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 392c72ba-464b-4a78-abc1-4f6f0e95facb
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/018f69c7-c802-437c-7b0f-965e9faac888>
+  PrefabRemaps:
+    []
+  Name: StreetX+20
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 961a0d0d-0ba4-4544-6a78-45ef5e7cb612
+- !<RenderMeshVisual/22cb827d-0316-4ab6-73ea-1473291290ae>
+  PrefabRemaps:
+    []
+  Name: StreetX+0
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> d7a2c748-c266-4245-a30c-b5dbf2edbd9e
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<RenderMeshVisual/2e078867-ad77-413c-4d42-cfe39c885603>
+  PrefabRemaps:
+    []
+  Name: MapPark2
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> d6e9d564-ab41-4eca-8855-9494c03fdff3
+  Mesh: !<reference> b2475aed-ba62-4e83-be6a-89baf09d0ac5
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/2e282259-cf6d-4762-43ca-3a4abb4c3513>
+  PrefabRemaps:
+    []
+  Name: MapPark0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 3794a816-dbb1-454c-5f81-c72773307479
+- !<RenderMeshVisual/3794a816-dbb1-454c-5f81-c72773307479>
+  PrefabRemaps:
+    []
+  Name: MapPark0
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> d6e9d564-ab41-4eca-8855-9494c03fdff3
+  Mesh: !<reference> d7ece820-882b-438d-b297-202154c31e99
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/38469658-7088-418b-7d9e-f53d07e00585>
+  PrefabRemaps:
+    []
+  Name: StreetZ+10
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> f1e12f7d-aec5-478d-618a-58755211c83d
+- !<ObjectPrefabAssetData/392c72ba-464b-4a78-abc1-4f6f0e95facb>
+  Prototype: !<ObjectOwner/b58e4a63-06f8-4cbb-9a6a-c94c4a7b06c8>
+    PackagePath: ""
+    objects:
+      - !<own> caffa390-c7e5-4e10-5a55-1694c22c0bd7
+- !<SceneObject/3c0e41ad-06f4-4e0b-497f-c0b897dba866>
+  PrefabRemaps:
+    []
+  Name: StreetZ+0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 4997c296-f661-4f35-6e93-0e6f86525fef
+- !<SceneObject/3f66a726-2d5e-48b5-778b-145209b6e757>
+  PrefabRemaps:
+    []
+  Name: MapRiver
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> b7ad2ee5-06da-492d-71df-6fa04abf10f0
+- !<RenderMeshVisual/4997c296-f661-4f35-6e93-0e6f86525fef>
+  PrefabRemaps:
+    []
+  Name: StreetZ+0
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> 810cc4a9-b123-4557-8470-a933728f1d05
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/4bafcb37-732d-4c09-6a96-0a3a73ee17de>
+  PrefabRemaps:
+    []
+  Name: MapPark1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> cf8d3b70-2a68-4699-719b-ba42501284aa
+- !<SceneObject/59507049-c209-45c4-7dd0-65e0a1f72e3e>
+  PrefabRemaps:
+    []
+  Name: StreetX-10
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e9d8b240-fe9a-4388-70fb-4361d18c5c0e
+- !<SceneObject/643f1104-5085-4cf1-6257-7c9518274754>
+  PrefabRemaps:
+    []
+  Name: StreetX-20
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> bd65d8b3-2e71-4abb-6fa4-c6a432505fed
+- !<SceneObject/6f4db01e-7333-44b5-71a1-277d6d30f855>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> ae117a1c-b143-4107-4edf-9569c8281f17
+  Components:
+    []
+- !<SceneObject/75e0f825-819f-4da6-71da-48e15b9bb4fc>
+  PrefabRemaps:
+    []
+  Name: Root_CityMap
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> e9bfcf0c-cdba-433f-4fba-74cb2ff77f9b
+    - !<own> 2e282259-cf6d-4762-43ca-3a4abb4c3513
+    - !<own> 4bafcb37-732d-4c09-6a96-0a3a73ee17de
+    - !<own> 79926c46-00e3-471d-6005-6bc94a7b79d9
+    - !<own> 3f66a726-2d5e-48b5-778b-145209b6e757
+    - !<own> 95537f70-aff1-4526-7c05-2fd62c9cb0b8
+    - !<own> d59d324f-e2d3-49da-7026-63d07e203f89
+    - !<own> 018f69c7-c802-437c-7b0f-965e9faac888
+    - !<own> 59507049-c209-45c4-7dd0-65e0a1f72e3e
+    - !<own> 643f1104-5085-4cf1-6257-7c9518274754
+    - !<own> 3c0e41ad-06f4-4e0b-497f-c0b897dba866
+    - !<own> 38469658-7088-418b-7d9e-f53d07e00585
+    - !<own> d34c7391-f5a2-40a8-6863-faeae0ffe48c
+  Components:
+    []
+- !<SceneObject/79926c46-00e3-471d-6005-6bc94a7b79d9>
+  PrefabRemaps:
+    []
+  Name: MapPark2
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 2e078867-ad77-413c-4d42-cfe39c885603
+- !<RenderMeshVisual/7a222e20-f942-4c83-5b52-7c9f7de9ce2e>
+  PrefabRemaps:
+    []
+  Name: StreetX+10
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> 7fe659a3-a54f-4b0c-ae03-691c693a6c62
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/95537f70-aff1-4526-7c05-2fd62c9cb0b8>
+  PrefabRemaps:
+    []
+  Name: StreetX+0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 22cb827d-0316-4ab6-73ea-1473291290ae
+- !<RenderMeshVisual/961a0d0d-0ba4-4544-6a78-45ef5e7cb612>
+  PrefabRemaps:
+    []
+  Name: StreetX+20
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> 845a8e3f-2122-42a3-9cb5-5b85354a10d8
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<RenderMeshVisual/9d7a3b0c-9711-481a-57dd-4eb2222f2dea>
+  PrefabRemaps:
+    []
+  Name: StreetZ-10
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> f150ce56-5b37-45f8-8e23-9333d106f475
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/ae117a1c-b143-4107-4edf-9569c8281f17>
+  PrefabRemaps:
+    []
+  Name: Scene
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 75e0f825-819f-4da6-71da-48e15b9bb4fc
+  Components:
+    []
+- !<RenderMeshVisual/b7ad2ee5-06da-492d-71df-6fa04abf10f0>
+  PrefabRemaps:
+    []
+  Name: MapRiver
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> b1940dd7-300f-42aa-97ed-a23316817e36
+  Mesh: !<reference> 4a3436f4-7bb1-40df-a24a-30e64596160c
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<RenderMeshVisual/bd65d8b3-2e71-4abb-6fa4-c6a432505fed>
+  PrefabRemaps:
+    []
+  Name: StreetX-20
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> 7d6450a2-3fec-4887-abe0-f8357f67bbbc
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/caffa390-c7e5-4e10-5a55-1694c22c0bd7>
+  PrefabRemaps:
+    []
+  Name: CityMap
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 6f4db01e-7333-44b5-71a1-277d6d30f855
+  Components:
+    []
+- !<RenderMeshVisual/cf8d3b70-2a68-4699-719b-ba42501284aa>
+  PrefabRemaps:
+    []
+  Name: MapPark1
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> d6e9d564-ab41-4eca-8855-9494c03fdff3
+  Mesh: !<reference> f81c2a7c-da08-4919-acf2-266c9033476d
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/d34c7391-f5a2-40a8-6863-faeae0ffe48c>
+  PrefabRemaps:
+    []
+  Name: StreetZ-10
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 9d7a3b0c-9711-481a-57dd-4eb2222f2dea
+- !<SceneObject/d59d324f-e2d3-49da-7026-63d07e203f89>
+  PrefabRemaps:
+    []
+  Name: StreetX+10
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 7a222e20-f942-4c83-5b52-7c9f7de9ce2e
+- !<SceneObject/e9bfcf0c-cdba-433f-4fba-74cb2ff77f9b>
+  PrefabRemaps:
+    []
+  Name: MapBase
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> ffc279ca-a565-4fcb-5b03-6f52bd5c4488
+- !<RenderMeshVisual/e9d8b240-fe9a-4388-70fb-4361d18c5c0e>
+  PrefabRemaps:
+    []
+  Name: StreetX-10
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> 56cb1b7c-5ccd-49aa-b1dd-cba8c0f7400e
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<RenderMeshVisual/f1e12f7d-aec5-478d-618a-58755211c83d>
+  PrefabRemaps:
+    []
+  Name: StreetZ+10
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3f89698d-57aa-4212-bfda-579bb3fd13b5
+  Mesh: !<reference> f42abf3e-761b-4aba-9501-b850fea307a7
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<RenderMeshVisual/ffc279ca-a565-4fcb-5b03-6f52bd5c4488>
+  PrefabRemaps:
+    []
+  Name: MapBase
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> e273f51e-d355-4a46-9546-30ffa4614a75
+  Mesh: !<reference> f50c1aad-18f8-4e71-93b5-f3cb05efbde0
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}

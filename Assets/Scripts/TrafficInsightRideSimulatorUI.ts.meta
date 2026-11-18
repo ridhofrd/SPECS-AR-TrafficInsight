@@ -1,0 +1,50 @@
+- !<AssetImportMetadata/0c63eb36-291c-49c9-8176-5fefdea02a24>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 30db65aa-bbc4-4d5a-a5df-66e7881a674d
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 30db65aa-bbc4-4d5a-a5df-66e7881a674d
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> ebb7c2bb-8b81-4b69-9aee-511d90208aea
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/ebb7c2bb-8b81-4b69-9aee-511d90208aea>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: adc8d3ef-cb9f-42c8-b307-6cfa9b48aec0
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    clarifyDialogRoot: false
+    rideSimulatorRoot: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - rideSimulatorRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      clarifyDialogRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject rideSimulatorRoot
+    - // @input SceneObject clarifyDialogRoot
