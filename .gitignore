@@ -27,3 +27,18 @@ Workspaces/**
 ls-live-instance.json
 ls-live-instance.json.tmp
 # END Lens Studio managed Agents-Docs block
+
+# --- Project ignores (outside Lens Studio's managed blocks) ---
+
+# Personal agent context (not shared)
+CLAUDE.local.md
+
+# Installed copy of the plan-lens skill (its version is pinned in skills-lock.json)
+.agents/
+.claude/skills/plan-lens/
+
+# OS and tooling
+Thumbs.db
+desktop.ini
+*.log
+node_modules/

@@ -260,3 +260,19 @@ Assets/**/*.worldmesh !filter !diff !merge text eol=lf linguist-language=yaml me
 Packages/**/*.worldmesh !filter !diff !merge text eol=lf linguist-language=yaml merge=lens-studio-yaml-merge
 
 # Shipped by Lens Studio
+
+# --- Project additions (outside Lens Studio's managed block) ---
+
+# Lens Studio's rules above only cover Assets/ and Packages/. The other text
+# files at the project root use LF too, so keep them LF on every OS. This
+# overrides core.autocrlf for these paths only.
+/.gitattributes text eol=lf
+/.gitignore text eol=lf
+/*.esproj text eol=lf
+/*.md text eol=lf
+/*.json text eol=lf
+/LICENSE text eol=lf
+/docs/**/*.md text eol=lf
+/devpost/**/*.md text eol=lf
+/.claude/**/*.md text eol=lf
+/.claude/*.json text eol=lf
