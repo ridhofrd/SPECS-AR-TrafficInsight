@@ -38,11 +38,16 @@ export class RerouteScenario extends Scenario {
         expect(s.visible.routeA, "rest of route A drawn").toBe(true);
         expect(s.visible.problemHighlight, "crash stretch highlighted").toBe(true);
         expect(s.visible.problemCard, "delay card visible").toBe(true);
-        expect(s.problemCardText, "delay card text").toBe("Crash, traffic stalled, +18 min");
+        expect(s.problemCardText, "delay card identifies the affected route and delay").toBe("Route A: crash ahead\nTraffic stalled · +18 min delay");
         expect(s.visible.routeB, "route B drawn").toBe(true);
         expect(s.visible.dotB, "route B dot visible").toBe(true);
         expect(s.recommendedRoute, "recommended after the crash").toBe("B");
-        expect(s.labelTextB.includes("Recommended"), "label B marked Recommended").toBe(true);
+        expect(s.labelTextB.includes("Fastest:"), "label B explains why it is recommended").toBe(true);
+        expect(s.labelTextA.includes("Current"), "current route remains distinct from recommendation").toBe(true);
+        expect(s.labelTextA.includes("50 min left"), "crash estimate is time remaining, including the full unpassed delay").toBe(true);
+        expect(s.labelTextB.includes("38 min left"), "alternate estimate is measured from the same rider position").toBe(true);
+        const shared = findSceneObjectByName("SharedApproachRibbon");
+        expect(!!shared && shared.isEnabledInHierarchy, "shared approach is rendered separately from either alternative").toBe(true);
 
         // The alternate route must start at the rider, not at an unrelated
         // equal-percentage point on the other side of the map.

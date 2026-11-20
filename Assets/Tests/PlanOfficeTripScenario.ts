@@ -57,14 +57,17 @@ export class PlanOfficeTripScenario extends Scenario {
             ["A", s.labelTextA],
             ["B", s.labelTextB],
         ]) {
-            expect(text.includes("Time:"), "label " + name + " has Time: " + text).toBe(true);
+            expect(text.includes("min total"), "label " + name + " makes whole-trip time explicit: " + text).toBe(true);
             expect(text.includes("Fuel:"), "label " + name + " has Fuel: " + text).toBe(true);
-            expect(text.includes("Weather:"), "label " + name + " has Weather: " + text).toBe(true);
+            expect(text.includes("Dry"), "label " + name + " has weather: " + text).toBe(true);
         }
-        const recCount = [s.labelTextA, s.labelTextB].filter((t) => t.includes("Recommended")).length;
-        expect(recCount, "exactly one Recommended label").toBe(1);
-        expect(s.labelTextA.includes("Recommended"), "route A is the Recommended one").toBe(true);
+        const recCount = [s.labelTextA, s.labelTextB].filter((t) => t.includes("Fastest:")).length;
+        expect(recCount, "exactly one label explains the recommendation as Fastest").toBe(1);
+        expect(s.labelTextA.includes("Fastest:"), "route A is the fastest one").toBe(true);
         expect(s.recommendedRoute, "recommendedRoute").toBe("A");
+        const start = findSceneObjectByName(ROOT_NAMES.homeMarker).getTransform().getLocalPosition();
+        const destination = findSceneObjectByName("OfficeMarker").getTransform().getLocalPosition();
+        expect(destination.z, "destination lies ahead of the start on the heading-up map").toBeLessThan(start.z);
 
         // Pinch route A's dot -> route picked, map hidden, riding.
         await driver.press(BUTTON_NAMES.routeDotA);

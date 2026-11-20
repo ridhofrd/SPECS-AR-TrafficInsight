@@ -67,8 +67,8 @@
     - // @input SceneObject dotB
     - // @input Asset.Material lineMaterial
     - '// @input float routeLineWidthCm = 0.6 {"widget":"slider", "min":0.2, "max":2, "step":0.1}'
-    - '// @input vec4 routeAColor = {0.494,0.784,0.949,1} {"widget":"color"}'
-    - '// @input vec4 routeBColor = {0.561,0.89,0.722,1} {"widget":"color"}'
+    - '// @input vec4 routeAColor = {0.15,0.72,1,1} {"widget":"color"}'
+    - '// @input vec4 routeBColor = {0.2,1,0.45,1} {"widget":"color"}'
     - '// @input vec4 crashHighlightColor = {1,0.62,0.541,1} {"widget":"color"}'
     - '// @input vec4 rainHighlightColor = {1,0.769,0.42,1} {"widget":"color"}'
     - '// @input float dotHoverScale = 1.25 {"widget":"slider", "min":1, "max":2, "step":0.05}'

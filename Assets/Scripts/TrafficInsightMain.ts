@@ -364,8 +364,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.lensUI.setInputEnabled(inputOk);
         if (vis.labelA && core.trip !== "none") {
             const phase = core.state === "Stopped" ? "stopped" : "planning";
-            const a = routeLabel(core.trip, phase, "A");
-            const b = routeLabel(core.trip, phase, "B");
+            const progress = core.state === "Stopped" ? core.progress : 0;
+            const a = routeLabel(core.trip, phase, "A", progress, core.activeRoute);
+            const b = routeLabel(core.trip, phase, "B", progress, core.activeRoute);
             this.lensUI.showRouteLabels(a, b);
             this.labelTextA = labelToText(a);
             this.labelTextB = labelToText(b);
@@ -375,7 +376,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             this.labelTextB = "";
         }
         if (vis.problemCard && core.trip !== "none" && core.alertKind !== "none") {
-            this.problemText = problemCardText(core.trip);
+            this.problemText = problemCardText(core.trip, core.progress);
             this.lensUI.showProblemCard(core.alertKind, this.problemText);
         } else {
             this.lensUI.hideProblemCard();

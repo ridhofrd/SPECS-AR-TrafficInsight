@@ -39,12 +39,14 @@ export type AudioCue = SfxCue | "voice" | "none";
 
 /** One route label card (TrafficInsightTrafficLensUI.showRouteLabels). */
 export interface RouteLabelData {
-    /** "Route A · Recommended" or "Route A" */
+    route: RouteId;
+    weatherKind: "dry" | "rain";
+    /** Route identity and its role: current route, alternative, or planning option. */
     title: string;
     recommended: boolean;
-    /** "Time: 52 min (+18)" */
+    /** Explicit whole-trip or remaining time; Fastest names the recommendation reason. */
     time: string;
-    /** "Fuel: 0.5 L" */
+    /** Whole-trip or remaining fuel, matching the time estimate's scope. */
     fuel: string;
     /** "Weather: Dry, 27 °C" */
     weather: string;

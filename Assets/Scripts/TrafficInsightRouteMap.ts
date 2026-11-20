@@ -20,9 +20,10 @@
 import { Interactable } from "InteractionKit.lspkg/Components/Interaction/Interactable/Interactable";
 import Event, { PublicApi } from "InteractionKit.lspkg/Utils/Event";
 import { MapPoint, MapView, ProblemSpan, RouteId, TripId } from "./TrafficInsightTypes";
-import { MAP_POINTS, pointAt, routePoints, slicePolyline } from "./TrafficInsightTripData";
+import { MAP_POINTS, pointAt, routePoints, sharedApproachFraction, slicePolyline } from "./TrafficInsightTripData";
 import { ROOT_NAMES, tiError, tiLog } from "./TrafficInsightSceneContracts";
 import { GeoBuffer, addPuck, addRibbon, newMeshBuilder } from "./TrafficInsightGeometry";
+import { dynamicText, makeCardRect, obj } from "./UIKitHelpers";
 
 const ROUTE_LINES_Y = 0.3;
 const GLOW_WIDTH_CM = 1.6;
@@ -41,7 +42,7 @@ const RIDDEN_Y = 0.05;
 /** The "you are here" marker is this many times the size of the normal rider marker. */
 const YOU_ARE_HERE_SCALE = 2.6;
 /** Dim, desaturated grey-blue: readable on the additive display but clearly "done". */
-const RIDDEN_COLOR = new vec4(0.5, 0.56, 0.64, 1);
+const RIDDEN_COLOR = new vec4(0.32, 0.4, 0.5, 1);
 /** Bright accent that no route or problem colour uses. */
 const YOU_ARE_HERE_COLOR = new vec4(1.0, 0.93, 0.2, 1);
 
@@ -71,8 +72,8 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
     @input dotB: SceneObject;
     @input lineMaterial: Material;
     @input @widget(new SliderWidget(0.2, 2, 0.1)) routeLineWidthCm: number = 0.6;
-    @input @widget(new ColorWidget()) routeAColor: vec4 = new vec4(0.494, 0.784, 0.949, 1);
-    @input @widget(new ColorWidget()) routeBColor: vec4 = new vec4(0.561, 0.890, 0.722, 1);
+    @input @widget(new ColorWidget()) routeAColor: vec4 = new vec4(0.15, 0.72, 1, 1);
+    @input @widget(new ColorWidget()) routeBColor: vec4 = new vec4(0.2, 1, 0.45, 1);
     @input @widget(new ColorWidget()) crashHighlightColor: vec4 = new vec4(1.0, 0.620, 0.541, 1);
     @input @widget(new ColorWidget()) rainHighlightColor: vec4 = new vec4(1.0, 0.769, 0.420, 1);
     @input @widget(new SliderWidget(1, 2, 0.05)) dotHoverScale: number = 1.25;
@@ -87,6 +88,8 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
     private routeLines: SceneObject;
     private ribbonA: RibbonPart;
     private ribbonB: RibbonPart;
+    private approach: RibbonPart;
+    private destinationLeg: RibbonPart;
     private glow: RibbonPart;
     private ridden: RibbonPart;
     private riderRmv: RenderMeshVisual;
@@ -97,6 +100,8 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
     private rainMat: Material;
     private rider: SceneObject;
     private endMarkers: SceneObject[] = [];
+    private homeLabel: Text;
+    private officeLabel: Text;
     private dots: { A: DotPart; B: DotPart };
 
     get onDotPicked(): PublicApi<{ route: RouteId }> {
@@ -143,16 +148,33 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         this.routeLines.enabled = true;
         const ptsA = routePoints(trip, "A");
         const ptsB = routePoints(trip, "B");
+        this.homeLabel.text = trip === "morning" ? "Home · Start" : "Home · Destination";
+        this.officeLabel.text = trip === "morning" ? "Office · Destination" : "Office · Start";
+        // The demo overview is heading-up, like the road choices: start near
+        // the rider, destination ahead. It does not pretend to be north-up GPS.
+        const homeZ = trip === "morning" ? MAP_POINTS.home.z : MAP_POINTS.office.z;
+        const officeZ = trip === "morning" ? MAP_POINTS.office.z : MAP_POINTS.home.z;
+        this.endMarkers[0].getTransform().setLocalPosition(new vec3(0, 0, homeZ));
+        this.endMarkers[1].getTransform().setLocalPosition(new vec3(0, 0, officeZ));
+        this.homeLabel.getSceneObject().getParent().getTransform().setLocalPosition(new vec3(0, 0.3, homeZ + Math.sign(homeZ) * 5));
+        this.officeLabel.getSceneObject().getParent().getTransform().setLocalPosition(new vec3(0, 0.3, officeZ + Math.sign(officeZ) * 5));
 
         if (key !== this.lastKey) {
             this.lastKey = key;
             const from = view.mode === "planning" ? 0 : progress;
-            this.showRibbon(this.ribbonA, slicePolyline(ptsA, from, 1), this.routeLineWidthCm);
+            const fork = sharedApproachFraction(trip);
+            const join = 1 - fork;
+            this.showRibbon(this.ribbonA, slicePolyline(ptsA, Math.max(from, fork), join), this.routeLineWidthCm);
             if (view.mode === "raincoat") {
                 this.hideRibbon(this.ribbonB);
             } else {
-                this.showRibbon(this.ribbonB, slicePolyline(ptsB, from, 1), this.routeLineWidthCm);
+                this.showRibbon(this.ribbonB, slicePolyline(ptsB, Math.max(from, fork), join), this.routeLineWidthCm);
             }
+            // Draw shared roads once. Painting A then B over the same segment
+            // falsely made the rider look as if they were already on B.
+            if (from < fork) this.showRibbon(this.approach, slicePolyline(ptsA, from, fork), this.routeLineWidthCm);
+            else this.hideRibbon(this.approach);
+            this.showRibbon(this.destinationLeg, slicePolyline(ptsA, Math.max(from, join), 1), this.routeLineWidthCm);
             // The part already ridden, drawn dim along the route the rider is on (stopped only).
             const ridingRoute: RouteId = view.activeRoute === "B" ? "B" : "A";
             if (view.mode !== "planning" && progress > 0) {
@@ -224,6 +246,8 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
 
         this.ribbonA = this.makeRibbon("RouteARibbon", this.colouredMaterial(this.routeAColor), 0);
         this.ribbonB = this.makeRibbon("RouteBRibbon", this.colouredMaterial(this.routeBColor), 0);
+        this.approach = this.makeRibbon("SharedApproachRibbon", this.colouredMaterial(new vec4(0.4, 0.48, 0.6, 1)), 0);
+        this.destinationLeg = this.makeRibbon("SharedDestinationRibbon", this.colouredMaterial(new vec4(0.4, 0.48, 0.6, 1)), 0);
         this.crashMat = this.colouredMaterial(this.crashHighlightColor);
         this.rainMat = this.colouredMaterial(this.rainHighlightColor);
         this.glow = this.makeRibbon("ProblemGlow", this.crashMat, GLOW_Y);
@@ -241,6 +265,18 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
             m.getTransform().setLocalPosition(new vec3(p.x, 0, p.z));
             this.endMarkers.push(m);
         }
+        this.homeLabel = this.makeMapLabel(this.routeLines, "HomeLabel", "Home", new vec3(10, 2.2, MAP_POINTS.home.z), 14);
+        this.officeLabel = this.makeMapLabel(this.routeLines, "OfficeLabel", "Office", new vec3(10, 2.2, MAP_POINTS.office.z), 14);
+    }
+
+    /** Small upright labels face the rider; they hide with their map or dot. */
+    private makeMapLabel(parent: SceneObject, name: string, text: string, position: vec3, width: number): Text {
+        const panel = obj(parent, name, position);
+        makeCardRect(panel, width, 2.6, { color: new vec4(0.26, 0.36, 0.5, 0.88), cornerRadius: 0.4 });
+        const label = dynamicText(panel, text, "Caption", width - 0.6, 2, new vec4(1, 1, 1, 1));
+        label.horizontalAlignment = HorizontalAlignment.Center;
+        label.horizontalOverflow = HorizontalOverflow.Shrink;
+        return label;
     }
 
     private colouredMaterial(color: vec4): Material {
@@ -275,6 +311,7 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         const material = this.colouredMaterial(color);
         const visual = this.makePuck("RouteDot" + route + "Visual", root, DOT_RADIUS_CM, DOT_HEIGHT_CM, material).obj;
         visual.getTransform().setLocalPosition(new vec3(0, -DOT_LOCAL_Y, 0)); // foot on the map surface
+        this.makeMapLabel(visual, "Route" + route + "Label", route, new vec3(0, 2.2, 0), 3);
 
         let collider = root.getComponent("Physics.ColliderComponent") as ColliderComponent;
         if (!collider) collider = root.createComponent("Physics.ColliderComponent") as ColliderComponent;

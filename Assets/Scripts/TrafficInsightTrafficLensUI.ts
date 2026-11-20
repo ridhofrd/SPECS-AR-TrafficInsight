@@ -32,7 +32,7 @@ import {
 } from "./UIKitHelpers"
 import {tiLog, tiWarn, tiError, ROOT_NAMES, BUTTON_NAMES} from "./TrafficInsightSceneContracts"
 import {ProblemKind, RouteLabelData} from "./TrafficInsightTypes"
-import {labelToText} from "./TrafficInsightTripData"
+import {CAPTIONS, labelToText} from "./TrafficInsightTripData"
 
 // ─── Palette (additive display: mid-tone plates, bright text, no near-black) ─
 // Lens-layer cards are a calm slate blue. Accents (mint recommended, coral
@@ -40,8 +40,8 @@ import {labelToText} from "./TrafficInsightTripData"
 const TEXT_PRIMARY = new vec4(1, 1, 1, 1)
 const TEXT_SECONDARY = new vec4(0.88, 0.9, 0.93, 1)
 const SLATE_PLATE = new vec4(0.26, 0.36, 0.5, 0.88)
-const SKY = new vec4(0.49, 0.78, 0.95, 1)
-const MINT = new vec4(0.56, 0.89, 0.72, 1)
+const SKY = new vec4(0.15, 0.72, 1, 1)
+const MINT = new vec4(0.2, 1, 0.45, 1)
 const AMBER = new vec4(1.0, 0.77, 0.42, 1)
 const CORAL = new vec4(1.0, 0.62, 0.54, 1)
 /** Lifts the theme's 0.35 inactive label alpha to about 0.63 (public opacity factor). */
@@ -83,7 +83,7 @@ const REMINDER_MSG_ROW_H = 3.6
 const REMINDER_BTN_W = 9
 const REMINDER_BTN_H = 3.6
 const REMINDER_BTN_GAP = 0.8
-const REMINDER_TEXT = "Rain ahead. Put on your raincoat?"
+const REMINDER_TEXT = CAPTIONS.raincoatPrompt
 
 const PROGRESS_W = 15
 const PROGRESS_H = 4.2
@@ -107,6 +107,7 @@ interface LabelVisuals {
     time: Text | null
     fuel: Text | null
     weather: Text | null
+    weatherIcon: ElementContent | null
     star: ElementContent | null
 }
 
@@ -183,8 +184,8 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private panelAlert: SceneObject | null = null
     private readonly canvases: CanvasController[] = []
 
-    private labelA: LabelVisuals = {title: null, time: null, fuel: null, weather: null, star: null}
-    private labelB: LabelVisuals = {title: null, time: null, fuel: null, weather: null, star: null}
+    private labelA: LabelVisuals = {title: null, time: null, fuel: null, weather: null, weatherIcon: null, star: null}
+    private labelB: LabelVisuals = {title: null, time: null, fuel: null, weather: null, weatherIcon: null, star: null}
     private problemCard: RoundedRectangle | null = null
     private problemIcon: ElementContent | null = null
     private problemHeader: Text | null = null
@@ -200,7 +201,6 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private texCrash: Texture | undefined = undefined
     private texRain: Texture | undefined = undefined
     private texStar: Texture | undefined = undefined
-    private texUmbrella: Texture | undefined = undefined
     private texArrow: Texture | undefined = undefined
     private texSchedule: Texture | undefined = undefined
     private texFuel: Texture | undefined = undefined
@@ -396,11 +396,17 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         if (!data) return
         if (v.title && !isNull(v.title)) {
             v.title.text = data.title ?? ""
-            v.title.textFill.color = data.recommended ? MINT : TEXT_PRIMARY
+            v.title.textFill.color = data.route === "A" ? SKY : MINT
         }
         if (v.time && !isNull(v.time)) v.time.text = data.time ?? ""
         if (v.fuel && !isNull(v.fuel)) v.fuel.text = data.fuel ?? ""
-        if (v.weather && !isNull(v.weather)) v.weather.text = data.weather ?? ""
+        if (v.weather && !isNull(v.weather)) {
+            v.weather.text = data.weather ?? ""
+            v.weather.textFill.color = data.weatherKind === "rain" ? AMBER : TEXT_SECONDARY
+        }
+        if (v.weatherIcon && !isNull(v.weatherIcon)) {
+            v.weatherIcon.leadingIcon = data.weatherKind === "rain" ? this.texRain : this.texWeather
+        }
         if (v.star && !isNull(v.star)) v.star.opacity = data.recommended ? 1 : 0
     }
 
@@ -412,7 +418,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             this.problemCard.borderColor = hue
         }
         if (this.problemHeader && !isNull(this.problemHeader)) {
-            this.problemHeader.text = this.problemKind === "rain" ? "Weather ahead" : "Problem ahead"
+            this.problemHeader.text = this.problemKind === "rain" ? "Rain on your route" : "Crash on your route"
             this.problemHeader.textFill.color = hue
         }
         if (this.problemIcon && !isNull(this.problemIcon)) {
@@ -531,7 +537,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
 
     /** Route label card: plate + [star | title] + time / fuel / weather. */
     private buildLabel(panel: SceneObject, border: vec4): LabelVisuals {
-        const v: LabelVisuals = {title: null, time: null, fuel: null, weather: null, star: null}
+        const v: LabelVisuals = {title: null, time: null, fuel: null, weather: null, weatherIcon: null, star: null}
         this.canvases.push(this.ensureCanvas(panel, LABEL_W, LABEL_H))
 
         const backing = obj(panel, "Backing")
@@ -569,7 +575,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
 
         v.time = this.labelLine(column, "Body", TEXT_PRIMARY, this.texSchedule)
         v.fuel = this.labelLine(column, "Caption", TEXT_SECONDARY, this.texFuel)
-        v.weather = this.labelLine(column, "Caption", TEXT_SECONDARY, this.texWeather)
+        v.weather = this.labelLine(column, "Caption", TEXT_SECONDARY, this.texWeather, (icon) => { v.weatherIcon = icon })
         return v
     }
 
@@ -578,7 +584,8 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         column: SceneObject,
         role: "Body" | "Caption",
         color: vec4,
-        icon: Texture | undefined
+        icon: Texture | undefined,
+        captureIcon?: (icon: ElementContent) => void
     ): Text {
         const row = flexRow(column, LABEL_INNER_W, LABEL_LINE_H, {
             gap: LABEL_ROW_GAP,
@@ -588,6 +595,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         flexChild(row, {w: LABEL_ROW_ICON, h: LABEL_ROW_ICON}, (cell) => {
             const ec = contentOn(cell, "", "Body", LABEL_ROW_ICON, LABEL_ROW_ICON, "center", icon)
             ec.leadingIconSize = LABEL_ROW_ICON * 0.9
+            if (captureIcon) captureIcon(ec)
         })
         const t = dynamicText(row, "", role, LABEL_ROW_TEXT_W, LABEL_LINE_H, color)
         t.horizontalAlignment = HorizontalAlignment.Left
@@ -683,7 +691,8 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         })
         const t = dynamicText(row, this.progressText, "Body", PROGRESS_TEXT_W, PROGRESS_INNER_H, TEXT_PRIMARY)
         t.horizontalAlignment = HorizontalAlignment.Left
-        t.horizontalOverflow = HorizontalOverflow.Shrink
+        t.horizontalOverflow = HorizontalOverflow.Wrap
+        t.verticalOverflow = VerticalOverflow.Shrink
         this.progressTextComp = t
     }
 
@@ -715,7 +724,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             align: FlexAlign.Center,
         })
         flexChild(msgRow, {w: REMINDER_ICON, h: REMINDER_ICON}, (cell) => {
-            const ec = contentOn(cell, "", "Body", REMINDER_ICON, REMINDER_ICON, "center", this.texUmbrella)
+            const ec = contentOn(cell, "", "Body", REMINDER_ICON, REMINDER_ICON, "center", this.texRain)
             ec.leadingIconSize = REMINDER_ICON * 0.85
         })
         const msg = dynamicText(msgRow, REMINDER_TEXT, "Body", REMINDER_TEXT_W, REMINDER_MSG_ROW_H, TEXT_PRIMARY)
@@ -728,7 +737,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             justify: FlexJustify.Center,
             align: FlexAlign.Center,
         })
-        const proceed = addButton(btnRow, "Proceed", REMINDER_BTN_W, REMINDER_BTN_H, () => this.pressProceed(), {
+        const proceed = addButton(btnRow, "Skip reminder", REMINDER_BTN_W, REMINDER_BTN_H, () => this.pressProceed(), {
             variant: {shape: "Rectangle", style: "Secondary"},
             leadingIcon: this.texArrow,
         })
@@ -745,7 +754,6 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             {
                 // Secondary, not Primary: Primary's dark gradient fill vanishes on the additive display.
                 variant: {shape: "Rectangle", style: "Secondary"},
-                leadingIcon: this.texUmbrella,
             }
         )
         raincoat.button.getSceneObject().name = BUTTON_NAMES.raincoatOn
@@ -824,11 +832,6 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             this.texStar = requireAsset("../Icons/star_hexfafafa.png") as Texture
         } catch (e) {
             tiWarn("TrafficInsightTrafficLensUI: icon star_hexfafafa.png missing, text-only: " + e)
-        }
-        try {
-            this.texUmbrella = requireAsset("../Icons/umbrella.png") as Texture
-        } catch (e) {
-            tiWarn("TrafficInsightTrafficLensUI: icon umbrella.png missing, text-only: " + e)
         }
         try {
             this.texArrow = requireAsset("../Icons/arrow_forward.png") as Texture

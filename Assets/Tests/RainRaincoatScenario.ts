@@ -14,6 +14,7 @@
 import { Scenario } from "Leaf.lspkg/Scenarios/scenario/Scenario";
 import { ScenarioConfig } from "Leaf.lspkg/Scenarios/scenario/ScenarioConfig";
 import { expect } from "Leaf.lspkg/Utils/common/Expect";
+import { findSceneObjectByName } from "Leaf.lspkg/Utils/common/Utils";
 import { BUTTON_NAMES } from "../Scripts/TrafficInsightSceneContracts";
 import { TrafficInsightLeafDriver, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
 
@@ -28,7 +29,7 @@ export class RainRaincoatScenario extends Scenario {
 
         if (mode === "both" || mode === "proceed") {
             await this.rainStop(driver, "first");
-            await this.resolve(driver, BUTTON_NAMES.proceed, "Proceeding on route A.");
+            await this.resolve(driver, BUTTON_NAMES.proceed, "Continuing on route A through rain.");
         }
 
         if (mode === "both") {
@@ -54,6 +55,9 @@ export class RainRaincoatScenario extends Scenario {
         let s = snap();
         expect(s.trip, which + " trip: trip after Go home").toBe("evening");
         expect(s.planningStep, which + " trip: step after Go home").toBe("map");
+        const start = findSceneObjectByName("OfficeMarker").getTransform().getLocalPosition();
+        const destination = findSceneObjectByName("HomeMarker").getTransform().getLocalPosition();
+        expect(destination.z, which + " trip: home destination is ahead, matching the road view").toBeLessThan(start.z);
 
         await driver.press(BUTTON_NAMES.routeDotA);
         expect(snap().state, which + " trip: riding route A").toBe("Riding");
@@ -74,6 +78,9 @@ export class RainRaincoatScenario extends Scenario {
         expect(s.problemCardText.includes("24 °C"), which + " trip: card temperature").toBe(true);
         expect(s.problemCardText.includes("heavy"), which + " trip: card rain intensity").toBe(true);
         expect(s.problemCardText.includes("windy rain"), which + " trip: card rain type").toBe(true);
+        expect(s.problemCardText.includes("rain in 8 min"), which + " trip: rain card and warning agree").toBe(true);
+        expect(s.labelTextA.includes("Current") && s.labelTextA.includes("Fastest:"), which + " trip: A is explicitly the current, fastest route").toBe(true);
+        expect(s.labelTextB.includes("+12 min") && s.labelTextB.includes("Dry"), which + " trip: dry option explains the time trade-off").toBe(true);
         expect(s.visible.dotA, which + " trip: rainy route dot visible").toBe(true);
 
         await driver.press(BUTTON_NAMES.routeDotA);
@@ -81,7 +88,7 @@ export class RainRaincoatScenario extends Scenario {
         expect(s.state, which + " trip: still Stopped at the reminder").toBe("Stopped");
         expect(s.raincoatPrompt, which + " trip: raincoatPrompt").toBe(true);
         expect(s.visible.raincoatReminder, which + " trip: raincoat reminder visible").toBe(true);
-        expect(s.lastCaption, which + " trip: reminder caption").toBe("Rain ahead. Put on your raincoat?");
+        expect(s.lastCaption, which + " trip: reminder caption").toBe("Route A: rain ahead. Put on your raincoat before riding.");
     }
 
     private async resolve(driver: TrafficInsightLeafDriver, button: string, caption: string): Promise<void> {

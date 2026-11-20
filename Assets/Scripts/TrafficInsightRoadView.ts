@@ -26,9 +26,10 @@ import { BUTTON_NAMES, ROOT_NAMES, tiError, tiLog } from "./TrafficInsightSceneC
 
 /** Muted street, so the vivid stripes stand out (the display is additive: no near-black). */
 const STREET_COLOR = new vec4(0.4, 0.43, 0.48, 1);
-const ROUTE_A_COLOR = new vec4(0.15, 0.72, 1.0, 1);
-const ROUTE_B_COLOR = new vec4(0.2, 1.0, 0.45, 1);
-const RING_COLOR = new vec4(1.0, 0.93, 0.2, 1);
+const ROUTE_A_COLOR = new vec4(0.15, 0.72, 1, 1);
+const ROUTE_B_COLOR = new vec4(0.2, 1, 0.45, 1);
+// Yellow means the rider's position only. The junction has a neutral white ring.
+const RING_COLOR = new vec4(0.95, 0.97, 1, 1);
 const HOVER_WHITE_MIX = 0.4;
 const CHOSEN_WHITE_MIX = 0.4;
 const FADE_TO_STREET_MIX = 0.88;

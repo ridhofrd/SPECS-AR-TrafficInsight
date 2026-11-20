@@ -19,6 +19,7 @@ import {
     ProblemKind,
     ProblemSpan,
     RouteId,
+    RouteOrNone,
     RouteLabelData,
     SfxCue,
     TripId,
@@ -77,7 +78,7 @@ export const MAP_POINTS = {
     dotB: { x: 14, z: 7 } as MapPoint,
 };
 
-/** Route polylines Home -> Office (the morning direction). Evening reverses them. */
+/** Schematic route corridors; start is near, destination is far. */
 const ROUTE_A_HOME_TO_OFFICE: MapPoint[] = [
     { x: 0, z: 19 },
     { x: 0, z: 7 },
@@ -97,6 +98,8 @@ const ROUTE_B_HOME_TO_OFFICE: MapPoint[] = [
     { x: 0, z: -7 },
     { x: 0, z: -19 },
 ];
+
+const RAIN = { temperatureC: 24, intensity: "heavy", type: "windy rain" };
 
 /** The two sample trips. */
 export const TRIPS: { morning: TripDef; evening: TripDef } = {
@@ -148,7 +151,7 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
             B: { timeMin: 48, deltaMin: 0, fuelL: 0.6, weather: "Dry, 26 °C" },
         },
         stopped: {
-            A: { timeMin: 36, deltaMin: 0, fuelL: 0.5, weather: "Windy rain, 24 °C" },
+            A: { timeMin: 36, deltaMin: 0, fuelL: 0.5, weather: RAIN.type + ", " + RAIN.temperatureC + " °C" },
             B: { timeMin: 48, deltaMin: 0, fuelL: 0.6, weather: "Dry, 26 °C" },
         },
         arrivedLine: "You've arrived.",
@@ -167,8 +170,8 @@ export const CAPTIONS = {
     stoppedEnter: "Stopped. Pick a route.",
     reroute: "New route set",
     keepCrashRoute: "Staying on route A, +18 min.",
-    raincoatPrompt: "Rain ahead. Put on your raincoat?",
-    proceed: "Proceeding on route A.",
+    raincoatPrompt: "Route A: rain ahead. Put on your raincoat before riding.",
+    proceed: "Continuing on route A through rain.",
     raincoatOn: "Raincoat on. Ride safe.",
     rideBlockedPlanning: "Pick a route first.",
     rideBlockedStopped: "Pick a route to ride on.",
@@ -189,13 +192,14 @@ export function getTrip(trip: TripId): TripDef {
     return trip === "morning" ? TRIPS.morning : TRIPS.evening;
 }
 
-/** Route polyline for a trip, in travel order (evening = reversed). Returns a fresh copy. */
-export function routePoints(trip: TripId, route: RouteId): MapPoint[] {
+/**
+ * Heading-up schematic: origin near the rider, destination ahead, A left/B
+ * right in either sample trip. Home/office endpoint labels change with the
+ * trip. These are illustrative corridors, not reversed geographic road data.
+ */
+export function routePoints(_trip: TripId, route: RouteId): MapPoint[] {
     const base = route === "A" ? ROUTE_A_HOME_TO_OFFICE : ROUTE_B_HOME_TO_OFFICE;
     const copy = base.map((p) => ({ x: p.x, z: p.z }));
-    if (trip === "evening") {
-        copy.reverse();
-    }
     return copy;
 }
 
@@ -260,6 +264,21 @@ export function routeStats(trip: TripId, phase: TripPhase, route: RouteId): Rout
     return route === "A" ? table.A : table.B;
 }
 
+/** Costs from the actual rider position, not a second whole-trip estimate. */
+export function remainingStats(trip: TripId, phase: TripPhase, route: RouteId, progress: number): RouteStats {
+    const planned = getTrip(trip).planning[route];
+    const updated = routeStats(trip, phase, route);
+    const problem = getTrip(trip).problem;
+    const passedProblem = clamp01((progress - problem.fromFraction) / (problem.toFraction - problem.fromFraction));
+    const delay = Math.max(0, updated.timeMin - planned.timeMin) * (1 - passedProblem);
+    return {
+        timeMin: Math.max(0, planned.timeMin - plannedMinutesAt(trip, route, progress) + delay),
+        deltaMin: delay,
+        fuelL: Math.max(0, planned.fuelL - sharedLegValueAt(trip, progress, planned.fuelL, 0.05)),
+        weather: updated.weather,
+    };
+}
+
 /** Recommended route: least time, then least fuel; ties go to A. */
 export function recommend(trip: TripId, phase: TripPhase): RouteId {
     const a = routeStats(trip, phase, "A");
@@ -274,16 +293,22 @@ export function recommend(trip: TripId, phase: TripPhase): RouteId {
 }
 
 /** Label card data for one route in one phase. */
-export function routeLabel(trip: TripId, phase: TripPhase, route: RouteId): RouteLabelData {
-    const stats = routeStats(trip, phase, route);
+export function routeLabel(trip: TripId, phase: TripPhase, route: RouteId, progress: number = 0, activeRoute: RouteOrNone = "none"): RouteLabelData {
+    const stats = remainingStats(trip, phase, route, progress);
     const recommended = recommend(trip, phase) === route;
-    const delta = stats.deltaMin > 0 ? " (+" + stats.deltaMin + ")" : "";
+    const stopped = phase === "stopped";
+    const rainy = stopped && trip === "evening" && route === getTrip(trip).problem.route;
+    const fastest = remainingStats(trip, phase, recommend(trip, phase), progress);
+    const extra = Math.round(stats.timeMin - fastest.timeMin);
+    const weather = rainy ? "Heavy rain, " + RAIN.temperatureC + " °C" : stats.weather;
     return {
-        title: recommended ? "Route " + route + " · Recommended" : "Route " + route,
+        route: route,
+        weatherKind: rainy ? "rain" : "dry",
+        title: "Route " + route + (route === activeRoute ? " · Current" : stopped ? " · Alternative" : ""),
         recommended: recommended,
-        time: "Time: " + stats.timeMin + " min" + delta,
-        fuel: "Fuel: " + stats.fuelL.toFixed(1) + " L",
-        weather: "Weather: " + stats.weather,
+        time: (recommended ? "Fastest: " : "Time: ") + Math.round(stats.timeMin) + " min " + (stopped ? "left" : "total"),
+        fuel: "Fuel: " + stats.fuelL.toFixed(2) + " L" + (stopped ? " left" : " total"),
+        weather: weather + (stopped && trip === "evening" && !rainy && extra > 0 ? " · +" + extra + " min" : ""),
     };
 }
 
@@ -302,8 +327,11 @@ export function problemSpan(trip: TripId): ProblemSpan {
     };
 }
 
-export function problemCardText(trip: TripId): string {
-    return getTrip(trip).problem.cardText;
+export function problemCardText(trip: TripId, progress: number = getTrip(trip).alertAtProgress): string {
+    const def = getTrip(trip);
+    if (def.alertKind === "crash") return "Route A: crash ahead\nTraffic stalled · +18 min delay";
+    const minutes = minutesToProblem(trip, progress);
+    return "Route A: rain in " + minutes + " min\nkm " + def.problem.km + " · " + RAIN.temperatureC + " °C\n" + RAIN.intensity + ", " + RAIN.type;
 }
 
 export function alertLine(trip: TripId, progress: number = getTrip(trip).alertAtProgress): string {
@@ -311,11 +339,13 @@ export function alertLine(trip: TripId, progress: number = getTrip(trip).alertAt
     if (def.alertKind === "crash") {
         return "Crash ahead on your route, traffic is stalled. Pull over to see options.";
     }
-    const minutes = Math.max(1, Math.round(
-        plannedMinutesAt(trip, def.problem.route, def.problem.fromFraction) -
-        plannedMinutesAt(trip, def.problem.route, progress)
-    ));
+    const minutes = minutesToProblem(trip, progress);
     return "Rain on your route in " + minutes + " minutes. Pull over to see options.";
+}
+
+function minutesToProblem(trip: TripId, progress: number): number {
+    const problem = getTrip(trip).problem;
+    return Math.max(1, Math.round(plannedMinutesAt(trip, problem.route, problem.fromFraction) - plannedMinutesAt(trip, problem.route, progress)));
 }
 
 /** Both options share the same approach and final road, in both travel directions. */
@@ -350,14 +380,9 @@ export function progressLabel(trip: TripId): string {
     return getTrip(trip).progressLabel;
 }
 
-/**
- * "Ridden 3 of 34 min": minutes ridden so far out of the route's planned time.
- * The numbers come from the sample data (planned time of the route the rider is on).
- */
+/** Rider identity and elapsed sample minutes, separate from the costs still ahead. */
 export function progressCardText(trip: TripId, route: RouteId, progress: number): string {
-    const total = routeStats(trip, "planning", route).timeMin;
-    const ridden = Math.round(clamp01(progress) * total);
-    return "Ridden " + ridden + " of " + total + " min";
+    return "You are here · " + route + "\n" + Math.round(plannedMinutesAt(trip, route, progress)) + " min ridden";
 }
 
 /** "Main office trip: pick a route." / "Branch office trip: ..." / "Home trip: ..." */
