@@ -77,7 +77,7 @@ stateDiagram-v2
     Arrived --> Planning: "Go home"
 ```
 
-- **Planning (at home or at the office):** the virtual table appears together with the map, once the destination is clear, and the map lies on it with route dots and labels. Before that, at the start and while the clarifying question is shown, there is no table. The table and map hide once a route is picked.
+- **Planning (at home or at the office):** the virtual table is visible for the whole planning state, including at the start and while the clarifying question is shown, and once the destination is clear the map shows the whole trip on it, with route dots and labels. The table and map hide once a route is picked.
 - **Riding:** nothing from the Lens on screen (no map, no table, no marks on the road), only short voice cues. Audio must not drown out traffic.
 - **Alerted:** a chime plus one short sentence, and the small icon low in the view, which disappears after about 2 seconds. Morning: "Crash ahead on your route, traffic is stalled. Pull over to see options." (default wording). Evening: "Rain on your route in 10 minutes. Pull over to see options." Keep the tone calm (default).
 - **Stopped:** the full picture. There is no table: the map floats in front of the rider, with the progress marks, the rest of the route with the problem stretch highlighted, the problem card, and a dot and label for each option. The routes are also laid on the mock street ahead, with a pulsing ring where they split. Morning: current route A and reroute B. Evening: the dry reroute (when available; in the sample data it is, at +12 min, a default number) and the rainy route.
@@ -93,7 +93,7 @@ Each one can be checked in Lens Studio's preview. Drafted from the learner's sto
 3. At the crash point a chime plays, the alert sentence plays (and shows as a caption), and a small icon appears low in the view, not in the center, then disappears after about 2 seconds.
 4. Pressing "I've stopped" after the crash alert shows the map floating in front of me (no table), with the rest of route A and the crash stretch highlighted, a delay card, plus route B. Pinching route B's dot plays "New route set" and hides the map, and riding on to the end plays the on-time arrival line.
 5. On the evening trip, after the rain alert, pressing "I've stopped" shows the rainy stretch highlighted with a card for temperature, rain intensity and type. Pinching the rainy route's dot shows the raincoat reminder, and pinching "Proceed" or "Raincoat on" hides it and returns to riding.
-6. The virtual table appears only together with the planning map, after the destination is clear. It is hidden at the start, while the clarifying question is shown, and in every other state.
+6. The virtual table is visible during the whole planning state, including at the start and while the clarifying question is shown, and is hidden in every other state.
 7. Pressing "I've stopped" puts the map about 1 m ahead and a little below eye level, in view.
 8. When stopped, the part of the route already ridden is shown dim, with a clear "you are here" marker and a progress card, for example "Ridden 12 of 34 min".
 9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot or at its line brightens that line. Pinching a route's line chooses that route, the same as pinching its dot. Choosing a route makes its line glow and fades the other. Riding hides all of it.
