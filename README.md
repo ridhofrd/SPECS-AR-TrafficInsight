@@ -6,7 +6,8 @@
 
 Built for **Learn AR with SPECS, Round 2** (Devpost, sponsored by Snap Inc.). Planned with Devpost's `plan-lens` skill, built by an AI coding agent through Snap's CLAD plugin and the Lens Studio MCP, and demonstrated in Lens Studio's Interactive Preview. No Spectacles hardware is needed.
 
-> **Status: the Lens is built and all five LEAF tests pass in the Lens Studio Preview.**
+> **Status: the Lens is built and all six LEAF tests (C1 to C6) pass in the Lens Studio Preview.**
+> Revision 1 is partly done: the table now shows only while planning, and the map floats when you stop. The progress marks and the route on the road ahead are not built yet (see the [Roadmap](#roadmap)).
 > It has not been run on Spectacles hardware (none is available), and the demo video is not recorded yet. Everything below was run in the Preview unless it is marked _unverified_.
 
 ## Contents
@@ -31,11 +32,13 @@ Built for **Learn AR with SPECS, Round 2** (Devpost, sponsored by Snap Inc.). Pl
 
 The demo tells one day in two trips that reuse the same map, alert and stop:
 
-1. **Morning, at home.** The map on the table shows the trip to the office, with two routes compared by time, fuel and weather. The rider picks one.
-2. **On the road.** Nothing on screen. Then a chime and a short sentence: a crash ahead has stalled traffic, pull over to see options. The rider pulls over, sees the crash stretch highlighted and the faster reroute, pinches it, and arrives on time.
+1. **Morning, at home.** A table is in the room and the map on it shows the trip to the office, with two routes compared by time, fuel and weather. The rider picks one.
+2. **On the road.** Nothing on screen, and no table. Then a chime and a short sentence: a crash ahead has stalled traffic, pull over to see options. The rider pulls over, and the map floats in front of them with the crash stretch highlighted and the faster reroute. They pinch it and arrive on time.
 3. **Evening, going home.** A rain alert comes before the rain zone. The rider pulls over, sees where the rain is and how bad it is, and either takes the dry reroute or stays on the route and is reminded to put on a raincoat.
 
 The Lens only ever shows content in two states, for safety: when the rider is planning and when they have stopped. While riding, it is silent except for short alerts.
+
+The virtual table is part of that rule. It is in the room for the whole Planning state (at the start, while the clarifying question is shown, and under the map) and hidden in every other state. When the rider stops, there is no table: the same map floats where it was, a little below eye level.
 
 ```mermaid
 stateDiagram-v2
@@ -59,9 +62,13 @@ All screenshots are from Lens Studio's Interactive Preview (SPECS 27 device simu
 
 ![Planning view: the city map on the table with route A in blue and route B in green, a dot on each route, and label cards above.](docs/media/planning-map.jpg)
 
-Pressing **Go to office** asks one clarifying question, *"Which office: Main office or Branch office?"*, and then the map appears on a virtual table about 1.1 m in front of the rider, a little below eye level. Each route has a big dot to pinch and a label card with time, fuel and weather. The route with the best time (then the least fuel) is marked **Recommended**. Pinching a dot sets the route, plays a soft confirmation tone and hides the map.
+The virtual table is already there when the Lens starts. Pressing **Go to office** asks one clarifying question, *"Which office: Main office or Branch office?"*, with the table still in view, and then the map appears on the table about 1.1 m in front of the rider, a little below eye level. Each route has a big dot to pinch and a label card with time, fuel and weather. The route with the best time (then the least fuel) is marked **Recommended**. Pinching a dot sets the route, plays a soft confirmation tone and hides the map and the table.
 
 ### Riding and the alert
+
+![Riding view: the same street with no table, no map and no cards. Nothing from the Lens is in view.](docs/media/riding-no-table.jpg)
+
+While riding, the view is empty, including the table.
 
 ![The rain alert icon: a small white cloud icon floating low and to the right of the centre of view, over the road.](docs/media/alert-icon.jpg)
 
@@ -71,11 +78,11 @@ While riding, nothing from the Lens is in view. When the route reaches a problem
 
 ![Stopped view: route A's crash stretch highlighted in coral, a "Problem ahead" card reading "Crash, traffic stalled, +18 min" above it, route A at 52 min (+18) and route B marked Recommended at 40 min.](docs/media/stopped-crash.jpg)
 
-Pressing **I've stopped** brings back the map with the full picture: the rest of the route, the crash stretch highlighted in coral, a card above it (*"Crash, traffic stalled, +18 min"*), and both options with updated numbers. Route B is now recommended. Pinching route B's dot says *"New route set"* and hides the map. Riding on to the end ends with *"You've arrived, on time."*
+Pressing **I've stopped** brings back the map, floating where it was with no table under it, with the full picture: the rest of the route, the crash stretch highlighted in coral, a card above it (*"Crash, traffic stalled, +18 min"*), and both options with updated numbers. Route B is now recommended. Pinching route B's dot says *"New route set"* and hides the map. Riding on to the end ends with *"You've arrived, on time."*
 
 ### Evening: rain ahead and the raincoat reminder
 
-![Stopped view on the evening trip: route A's rain stretch highlighted in amber, a "Weather ahead" card reading "Rain km 4–7: 24 °C, heavy, windy rain", route A marked Recommended with windy rain, and route B at 48 min (+12), dry.](docs/media/stopped-rain.jpg)
+![Stopped view on the evening trip: route A's rain stretch highlighted in amber, a "Weather ahead" card reading "Rain km 4–7: 24 °C, heavy, windy rain", route A marked Recommended with windy rain, and route B at 48 min (+12), dry. There is no table: the map floats.](docs/media/stopped-floating-map.jpg)
 
 On the way home, the alert is *"Rain on your route in 10 minutes. Pull over to see options."* Stopped, the rider sees the rain stretch in amber with its temperature, intensity and type, and a dry reroute that costs 12 minutes more.
 
@@ -97,7 +104,7 @@ The Preview has no road, no GPS and no microphone, so a separate panel to the ri
 | Saying "route A" / "route B" | **Choose route A** / **Choose route B** buttons, next to the pinchable dots |
 | Live traffic, weather and routing | Hard-coded sample data (see below) |
 | Spoken alerts and confirmations | The caption line at the bottom of the panel |
-| A real table, or floating 1 m ahead without one | A virtual table |
+| A real table or wall at home, or the map floating about 1 m ahead without one | A virtual table for the planning view at home. At the roadside the map floats, with no table |
 
 The sample data lives in [`Assets/Scripts/TrafficInsightTripData.ts`](Assets/Scripts/TrafficInsightTripData.ts):
 
@@ -117,6 +124,9 @@ Each done criterion in the design brief has one [LEAF](https://developers.snap.c
 | C3 | At the crash point: chime, alert sentence as a caption, a small icon low and off-centre, gone after about 2 s | **Pass** (icon measured 16 cm below and 10 cm right of the line of sight, 1 m ahead; gone after about 1.9 s) |
 | C4 | "I've stopped" shows the crash stretch highlighted, the delay card and route B; pinching B says "New route set" and riding on ends with the on-time arrival line | **Pass** |
 | C5 | Evening: rain stretch and a card with temperature, intensity and type; picking the rainy route shows the raincoat reminder; Proceed or Raincoat on hides it | **Pass** (both buttons tested) |
+| C6 | The virtual table is visible during the whole Planning state and hidden in every other state | **Pass** (checked at the start, during the clarifying question, with the map, then Riding, Alerted, Stopped, Arrived, and Planning again after "Go home") |
+
+C2 and C4 were extended for the table: C2 also checks that the table is off while riding, and C4 checks that the map floats with no table when stopped. Each check reads both the snapshot flag and the real `MapTable` object in the scene.
 
 What the tests cannot check, and so remains unverified:
 
@@ -124,12 +134,12 @@ What the tests cannot check, and so remains unverified:
 - **The icon's size on screen and its fade.** Its position and timing are tested; its look was checked by eye in the screenshot above.
 - **Reach and comfort on real glasses**, and anything about riding a real motorcycle.
 
-To run them: open the project in Lens Studio, open the LEAF panel, and run C1 to C5 against the Preview.
+To run them: open the project in Lens Studio, open the LEAF panel, and run C1 to C6 against the Preview.
 
 ## Why it belongs on glasses
 
 - **Hands and eyes stay on the road.** A rider's hands are on the handlebars and their eyes must stay ahead, so a phone is not an option while moving. The Lens speaks instead of showing, and only shows when the rider has stopped.
-- **The routes are laid out in your space.** When stopped, the options sit on the surface in front of you at a readable size, side by side, instead of on a small flat map.
+- **The routes are laid out in your space.** When stopped, the options float in front of you at a readable size, side by side, instead of on a small flat map.
 
 ## How this project is built
 
@@ -166,9 +176,9 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 
 | Script | Role |
 |---|---|
-| `TrafficInsightState.ts` | The five states and every transition |
+| `TrafficInsightState.ts` | The five states, every transition, and which parts are visible in each (including the table) |
 | `TrafficInsightTripData.ts` | Sample routes per trip and the "Recommended" rule |
-| `TrafficInsightMain.ts` | Connects input to the state, redraws the views, runs the 2 s alert timer |
+| `TrafficInsightMain.ts` | Connects input to the state, redraws the views (and shows or hides the table), runs the 2 s alert timer |
 | `TrafficInsightRouteMap.ts` | Builds the route lines, problem highlight and pinchable dots at runtime |
 | `TrafficInsightTrafficLensUI.ts` | The Lens layer: label cards, problem card, raincoat reminder, alert icon (UI Kit) |
 | `TrafficInsightRideSimulatorUI.ts` | The demo panel (UI Kit) |
@@ -198,7 +208,7 @@ These changed a default number from the brief, or settled something the brief le
 |---|---|
 | `TrafficInsight.esproj` | The Lens Studio project file |
 | `Assets/Scripts/` | The Lens's TypeScript components (see [Inside the Lens](#inside-the-lens)) |
-| `Assets/Tests/` | LEAF scenarios C1 to C5 and their shared driver |
+| `Assets/Tests/` | LEAF scenarios C1 to C6 and their shared driver |
 | `Assets/GeneratedMeshes/`, `Assets/GeneratedSFX/` | The table and city map models and the four sound effects, all made in code (no third-party assets) |
 | `Assets/Icons/`, `Assets/Materials/` | Material icons and the route line material |
 | `Packages/` | Spectacles Interaction Kit (SIK), UI Kit, Motion and Icons from the Base Template; LEAF; and the Lens Studio preview-agent helpers. Stored with Git LFS |
@@ -277,7 +287,9 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Run `plan-lens` and approve `devpost/design-brief.md`
 - [x] Build with CLAD and test with LEAF (C1 to C5 pass in the Preview)
 - [x] Screenshots in `docs/media/` and the feature walkthrough
-- [ ] Revision 1: no table while riding, a floating map when stopped, progress along the path, and the route marked on the road ahead
+- [x] Revision 1, part 1: the table shows only while planning, and the map floats when stopped (C6 added; C1 to C6 pass)
+- [ ] Revision 1, part 2: progress along the path (the ridden part dim, a "you are here" marker, a progress card)
+- [ ] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines)
 - [ ] Judge in the Preview and iterate
 - [ ] Parked for later: a brief glance at the route while riding (see [docs/backlog.md](docs/backlog.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
