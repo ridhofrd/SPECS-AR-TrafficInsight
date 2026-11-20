@@ -199,10 +199,10 @@ export class TrafficInsightPreviewContext extends BaseScriptComponent {
         this.crash = obj(r,"PreviewCrashAhead");
         this.aheadDrops = obj(this.ahead,"PreviewRainAheadDrops");
         this.hereDrops = obj(this.here,"PreviewRainHereDrops");
-        this.rain(this.aheadDrops,2200,1900);
+        this.rain(this.aheadDrops,2600,1600,true);
         this.rain(this.hereDrops,350,650);
-        this.box(this.ahead,[0.43,0.48,0.58],-90,900,-3000,1200,180,350);
-        this.box(this.ahead,[0.48,0.53,0.62],-350,1030,-3150,550,180,330);
+        this.box(this.ahead,[0.43,0.48,0.58],-130,380,-3200,650,100,300);
+        this.box(this.ahead,[0.48,0.53,0.62],-300,450,-3350,300,110,260);
         for(const z of [-2550,-2800,-3050]) {
             this.box(this.crash,[0.89,0.49,0.25],-140,-121,z,32,78,32);
             this.box(this.crash,paint,-140,-105,z+1,33,15,33);
@@ -229,10 +229,12 @@ export class TrafficInsightPreviewContext extends BaseScriptComponent {
         }
     }
 
-    private rain(parent: SceneObject, near: number, depth: number): void {
+    private rain(parent: SceneObject, near: number, depth: number, distant: boolean = false): void {
         for(let i=0;i<120;i++) {
-            const x=((i*137)%900)-450, y=((i*83)%700)-80, z=-(near+(i*97)%depth);
-            this.box(parent,[0.58,0.72,0.82],x,y,z,3,65,3,"glow");
+            const width = distant ? 360 : 900;
+            const x=((i*137)%width)-width/2+(distant ? -130 : 0);
+            const y=((i*83)%(distant ? 400 : 700))-(distant ? 140 : 80), z=-(near+(i*97)%depth);
+            this.box(parent,[0.58,0.72,0.82],x,y,z,3,distant ? 45 : 65,3,"glow");
         }
     }
 }
