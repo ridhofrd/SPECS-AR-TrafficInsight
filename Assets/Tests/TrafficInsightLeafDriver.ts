@@ -208,6 +208,12 @@ export class TrafficInsightLeafDriver extends DefaultLeafInteractor {
         expect(snap().planningStep, "planning step after Main office").toBe("map");
     }
 
+    /** After a route is picked while stopped, the chosen stripe glows for a moment; waits until riding starts. */
+    async waitForRidingAfterPick(): Promise<void> {
+        await this.waitForState("Riding", 4000);
+        await sleep(100);
+    }
+
     /** Morning trip: pick route A, ride to the crash alert, let it end, then pull over. */
     async stopAfterCrash(): Promise<void> {
         await this.planMorningTrip();

@@ -57,6 +57,8 @@ export class TableOnlyWhilePlanningScenario extends Scenario {
 
         // Back to Riding, then Arrived.
         await driver.press(BUTTON_NAMES.routeDotB);
+        expectTable("Stopped while the pick glows", false);
+        await driver.waitForRidingAfterPick();
         expect(snap().state, "state after rerouting").toBe("Riding");
         expectTable("Riding after the reroute", false);
 

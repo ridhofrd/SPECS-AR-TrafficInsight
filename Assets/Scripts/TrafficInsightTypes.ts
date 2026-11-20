@@ -149,6 +149,11 @@ export interface StateCore {
     lastAudioCue: AudioCue;
     /** Progress from which the remaining routes are drawn (Stopped), else 0. */
     remainingFrom: number;
+    /**
+     * While Stopped: the route the rider has just picked, shown glowing (the other faded) for a
+     * moment before riding starts. 'none' at every other time.
+     */
+    confirmRoute: RouteOrNone;
 }
 
 /** Result of one intent on the state machine. */

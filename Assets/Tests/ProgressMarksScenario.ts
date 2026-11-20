@@ -70,6 +70,7 @@ export class ProgressMarksScenario extends Scenario {
 
         // Riding on hides it all.
         await driver.press(BUTTON_NAMES.routeDotB);
+        await driver.waitForRidingAfterPick();
         const after = snap();
         expect(after.state, "riding again").toBe("Riding");
         expect(visibleLensFlags(after).length, "Lens layer empty after riding on: " + visibleLensFlags(after).join(",")).toBe(0);

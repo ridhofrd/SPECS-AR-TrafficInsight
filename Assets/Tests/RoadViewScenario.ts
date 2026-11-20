@@ -8,7 +8,8 @@
  * the same as pinching its dot. Choosing a route makes its line glow and fades
  * the other. Riding hides all of it.
  *
- * Morning: layout, aiming, and pinching route B's side-road stripe (reroute).
+ * Morning: layout, aiming, and pinching route B's side-road stripe (reroute:
+ * its stripe glows and A's fades for a moment, then riding starts).
  * Evening: pinching route A's stripe asks about the raincoat and the chosen
  * stripe glows while the other fades.
  */
@@ -85,6 +86,15 @@ export class RoadViewScenario extends Scenario {
         s = snap();
         expect(s.lastCaption, "caption after pinching route B's line").toBe("New route set");
         expect(s.lastAudioCue, "route-set tone").toBe("RouteSetTone");
+        // The picked route glows and the other fades for a moment, with nothing left to pinch ...
+        expect(s.state, "still stopped while the pick glows").toBe("Stopped");
+        expect(s.roadChosen, "route B's stripe glows").toBe("B");
+        expect(s.visible.roadLineA && s.visible.roadLineB, "both stripes still drawn while the pick glows").toBe(true);
+        expect(!!findInteractableByName(BUTTON_NAMES.roadLineA, undefined, true), "the faded stripe cannot be pinched").toBe(false);
+        expect(!!findInteractableByName(BUTTON_NAMES.roadLineB, undefined, true), "stripes cannot be pinched while the pick glows").toBe(false);
+        // ... then riding starts.
+        await driver.waitForRidingAfterPick();
+        s = snap();
         expect(s.state, "riding again").toBe("Riding");
         expect(s.activeRoute, "now on route B").toBe("B");
         expect(visibleLensFlags(s).length, "Lens layer empty after choosing: " + visibleLensFlags(s).join(",")).toBe(0);

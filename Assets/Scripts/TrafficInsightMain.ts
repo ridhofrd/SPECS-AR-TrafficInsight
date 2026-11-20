@@ -95,6 +95,11 @@ export class TrafficInsightMain extends BaseScriptComponent {
     @widget(new SliderWidget(0.1, 1.5, 0.05))
     alertFadeSec: number = 0.5;
 
+    // How long the picked route's stripe glows (the other fades) before riding starts.
+    @input
+    @widget(new SliderWidget(0.3, 3, 0.1))
+    confirmDurationSec: number = 1.2;
+
     // Logs the 'visible ...' line after every render that changes it.
     @input
     verboseLogs: boolean = true;
@@ -105,6 +110,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     private alertActive = false;
     private alertStartTime = 0;
+
+    private confirmActive = false;
+    private confirmStartTime = 0;
 
     private labelTextA = "";
     private labelTextB = "";
@@ -150,6 +158,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             lastCaption: core.lastCaption,
             lastAudioCue: core.lastAudioCue,
             remainingFrom: core.remainingFrom,
+            confirmRoute: core.confirmRoute,
             labelTextA: this.labelTextA,
             labelTextB: this.labelTextB,
             problemCardText: this.problemText,
@@ -222,7 +231,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             return;
         }
         const before = this.sm.getCore();
-        if (before.state === "Alerted") {
+        if (before.state === "Alerted" || before.confirmRoute !== "none") {
             tiLog("input ignored state=" + before.state + " source=" + source);
             return;
         }
@@ -249,6 +258,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.render();
         if (after.state === "Alerted" && before.state !== "Alerted") {
             this.beginAlert(after);
+        }
+        if (after.confirmRoute !== "none" && before.confirmRoute === "none") {
+            this.confirmActive = true;
+            this.confirmStartTime = getTime();
         }
         this.logState(after, false);
     }
@@ -277,7 +290,15 @@ export class TrafficInsightMain extends BaseScriptComponent {
     }
 
     private onUpdate(): void {
-        if (!this.started || !this.alertActive) {
+        if (!this.started) {
+            return;
+        }
+        if (this.confirmActive && getTime() - this.confirmStartTime >= Math.max(0.3, this.confirmDurationSec)) {
+            this.confirmActive = false;
+            const before = this.sm.getCore();
+            this.applyResult(before, this.sm.finishConfirm());
+        }
+        if (!this.alertActive) {
             return;
         }
         const elapsed = getTime() - this.alertStartTime;
@@ -308,7 +329,8 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
         const core = this.sm.getCore();
         const vis = visibilityFor(core);
-        const inputOk = core.state !== "Alerted";
+        // No hand input while an alert shows or while a just-picked route is being confirmed.
+        const inputOk = core.state !== "Alerted" && core.confirmRoute === "none";
 
         // Ride simulator panel (demo scaffolding)
         this.simulatorUI.setStateLabel(core.state);
@@ -434,7 +456,8 @@ export class TrafficInsightMain extends BaseScriptComponent {
             " progress=" +
             core.progress.toFixed(2) +
             " route=" +
-            core.activeRoute;
+            core.activeRoute +
+            (core.confirmRoute !== "none" ? " confirming=" + core.confirmRoute : "");
         if (force || key !== this.lastStateKey) {
             this.lastStateKey = key;
             tiLog(key);

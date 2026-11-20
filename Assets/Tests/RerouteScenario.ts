@@ -47,10 +47,19 @@ export class RerouteScenario extends Scenario {
         s = snap();
         expect(s.lastCaption, "caption after pinching dot B").toBe("New route set");
         expect(s.lastAudioCue, "route-set tone").toBe("RouteSetTone");
+        // For a moment the picked route glows and the other fades (the rider is still stopped) ...
+        expect(s.state, "still stopped while the pick is confirmed").toBe("Stopped");
+        expect(s.confirmRoute, "route B is the pick being confirmed").toBe("B");
+        expect(s.roadChosen, "route B's stripe on the road glows").toBe("B");
+        expect(s.visible.road, "street still drawn while the pick glows").toBe(true);
+        // ... then riding starts and everything hides.
+        await driver.waitForRidingAfterPick();
+        s = snap();
         expect(s.visible.map, "map hidden after reroute").toBe(false);
         expect(visibleLensFlags(s).length, "Lens layer empty after reroute").toBe(0);
         expect(s.state, "riding again").toBe("Riding");
         expect(s.activeRoute, "now on route B").toBe("B");
+        expect(s.roadChosen, "no stripe chosen once riding").toBe("none");
 
         let presses = 0;
         while (snap().state === "Riding" && presses < 30) {

@@ -57,6 +57,9 @@ export class TrafficInsightStateMachine {
     private alertKind: ProblemKindOrNone = "none";
     private raincoatPrompt = false;
     private keptProblemRoute = false;
+    // The route just picked while Stopped; riding starts when finishConfirm() is called.
+    private confirmRoute: RouteOrNone = "none";
+    private confirmKeptProblemRoute = false;
     private lastCaption: string = CAPTIONS.idle;
     private lastAudioCue: AudioCue = "none";
 
@@ -82,6 +85,7 @@ export class TrafficInsightStateMachine {
             lastCaption: this.lastCaption,
             lastAudioCue: this.lastAudioCue,
             remainingFrom: this.state === "Stopped" ? this.progress : 0,
+            confirmRoute: this.confirmRoute,
         };
     }
 
@@ -131,21 +135,22 @@ export class TrafficInsightStateMachine {
         }
 
         if (this.state === "Stopped") {
+            // A pick is already being confirmed: wait for riding to start.
+            if (this.confirmRoute !== "none") return this.idleResult();
             if (this.raincoatPrompt && route === "A") {
                 return this.apply({ changed: false, caption: CAPTIONS.raincoatPrompt });
             }
+            // Rerouting, or keeping the crash route: the chosen route glows and the other fades
+            // while Stopped (the rider hears "New route set"), then finishConfirm() starts riding.
             if (route === "B") {
-                this.state = "Riding";
-                this.activeRoute = "B";
-                this.alertResolved = true;
+                this.confirmRoute = "B";
+                this.confirmKeptProblemRoute = false;
                 this.raincoatPrompt = false;
                 return this.apply({ changed: true, caption: CAPTIONS.reroute, cue: CUES.routeSet, speak: true });
             }
             if (this.trip === "morning") {
-                this.state = "Riding";
-                this.activeRoute = "A";
-                this.alertResolved = true;
-                this.keptProblemRoute = true;
+                this.confirmRoute = "A";
+                this.confirmKeptProblemRoute = true;
                 return this.apply({ changed: true, caption: CAPTIONS.keepCrashRoute, cue: CUES.routeSet, speak: true });
             }
             // Evening, route A: stay Stopped and ask about the raincoat.
@@ -222,6 +227,18 @@ export class TrafficInsightStateMachine {
         }
     }
 
+    /** Main calls this after the short confirm moment: the picked route glowed, now riding starts. */
+    finishConfirm(): IntentResult {
+        if (this.state !== "Stopped" || this.confirmRoute === "none") return this.idleResult();
+        this.state = "Riding";
+        this.activeRoute = this.confirmRoute;
+        this.alertResolved = true;
+        this.keptProblemRoute = this.keptProblemRoute || this.confirmKeptProblemRoute;
+        this.confirmRoute = "none";
+        this.confirmKeptProblemRoute = false;
+        return this.apply({ changed: true });
+    }
+
     /** Main calls this after the 2 s alert timer. The alert line stays as the caption. */
     endAlert(): IntentResult {
         if (this.state !== "Alerted") return this.idleResult();
@@ -260,6 +277,8 @@ export class TrafficInsightStateMachine {
         this.alertResolved = false;
         this.raincoatPrompt = false;
         this.keptProblemRoute = false;
+        this.confirmRoute = "none";
+        this.confirmKeptProblemRoute = false;
         this.alertKind = "none";
     }
 
@@ -328,15 +347,16 @@ export function visibilityFor(core: StateCore): LensVisibility {
 /**
  * The road view follows the same rule as the map's dots: it exists only while
  * Stopped, and its stripes can be aimed at and pinched only while the rider is
- * still choosing. Once the rider has chosen the route to keep (the raincoat
- * question), that stripe glows, the other fades, and neither can be pinched.
+ * still choosing. Once the rider has chosen (the raincoat question, or the
+ * moment before riding starts), that stripe glows, the other fades, and
+ * neither can be pinched.
  */
 export function roadViewFor(core: StateCore): RoadViewState {
     const stopped = core.state === "Stopped";
     return {
         shown: stopped,
-        targetable: stopped && !core.raincoatPrompt,
-        chosen: stopped && core.raincoatPrompt ? core.activeRoute : "none",
+        targetable: stopped && !core.raincoatPrompt && core.confirmRoute === "none",
+        chosen: !stopped ? "none" : core.raincoatPrompt ? core.activeRoute : core.confirmRoute,
     };
 }
 
