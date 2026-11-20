@@ -88,6 +88,8 @@ export interface MapView {
 
 /** Visibility flags of everything the LEAF tests assert on. */
 export interface LensVisibility {
+    /** The virtual table under the map: shown for the whole Planning state only. */
+    table: boolean;
     map: boolean;
     routeA: boolean;
     routeB: boolean;

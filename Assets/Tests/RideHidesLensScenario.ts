@@ -2,12 +2,14 @@
  * RideHidesLensScenario.ts — LEAF scenario C2 (design brief, done criterion 2).
  *
  * While riding, "Ride" moves the Ride simulator's progress, and nothing from the
- * Lens is in view until an alert.
+ * Lens is in view until an alert. That includes the virtual table: the flag in
+ * the snapshot and the MapTable object in the scene are both off.
  */
 
 import { Scenario } from "Leaf.lspkg/Scenarios/scenario/Scenario";
 import { expect } from "Leaf.lspkg/Utils/common/Expect";
-import { BUTTON_NAMES } from "../Scripts/TrafficInsightSceneContracts";
+import { findSceneObjectByName } from "Leaf.lspkg/Utils/common/Utils";
+import { BUTTON_NAMES, ROOT_NAMES } from "../Scripts/TrafficInsightSceneContracts";
 import {
     TrafficInsightLeafDriver,
     leafLog,
@@ -45,6 +47,9 @@ export class RideHidesLensScenario extends Scenario {
         // Nothing from the Lens in view while riding (before the alert).
         const shown = visibleLensFlags(s);
         expect(shown.length, "Lens flags visible while riding: " + shown.join(",")).toBe(0);
+        expect(s.visible.table, "table hidden while riding").toBe(false);
+        const table = findSceneObjectByName(ROOT_NAMES.mapTable);
+        expect(!!table && table.isEnabledInHierarchy, "MapTable object is off while riding").toBe(false);
         expect(s.visible.clarifyQuestion, "clarify dialog hidden while riding").toBe(false);
         expect(s.alertFired, "no alert yet").toBe(false);
         leafLog("C2 done");

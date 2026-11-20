@@ -10,7 +10,7 @@
  * exposes getState() / static getInstance() for the LEAF tests.
  *
  * Inputs (wired by the bootstrap): simulatorUI, lensUI, routeMap, audio,
- * alertFollow (ScriptComponents), cameraObject (SceneObject); tuning sliders.
+ * alertFollow (ScriptComponents), cameraObject and table (SceneObjects); tuning sliders.
  *
  * Must not: hold domain state (TrafficInsightState owns it), create text or
  * UIKit components, call into sibling components from onAwake, or disable a
@@ -71,6 +71,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     @input
     cameraObject: SceneObject;
+
+    // The virtual table (MapTable). Shown from visibilityFor(core).table only.
+    @input
+    table: SceneObject;
 
     @input
     @widget(new SliderWidget(0.01, 0.25, 0.01))
@@ -286,6 +290,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.simulatorUI.setRouteChoiceEnabled(routeChoiceOk);
         this.simulatorUI.setInputEnabled(inputOk);
 
+        // Virtual table (a plain mesh, no scripts, so enabling it is safe)
+        this.table.enabled = vis.table;
+
         // Map, routes and dots
         this.routeMap.applyView(mapViewFor(core));
         this.routeMap.setInputEnabled(inputOk);
@@ -334,6 +341,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         const map = this.routeMap.getVisibility();
         const lens = this.lensUI.getVisibility();
         return {
+            table: this.table.isEnabledInHierarchy,
             map: map.map,
             routeA: map.routeA,
             routeB: map.routeB,
@@ -384,7 +392,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
         const v = this.readVisibility(core);
         const key =
-            "visible map=" +
+            "visible table=" +
+            v.table +
+            " map=" +
             v.map +
             " dots=" +
             (v.dotA || v.dotB) +
@@ -412,6 +422,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         if (!this.audio) missing.push("audio");
         if (!this.alertFollow) missing.push("alertFollow");
         if (isNull(this.cameraObject)) missing.push("cameraObject");
+        if (isNull(this.table)) missing.push("table");
         if (missing.length > 0) {
             tiError("TrafficInsightMain: required @input not wired: " + missing.join(", ") + ". Check the bootstrap wiring.");
             return false;

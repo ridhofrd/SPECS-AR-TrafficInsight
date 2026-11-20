@@ -275,6 +275,7 @@ export class TrafficInsightStateMachine {
 
 function hiddenVisibility(): LensVisibility {
     return {
+        table: false,
         map: false,
         routeA: false,
         routeB: false,
@@ -293,6 +294,9 @@ function hiddenVisibility(): LensVisibility {
 export function visibilityFor(core: StateCore): LensVisibility {
     const v = hiddenVisibility();
     if (core.state === "Planning") {
+        // The table is there for the whole Planning state: at the start, during
+        // the clarifying question, and under the map. Every other state hides it.
+        v.table = true;
         if (core.planningStep === "clarify") {
             v.clarifyQuestion = true;
         } else if (core.planningStep === "map") {

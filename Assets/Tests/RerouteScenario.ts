@@ -1,15 +1,17 @@
 /**
  * RerouteScenario.ts — LEAF scenario C4 (design brief, done criterion 4).
  *
- * "I've stopped" after the crash alert shows the rest of route A with the crash
- * stretch highlighted and a delay card, plus route B. Pinching route B's dot
+ * "I've stopped" after the crash alert shows the map floating (no table under
+ * it) with the rest of route A, the crash stretch highlighted and a delay card,
+ * plus route B. Pinching route B's dot
  * says "New route set" and hides the map; riding to the end gives the on-time
  * arrival line.
  */
 
 import { Scenario } from "Leaf.lspkg/Scenarios/scenario/Scenario";
 import { expect } from "Leaf.lspkg/Utils/common/Expect";
-import { BUTTON_NAMES } from "../Scripts/TrafficInsightSceneContracts";
+import { findSceneObjectByName } from "Leaf.lspkg/Utils/common/Utils";
+import { BUTTON_NAMES, ROOT_NAMES } from "../Scripts/TrafficInsightSceneContracts";
 import { TrafficInsightLeafDriver, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
 
 @component
@@ -29,6 +31,9 @@ export class RerouteScenario extends Scenario {
         expect(s.state, "state after I've stopped").toBe("Stopped");
         expect(s.remainingFrom, "rest of route drawn from the rider's progress").toBeGreaterThan(0);
         expect(s.visible.map, "map visible").toBe(true);
+        expect(s.visible.table, "no table under the map: it floats").toBe(false);
+        const table = findSceneObjectByName(ROOT_NAMES.mapTable);
+        expect(!!table && table.isEnabledInHierarchy, "MapTable object is off while stopped").toBe(false);
         expect(s.visible.routeA, "rest of route A drawn").toBe(true);
         expect(s.visible.problemHighlight, "crash stretch highlighted").toBe(true);
         expect(s.visible.problemCard, "delay card visible").toBe(true);

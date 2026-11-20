@@ -1,7 +1,7 @@
 /**
  * TrafficInsightLeafDriver.ts
  *
- * Owns: the shared test helpers for the TrafficInsight LEAF scenarios (C1-C5):
+ * Owns: the shared test helpers for the TrafficInsight LEAF scenarios (C1-C6):
  * a DefaultLeafInteractor subclass that presses buttons / pinches route dots by
  * their stable scene names, plus read-only helpers for the Lens snapshot
  * (TrafficInsightMain.getState()) and for Text shown on the Ride simulator.
@@ -23,6 +23,7 @@ import { LensVisibility, StateName, TrafficInsightSnapshot } from "../Scripts/Tr
 
 /** Every Lens-layer flag (everything except the simulator's clarify dialog). */
 export const LENS_FLAGS: (keyof LensVisibility)[] = [
+    "table",
     "map",
     "routeA",
     "routeB",

@@ -2773,6 +2773,7 @@
       audio: !<MappingBased.AssignableType_4> fa9bc580-df81-4654-9979-c1152e12e74d
       alertFollow: !<MappingBased.AssignableType_5> 1a1b0750-69a3-4235-9649-9429219e1276
       cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
+      table: !<reference.SceneObject> b3d40916-edb6-4237-981c-af9eb9a1fbf2
       rideStep: 0.050000
       alertDurationSec: !<float> 2.000000
       alertFadeSec: 0.500000
