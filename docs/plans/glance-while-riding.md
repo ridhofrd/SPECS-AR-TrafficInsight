@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **Planned, not started.** Agreed with the author on 2026-11-20 |
+| Status | **Implementation in progress.** Author requested the build on 2026-11-20 |
 | Depends on | Revision 1 and consistency polish; trip-stage Preview surroundings now occupy C10 (built; LEAF C1 to C10 pass) |
 | Replaces | The parked entry "A glance at the route while riding" in [docs/backlog.md](../backlog.md) |
 | Source of truth | [devpost/design-brief.md](../../devpost/design-brief.md). This plan is **not** the brief. Step 0 updates the brief, and only with the author's approval |
@@ -24,7 +24,7 @@ While riding, the Lens shows nothing. This feature adds one exception the rider 
 | D5 | **2-second cap, then look up to re-arm** | US car guidance: a single glance away from the road of at most 2 s. Re-arming stops a rider staring down by holding their head low |
 | D6 | **Riding only; an alert always wins** | An alert is safety-critical. A glance never shows in Planning, Alerted, Stopped or Arrived, and an alert that fires mid-glance cancels it |
 | D7 | **Low in the view, never in the middle of the road view** | The strip is below the normal view while the rider looks at the road. It is centred only when the rider deliberately looks down at it, like a speedometer |
-| D8 | **Speed rule: real-product note only, not built** (proposed; confirm at step 0) | The real product could answer by voice only above some speed. The Preview has no speed, so it is documented in the README's real-product notes, not implemented |
+| D8 | **Speed rule: real-product note only, not built** (confirmed by implementation scope, 2026-11-20) | The real product could answer by voice only above some speed. The Preview has no speed, so it is documented in the README's real-product notes, not implemented |
 
 Evidence for D1 to D7 is in [docs/research/ar-ui-while-moving.md](../research/ar-ui-while-moving.md). **The look-down trigger itself is this project's idea, not something any source tested.** No source tests AR glasses on motorcycles or bicycles. Everything about how safe or comfortable this is on a real bike is *feel unproven*.
 
@@ -136,7 +136,7 @@ Each step ends with a compile and a read of the Lens Studio Logger. Each step th
    - Add the strip and the voice answer to *Where things live*, *Hands and input* and *When things show*.
    - Add two stand-in rows: "Looking down at the dashboard spot" = right-drag to look down in Interactive Preview, and "Saying 'where am I?'" = a button.
    - Add done criteria 11 to 14 (section 6).
-   - Confirm D8 (speed rule).
+   - D8: confirmed as a future-product note; the simulator has no speed input.
    - Preserve the current consistency rules in the brief.
 
    **0b. Resolved by the consistency pass (2026-11-20).** The old fixed ten-minute rain line was removed. The active-route warning now fires before the fork, and warning/card countdowns come from shared route timing. Reuse the existing helpers; do not restore the old 25% trigger or a fixed ten-minute sentence.
