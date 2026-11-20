@@ -1,0 +1,47 @@
+- !<AssetImportMetadata/8f7d2720-e6f8-4c22-8946-7c70903a477e>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> fa5868bd-f10b-4f89-80d6-530c7ab9e183
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> fa5868bd-f10b-4f89-80d6-530c7ab9e183
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 43486c40-43c3-460c-a260-77978241c2b3
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/43486c40-43c3-460c-a260-77978241c2b3>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: 808266ad-948b-47e2-9cc3-f37235ef84b5
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    previewEnabled: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - previewEnabled: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input bool previewEnabled = true

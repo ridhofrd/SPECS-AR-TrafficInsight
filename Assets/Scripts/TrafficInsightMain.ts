@@ -28,7 +28,8 @@ import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
 import { TrafficInsightRoadView } from "./TrafficInsightRoadView";
 import { TrafficInsightAudioController } from "./TrafficInsightAudioController";
 import { TrafficInsightLazyFollow } from "./TrafficInsightLazyFollow";
-import { TrafficInsightStateMachine, mapViewFor, roadViewFor, visibilityFor } from "./TrafficInsightState";
+import { TrafficInsightPreviewContext } from "./TrafficInsightPreviewContext";
+import { TrafficInsightStateMachine, mapViewFor, previewContextFor, roadViewFor, visibilityFor } from "./TrafficInsightState";
 import { labelToText, problemCardText, progressCardText, progressLabel, routeLabel } from "./TrafficInsightTripData";
 import { BUTTON_NAMES, tiError, tiLog, tiWarn } from "./TrafficInsightSceneContracts";
 import {
@@ -75,6 +76,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
     // The mock street with both routes laid on it (shown only while Stopped).
     @input
     roadView: TrafficInsightRoadView;
+
+    // Editor-only surroundings are demo scaffolding, like the simulator panel.
+    @input @allowUndefined
+    previewContext: TrafficInsightPreviewContext;
 
     @input
     cameraObject: SceneObject;
@@ -167,6 +172,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             roadChosen: this.started ? this.roadView.getChosen() : "none",
             visible: this.readVisibility(core),
             alertIconCameraLocal: this.alertIconCameraLocal(),
+            previewContext: this.previewContext ? this.previewContext.getSnapshot() : null,
         };
     }
 
@@ -329,6 +335,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
         const core = this.sm.getCore();
         const vis = visibilityFor(core);
+        if (this.previewContext) this.previewContext.applyView(previewContextFor(core));
         // No hand input while an alert shows or while a just-picked route is being confirmed.
         const inputOk = core.state !== "Alerted" && core.confirmRoute === "none";
 

@@ -190,6 +190,7 @@ export interface IntentResult {
 
 /** Full LEAF snapshot returned by TrafficInsightMain.getState(). */
 export interface TrafficInsightSnapshot extends StateCore {
+    previewContext: PreviewContextSnapshot | null;
     labelTextA: string;
     labelTextB: string;
     problemCardText: string;

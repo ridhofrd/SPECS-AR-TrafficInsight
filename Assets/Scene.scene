@@ -20,6 +20,7 @@
     - !<own> 56a9ccb1-7d46-4a4d-8a9d-4164f875cca8
     - !<own> df5b9bee-1e25-4538-9944-cbc7a0ec72bc
     - !<own> 9dafd6a8-9536-481e-82c9-ec48cab742d8
+    - !<own> 280e1cd8-3a33-4079-9862-830b1ac24fbe
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -791,6 +792,21 @@
   BlendNormals: false
   BlendShapes:
     {}
+- !<SceneObject/280e1cd8-3a33-4079-9862-830b1ac24fbe>
+  PrefabRemaps:
+    []
+  Name: PreviewContextRoot
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 9f4ff1ce-0a82-4e0d-b0a8-77008ea62508
 - !<Skin/28e05826-1521-46fa-a54c-80f2957ec80c>
   PrefabRemaps:
     []
@@ -2229,6 +2245,22 @@
     []
   Components:
     - !<own> 1e9048ec-9ce6-4d29-b87e-78e858914fd7
+- !<ScriptComponent/9f4ff1ce-0a82-4e0d-b0a8-77008ea62508>
+  PrefabRemaps:
+    []
+  Name: TrafficInsightPreviewContext
+  Enabled: true
+  ScriptAsset: !<reference> fa5868bd-f10b-4f89-80d6-530c7ab9e183
+  ScriptInputsDefault:
+    previewEnabled: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      previewEnabled: true
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/a0f9b518-859f-4395-8f10-6a17ab3e1274>
   PrefabRemaps:
     []
@@ -2774,6 +2806,7 @@
       audio: !<MappingBased.AssignableType_4> fa9bc580-df81-4654-9979-c1152e12e74d
       alertFollow: !<MappingBased.AssignableType_5> 1a1b0750-69a3-4235-9649-9429219e1276
       roadView: !<MappingBased.AssignableType_6> d4e0d609-5549-498e-bb19-5970030d6405
+      previewContext: !<MappingBased.AssignableType_7> 9f4ff1ce-0a82-4e0d-b0a8-77008ea62508
       cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
       table: !<reference.SceneObject> b3d40916-edb6-4237-981c-af9eb9a1fbf2
       rideStep: 0.050000
