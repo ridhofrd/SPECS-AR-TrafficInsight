@@ -8,6 +8,8 @@ Ideas that were considered and deliberately not built yet, with the reasoning, s
 
 By default the Lens shows **nothing** while the rider is moving, because anything in view is a distraction. But a rider who forgets the route, or wants to check how far along they are, should be able to trigger a **brief look at the route** and have it go away again by itself. The original wording asked for two views: the route **on the road**, and a **broad overview**, shown for a short time, triggered by a **gesture**.
 
+> **Update 2026-11-20:** showing the route and marks **on the road while the rider is stopped** was moved into revision 1 (a mock street in the Preview, route lines laid on it). This entry now covers only what happens **while riding**: a brief glance, and any route overlay on the road during the ride.
+
 ### Why it was parked
 
 It was deferred in favour of three simpler revisions (table gone while riding, floating map when stopped, progress along the path), and because the gesture trigger conflicts with decisions already made:

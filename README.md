@@ -277,7 +277,7 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Run `plan-lens` and approve `devpost/design-brief.md`
 - [x] Build with CLAD and test with LEAF (C1 to C5 pass in the Preview)
 - [x] Screenshots in `docs/media/` and the feature walkthrough
-- [ ] Revision 1: no table while riding, a floating map when stopped, and progress along the path
+- [ ] Revision 1: no table while riding, a floating map when stopped, progress along the path, and the route marked on the road ahead
 - [ ] Judge in the Preview and iterate
 - [ ] Parked for later: a brief glance at the route while riding (see [docs/backlog.md](docs/backlog.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
