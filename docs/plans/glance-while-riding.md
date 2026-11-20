@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | **Planned, not started.** Agreed with the author on 2026-11-20 |
-| Depends on | Revision 1 (built: table only while planning, floating map, progress marks, road view; LEAF C1 to C9 pass) |
+| Depends on | Revision 1 and consistency polish; trip-stage Preview surroundings now occupy C10 (built; LEAF C1 to C10 pass) |
 | Replaces | The parked entry "A glance at the route while riding" in [docs/backlog.md](../backlog.md) |
 | Source of truth | [devpost/design-brief.md](../../devpost/design-brief.md). This plan is **not** the brief. Step 0 updates the brief, and only with the author's approval |
 
@@ -135,7 +135,7 @@ Each step ends with a compile and a read of the Lens Studio Logger. Each step th
    - The rule "Riding: nothing from the Lens on screen" gets one named exception: the glance strip, only when the rider looks down at it, at most 2 s.
    - Add the strip and the voice answer to *Where things live*, *Hands and input* and *When things show*.
    - Add two stand-in rows: "Looking down at the dashboard spot" = right-drag to look down in Interactive Preview, and "Saying 'where am I?'" = a button.
-   - Add done criteria 10 to 13 (section 6).
+   - Add done criteria 11 to 14 (section 6).
    - Confirm D8 (speed rule).
    - Preserve the current consistency rules in the brief.
 
@@ -158,7 +158,7 @@ Each step ends with a compile and a read of the Lens Studio Logger. Each step th
    - Each frame in Riding: read camera pitch, feed the trigger, call `glanceStart`/`glanceEnd`. Run the 2 s cap and the fades as the alert timer does.
    - Wire the button to `whereAmI()`.
    - Add a test hook so LEAF can inject a head pitch, because LEAF cannot turn the Preview camera. Proposed: `setHeadPitchOverrideForTests(deg | null)`, used only by scenarios.
-5. **Tests.** LEAF scenarios C10 to C13 (section 6), one file each in `Assets/Tests/`, registered in `LeafIndex.ts`. Add `glanceStrip` to `LENS_FLAGS` in `TrafficInsightLeafDriver.ts`, so C2 and the other "Lens layer empty" checks also cover the strip. Re-run C1 to C13.
+5. **Tests.** LEAF scenarios C11 to C14 (section 6), one file each in `Assets/Tests/`, registered in `LeafIndex.ts`. Add `glanceStrip` to `LENS_FLAGS` in `TrafficInsightLeafDriver.ts`, so C2 and the other "Lens layer empty" checks also cover the strip. Re-run C1 to C14.
 6. **Docs.**
    - README: walkthrough section with a screenshot of the strip. Take it with the Preview camera tilted down, then reset the camera.
    - Tests table, decisions, known limitations, roadmap.
@@ -166,14 +166,14 @@ Each step ends with a compile and a read of the Lens Studio Logger. Each step th
 
 ## 6. Proposed done criteria and tests
 
-Numbers follow the brief's existing criteria 1 to 9. Each gets one LEAF scenario with the matching ID.
+Numbers follow the brief's existing criteria 1 to 10, including Preview surroundings. Each gets one LEAF scenario with the matching ID.
 
 | ID | Done criterion (proposed wording for the brief) | How the test checks it |
 |---|---|---|
-| C10 | While riding, looking down at the dashboard spot for about 0.3 s shows the glance strip: the route as a straight line with "you are here", the minutes left and the next problem. Looking back up hides it | Inject a pitch of 25° down: hidden at 0.1 s, shown by 0.5 s; text matches `glanceFacts`; inject 0°: hidden. Check the strip is below the horizon and centred left-right, measured from the eye position as C7 does |
-| C11 | The strip never stays longer than about 2 seconds, and only shows again after the rider has looked back up | Hold 25° down: gone by about 2.3 s; still down at 4 s: not shown; level for 0.6 s, then down again: shown |
-| C12 | Saying "where am I?" (a button in the Preview) gives the minutes left and the next problem as a spoken line (a caption), and shows nothing | Press the button while riding: caption equals the `glanceFacts` sentence; every Lens flag stays false |
-| C13 | No glance outside riding, and an alert wins | Inject 25° down in Planning, Alerted, Stopped and Arrived: never shown. Start a glance, ride to the alert point: the glance ends and the alert icon shows |
+| C11 | While riding, looking down at the dashboard spot for about 0.3 s shows the glance strip: the route as a straight line with "you are here", the minutes left and the next problem. Looking back up hides it | Inject a pitch of 25° down: hidden at 0.1 s, shown by 0.5 s; text matches `glanceFacts`; inject 0°: hidden. Check the strip is below the horizon and centred left-right, measured from the eye position as C7 does |
+| C12 | The strip never stays longer than about 2 seconds, and only shows again after the rider has looked back up | Hold 25° down: gone by about 2.3 s; still down at 4 s: not shown; level for 0.6 s, then down again: shown |
+| C13 | Saying "where am I?" (a button in the Preview) gives the minutes left and the next problem as a spoken line (a caption), and shows nothing | Press the button while riding: caption equals the `glanceFacts` sentence; every Lens flag stays false |
+| C14 | No glance outside riding, and an alert wins | Inject 25° down in Planning, Alerted, Stopped and Arrived: never shown. Start a glance, ride to the alert point: the glance ends and the alert icon shows |
 
 ## 7. What stays unproven
 

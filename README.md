@@ -2,17 +2,18 @@
 
 **A commute co-pilot for motorcycle riders on Snap Spectacles.** Plan a trip in your space, receive a brief warning when your route is affected, and pull over to compare the options before continuing.
 
-![Planning: labelled start and destination, blue A and green B dots, and whole-trip time and fuel estimates.](docs/media/consistency-planning.png)
+![Planning: labelled start and destination, blue A and green B dots, and whole-trip time and fuel estimates.](docs/media/context-home-planning.png)
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
-> **Verified in Interactive Preview on 2026-11-20:** TypeScript compiles, runtime startup was checked, and LEAF C1-C9 pass after the consistency polish. C5 and C9 were also rerun after the final raincoat layout fix. The four consistency screenshots below are fresh Preview captures.
+> **Verified in Interactive Preview on 2026-11-20:** TypeScript compiles, runtime startup was checked, and LEAF C1-C10 pass with the trip-stage scenery. C10 passed again after refining distant rain; C2 was also rerun for the home-arrival capture. The context screenshots below are fresh Preview captures.
 > This is a simulation: routes, movement, traffic, weather and fuel are sample data. No Spectacles hardware has been tested. The glance feature remains planned, not built; the submission video is still outstanding.
 
 ## Contents
 
 - [What it does](#what-it-does)
 - [Walkthrough](#walkthrough)
+- [Preview surroundings](#preview-surroundings)
 - [Tests](#tests)
 - [Why it belongs on glasses](#why-it-belongs-on-glasses)
 - [How this project is built](#how-this-project-is-built)
@@ -52,7 +53,7 @@ stateDiagram-v2
 
 ### Planning: where am I going, and which option is fastest?
 
-![The map on the table with Home as Start, Office as Destination, labelled A/B dots and explicit total estimates.](docs/media/consistency-planning.png)
+![The map on the table with Home as Start, Office as Destination, labelled A/B dots and explicit total estimates.](docs/media/context-home-planning.png)
 
 **Go to office** asks which office, then displays the map. **Go home** opens the evening trip. The destination clarification is a fixed sample question; both office choices use the sample corridor.
 
@@ -64,7 +65,7 @@ Cards say **min total** and **L total** during planning. The recommended option 
 
 ### Riding: keep the view clear
 
-![Riding with the table, map and other Lens content hidden.](docs/media/riding-no-table.jpg)
+![Riding with the table, map and other Lens content hidden.](docs/media/context-street-riding.png)
 
 Choosing a route hides the Lens interface. **Ride** advances the simulator by 5% per press. Both sample hazards belong to A: choosing B allows either trip to finish without a false warning or forced stop.
 
@@ -74,7 +75,7 @@ Until the simulated problem is resolved, progress is held at 14%, still before t
 
 ### Stopped after the crash: what changed, and why reroute?
 
-![Crash stop: current A, fastest alternative B, an affected-route delay card, yellow rider marker, neutral approach and white road junction ring.](docs/media/consistency-crash.png)
+![Crash stop: current A, fastest alternative B, an affected-route delay card, yellow rider marker, neutral approach and white road junction ring.](docs/media/context-street-day.png)
 
 **I've stopped** opens the floating map without the table. The yellow marker and **You are here · A** card identify the rider and current route. The dim stretch records travel already completed; the card reports elapsed minutes.
 
@@ -86,7 +87,7 @@ Arrival says **You've arrived.** No deadline is modelled, so the Lens does not c
 
 ### Evening: fastest through rain, or a longer dry route?
 
-![Evening stop: A is Current and Fastest with a rain icon; the dry alternative B explicitly costs 12 more minutes. Office is Start and Home is Destination.](docs/media/consistency-rain.png)
+![Evening stop: A is Current and Fastest with a rain icon; the dry alternative B explicitly costs 12 more minutes. Office is Start and Home is Destination.](docs/media/context-evening-rain.png)
 
 The amber card identifies rain on A, its distance interval, temperature, intensity and type. A's weather row uses the same rain-cloud symbol as the alert and problem card. Dry rows keep the dry-weather symbol.
 
@@ -94,7 +95,7 @@ The choice is explicit: **A is fastest, with heavy rain; B is dry and takes 12 m
 
 ### Keeping A: prepare before riding
 
-![The compact raincoat reminder sits below the map, with Skip reminder and Raincoat on fully visible. The destination and yellow rider marker remain visible.](docs/media/consistency-raincoat.png)
+![The compact raincoat reminder sits below the map, with Skip reminder and Raincoat on fully visible. The destination and yellow rider marker remain visible.](docs/media/context-raincoat.png)
 
 Selecting rainy A asks the rider to put on a raincoat **before riding**. **Skip reminder** resumes without a raincoat confirmation; **Raincoat on** confirms preparation and resumes. The same rain symbol describes the hazard throughout; an umbrella is not used as a raincoat action.
 
@@ -108,9 +109,29 @@ The panel to the rider's right is labelled **Ride simulator (preview only)**. It
 
 Sample data and the shared timing/fuel calculations live in [`TrafficInsightTripData.ts`](Assets/Scripts/TrafficInsightTripData.ts). Each shared end road is assigned four sample minutes and 0.05 L; the branch contains the remaining cost. This keeps the already-ridden cost equal when switching routes before the fork. Hazard fractions are derived from the displayed kilometre interval and map scale.
 
+## Preview surroundings
+
+The scenery makes the journey stage visible: plan at home, compare routes on the street, and arrive at the office. The return trip starts at the office and ends back home, with evening colours.
+
+| Stage | Morning: home to office | Evening: office to home |
+|---|---|---|
+| Planning, including clarification | Home, day | Office, evening |
+| Riding, Alerted or Stopped | Street, day | Street, evening |
+| Arrived | Office, day | Home, evening |
+
+| Office arrival | Home arrival |
+|---|---|
+| ![Office doors and sign on morning arrival.](docs/media/context-office-arrival.png) | ![Home room on evening arrival, with the Lens interface cleared.](docs/media/context-home-arrival.png) |
+
+These are lightweight, stylised demo surroundings. They follow the same state as the UI, without refreshing the Preview or resetting progress. Scenery has no colliders or hand interactions. A known crash appears ahead on A; known evening rain stays in the distant A corridor before the rain interval, surrounds the rider inside it, and clears after it or when choosing dry B. The street remains visible during the warning and raincoat reminder.
+
+**Editor only:** the component checks `isEditor()` before building scenery. On real glasses, the rider's actual surroundings would provide this context. This does not add GPS, live weather, geographic road alignment or a riding HUD; the glance feature remains planned.
+
+For the demo, use **Interactive > Plane** with the **SPECS27** device in Preview. The authored scenery appears inside the simulated display; the neutral Plane and its grid can remain visible through the additive display and around its edges. This is a staged Preview environment rather than a full replacement of Lens Studio's camera background. Preview input selection is local workspace state; choose Plane again in a fresh workspace.
+
 ## Tests
 
-C1-C9 were run in Preview after the consistency changes on 2026-11-20. **All passed.** C5 and C9 passed again after compacting the reminder. Scenarios use the real Interactables and inspect state and scene objects.
+C1-C9 were rerun in Preview with the scenery on 2026-11-20. **All passed.** C10 passed after the final distant-rain refinement; C2 also passed again for the arrival screenshot. Scenarios use the real Interactables and inspect state and scene objects.
 
 | ID | Verified behaviour | Result |
 |---|---|---|
@@ -123,6 +144,7 @@ C1-C9 were run in Preview after the consistency changes on 2026-11-20. **All pas
 | C7 | Floating map about 1.1 m ahead and below eye level | Pass |
 | C8 | Dim ridden stretch, larger yellow rider marker, explicit rider/route/elapsed card, hidden when riding | Pass |
 | C9 | Road/map separation, usable stripe width, hover, pinch, chosen glow, other-route fade and hidden riding view | Pass |
+| C10 | Home/street/office across both trips, day/evening, actual scene visibility, weather boundaries, dry reroute, preserved progress, no scenery interactions or riding HUD | Pass |
 
 Sound audibility, hardware hand tracking, daylight readability and real riding comfort are unverified. Logger checks still report existing SDK deprecation and renderer batching warnings; no runtime exceptions were observed during verification.
 
@@ -160,11 +182,12 @@ flowchart LR
     MAIN --> MAP["Route map\nlines, highlight, dots,\nridden stretch, you-are-here"]
     MAIN --> ROAD["Road view\nmock street, stripes, ring"]
     MAIN --> CARDS["Lens cards\nlabels, problem card, progress card,\nreminder, alert icon"]
+    MAIN --> CONTEXT["Preview surroundings\neditor only: home, street, office"]
     MAIN --> AUDIO["Audio + captions"]
     MAIN --> LEAF["getState()\nfor LEAF tests"]
 ```
 
-Every press goes to one place, `TrafficInsightState`, a plain state machine with no scene code. After each change, `TrafficInsightMain` redraws everything from the state's snapshot. Nothing on screen keeps its own idea of what state the Lens is in, so a rule like "nothing from the Lens while riding" holds everywhere at once, and the tests can check it by reading one snapshot.
+Every press goes to one place, `TrafficInsightState`, a plain state machine with no scene code. After each change, `TrafficInsightMain` redraws everything from the state's snapshot. The scene views derive their visibility from that state. Preview surroundings have a separate snapshot from `LensVisibility`, so C2 can check that the riding interface is empty while C10 checks that the street remains visible. Within the scenery component, only the decorative rain animation uses a frame timer.
 
 | Script | Role |
 |---|---|
@@ -172,8 +195,9 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 | `TrafficInsightTripData.ts` | Sample routes, shared timing/fuel helpers and the Fastest rule |
 | `TrafficInsightMain.ts` | Connects input to the state, redraws the views (and shows or hides the table), runs the 2 s alert timer |
 | `TrafficInsightRouteMap.ts` | Builds the route lines, problem highlight, dim ridden stretch, "you are here" marker and pinchable dots at runtime |
-| `TrafficInsightRoadView.ts` | Builds the mock street, the two route stripes (aimable and pinchable) and the pulsing ring at runtime |
-| `TrafficInsightGeometry.ts` | The small mesh helpers the map and the road view share (ribbon, puck, ring, rectangle) |
+| `TrafficInsightRoadView.ts` | Builds the stopped-road overlay, the two route stripes (aimable and pinchable) and the pulsing ring at runtime |
+| `TrafficInsightPreviewContext.ts` | Builds editor-only home, street and office scenery; applies the pure `previewContextFor` result and reports actual visibility |
+| `TrafficInsightGeometry.ts` | The small mesh helpers the map and the road view share (ribbon, puck, ring, rectangle, box) |
 | `TrafficInsightTrafficLensUI.ts` | The Lens layer: label cards, problem card, progress card, raincoat reminder, alert icon (UI Kit) |
 | `TrafficInsightRideSimulatorUI.ts` | The demo panel (UI Kit) |
 | `TrafficInsightLazyFollow.ts` | Lets the alert icon follow the head gently |
@@ -190,14 +214,14 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 - **Confirmation before moving:** a 1.2-second route glow; hand input is gated during alert/confirmation. Raincoat preparation keeps the rider stopped.
 - **Reminder stays in view:** a compact panel below the map, with no redundant start label beneath it; C5 checks projected button corners.
 
-The reasoning and validation are recorded in [decision 0006](docs/decisions/0006-consistent-route-story.md).
+The route reasoning and validation are recorded in [decision 0006](docs/decisions/0006-consistent-route-story.md). The trip-stage scenery and its Preview limitations are recorded in [decision 0007](docs/decisions/0007-preview-journey-surroundings.md).
 
 ## Known limitations
 
 - **Riding with AR glasses is unproven.** No study of AR glasses on motorcycles was found, and there is no Snap guidance about vehicles. The three-state design follows car and helmet head-up display research; whether it is safe on a real bike can only be found out by real-world testing.
 - **No spoken voice.** The Lens plays its chime and tones, but the text-to-speech module is deprecated in this SDK, so the spoken lines appear as captions on the simulator panel instead. The brief planned captions as the fallback for exactly this case.
 - **Preview only.** Hand tracking, comfort over time and readability in daylight are untested on real Spectacles.
-- **The road view and map are schematic stand-ins.** It is a model of a street in the Preview room. How accurately a route line would sit on a real road, and how it would look in daylight, is untested.
+- **The road view and map are schematic stand-ins.** The route corridors and surrounding street are illustrative models in Preview. How accurately a route line would sit on a real road, and how it would look in daylight, is untested.
 - **Tooling left in the scene.** The scene contains an `AiPreviewAgent Handler` object, added by the Lens Studio preview tools the agent used. It renders nothing and may be removed before submission.
 
 ## Repository layout
@@ -206,7 +230,7 @@ The reasoning and validation are recorded in [decision 0006](docs/decisions/0006
 |---|---|
 | `TrafficInsight.esproj` | The Lens Studio project file |
 | `Assets/Scripts/` | The Lens's TypeScript components (see [Inside the Lens](#inside-the-lens)) |
-| `Assets/Tests/` | LEAF scenarios C1 to C9 and their shared driver |
+| `Assets/Tests/` | LEAF scenarios C1 to C10 and their shared driver |
 | `Assets/GeneratedMeshes/`, `Assets/GeneratedSFX/` | The table and city map models and the four sound effects, all made in code (no third-party assets) |
 | `Assets/Icons/`, `Assets/Materials/` | Material icons and the route line material |
 | `Packages/` | Spectacles Interaction Kit (SIK), UI Kit, Motion and Icons from the Base Template; LEAF; and the Lens Studio preview-agent helpers. Stored with Git LFS |
@@ -228,7 +252,7 @@ The large files (the environment map, the packages and the generated assets) are
 
 1. Install Git LFS, then run `git lfs install` once. Clone the repository. If the packages show up as tiny text files, run `git lfs pull`.
 2. Open `TrafficInsight.esproj` in Lens Studio.
-3. Use the **Preview** panel. In Interactive Preview:
+3. In the **Preview** panel choose **Interactive > Plane**, retaining **SPECS27**. This neutral input lets the authored surroundings tell the trip stage. In Interactive Preview:
    - `W` `A` `S` `D` to move, `Q` and `E` to move down and up
    - right-drag (or hold Shift) to look around
    - a mouse click acts as a pinch
@@ -289,6 +313,7 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Revision 1, part 2: progress along the path (the ridden part dim, a "you are here" marker, a progress card) (C8, with the map placement check C7)
 - [x] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines) (C9; C1 to C9 pass)
 - [x] Consistency polish: route reachability, timing, ranking explanation, map labels, unified symbols and reminder layout (C1-C9 pass)
+- [x] Preview surroundings: home, street and office follow both trips, with day/evening and route-aware rain (C10; C1-C9 regression pass)
 - [ ] Planned: a brief glance at the route while riding, by looking down or asking "where am I?" (plan: [docs/plans/glance-while-riding.md](docs/plans/glance-while-riding.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
 
@@ -309,5 +334,5 @@ _To be written._
 - The Base Template, including its default scene, `Assets/Render/Echopark.hdr` and the Interaction Kit, UI Kit, Motion and Icons packages, is Snap's and remains subject to Snap's terms.
 - Icons are [Material Symbols](https://fonts.google.com/icons) by Google (Apache License 2.0), imported through Snap's Icons package.
 - `Assets/Tests/TrafficInsightLeafDriver.ts` adapts the "Custom Interactor Template" from Snap's LEAF package.
-- The table and city map models and the sound effects were generated by code written for this project (`tools/asset-generators/`) and use no third-party assets.
+- The table and city map models and the sound effects were generated by code written for this project (`tools/asset-generators/`) and use no third-party assets. The Preview home, street, office and weather scenery are built procedurally by `TrafficInsightPreviewContext.ts`.
 - Code in this repository is released under the [MIT License](LICENSE).
