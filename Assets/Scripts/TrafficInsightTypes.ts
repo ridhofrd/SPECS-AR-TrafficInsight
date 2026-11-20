@@ -80,6 +80,8 @@ export interface ProblemSpan {
 
 /** Shared facts for a requested glance and the eyes-free answer. */
 export interface GlanceFacts {
+    /** The same bent schematic geometry used by the planning/stopped map. */
+    points: MapPoint[];
     from: string;
     to: string;
     route: RouteId;

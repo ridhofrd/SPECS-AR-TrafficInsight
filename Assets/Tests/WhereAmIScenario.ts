@@ -46,8 +46,8 @@ export class WhereAmIScenario extends Scenario {
             expect(before.glanceText, "known rain facts rendered").toBe(glanceFacts("evening", "A", before.progress, true).text);
             const interval = findSceneObjectByName("GlanceProblem");
             expect(interval.isEnabledInHierarchy, "known rain interval is actually drawn").toBe(true);
-            expect(interval.getTransform().getLocalScale().x, "interval uses the same route fractions")
-                .toBeCloseTo(18 * (rain.toFraction - rain.fromFraction), 3);
+            const mesh = (interval.getComponent("Component.RenderMeshVisual") as RenderMeshVisual).mesh;
+            expect(mesh.extractVerticesForAttribute("position").length > 12, "rain highlight follows the bent route geometry").toBe(true);
             await d.press(BUTTON_NAMES.whereAmI);
             const after = snap();
             const expected = glanceFacts("evening", "A", before.progress, true).sentence;

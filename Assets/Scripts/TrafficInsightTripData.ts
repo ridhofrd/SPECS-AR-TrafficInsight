@@ -298,6 +298,7 @@ export function glanceFacts(trip: TripId, route: RouteId, progress: number, haza
         next = name + (before ? " in " : span.kind === "rain" ? " ends in " : " clears in ") + minutes + " min";
     }
     return {
+        points: routePoints(trip, route),
         from: def.from, to: def.to, route, progress: p, minutesLeft, next,
         text: minutesLeft + " min left · " + next,
         sentence: minutesLeft + " minutes to " + (trip === "morning" ? "the office" : "home") + ". " + next.replace(/ min$/, " minutes") + ".",

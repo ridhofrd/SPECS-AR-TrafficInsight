@@ -55,7 +55,7 @@ The demo tells this as one day, in two trips that reuse the same map, alert and 
 - **Progress marks (stopped):** the part of the route already ridden is drawn dim. A clear "you are here" marker, larger than the home and office markers and in a bright accent colour (default). A small progress card, for example "You are here · A / 2 min ridden" (default wording, numbers from the sample data).
 - **Route on the road (stopped):** a mock street on the floor of the room a few metres ahead (default: straight, about 3 m wide, about 10 m long, one junction where route B turns off). Both route lines lie on it as wide stripes (default about 40 cm, so each is at least about 2 degrees wide from where I stand, which makes it easy to aim at) in vivid, saturated colours that stand out on the muted street (default). A pulsing ring marks where the routes split (default). The street, the lines and the floating map are all in view at the same time and must not cover each other; adjust their positions in the preview until they don't.
 
-- **Glance strip (riding, requested):** a compact slate UI Kit card about 22 x 6 cm, about 1 m from the eye and 25 degrees below the horizon. It follows heading with smoothing, never head tilt. One straight line shows the active route, dim ridden part, yellow rider marker, known problem interval and Home/Office endpoints; one text line shows minutes left and the next problem. Nothing can be pinched.
+- **Route peek (riding, requested):** a compact slate UI Kit map about 24 x 18 cm, about 1 m from the eye and 25 degrees below the horizon. Show the active route's actual sample polyline, dim ridden path, yellow rider marker, known problem interval and Home/Office endpoints. Keep minutes left and the next problem below it. Hold the map heading while viewing it so looking aside leaves its direction. The map itself has no hand targets; Hide route is a simulator control.
 
 ## Hands and input
 - Choose destination: pinch "Go to office" or "Go home" (stand-ins for voice or a saved shortcut). If the destination is unclear, pinch the answer to the clarifying question.
@@ -64,8 +64,8 @@ The demo tells this as one day, in two trips that reuse the same map, alert and 
 - Simulate the ride: pinch "Ride" on the Ride simulator to move along the route, and "I've stopped" to pull over.
 - Targets are big and highlight when aimed at.
 - Voice and the button that does the same job: "office" or "home" = the trip buttons; "route A" or "route B" = a "Choose route A" or "Choose route B" button on the simulator panel, plus the dots themselves; "skip reminder" or "raincoat on" = the reminder buttons.
-- Glance: look down at least 20 degrees for 0.3 s while Riding. Looking up within 12 degrees hides it; the complete visual lasts at most 2 s. Look level within 8 degrees for 0.5 s to re-arm, including after an interruption. No hand gesture is required.
-- "Where am I?" reports minutes left and the next known problem by voice/caption only, dismissing any active glance. Outside Riding it gives "Ask while riding."; during Alerted it is ignored so the warning wins.
+- Route peek: look down 20-40 degrees for 0.3 s while Riding, within 15 degrees horizontally of the map. It stays visible without a time limit while the view remains within the wider hold zone (12-45 degrees down, 22 degrees sideways). Looking straight, too far down or aside hides it; looking back into its direction reopens it after the dwell. Hide route explicitly dismisses it; look level within 8 degrees for 0.5 s to re-arm after an explicit dismissal, voice request or state interruption. This uses head/camera direction, not eye tracking.
+- "Where am I?" reports minutes left and the next known problem by voice/caption only, dismissing any active route peek. Outside Riding it gives "Ask while riding."; during Alerted it is ignored so the warning wins.
 - Alerted state: no hand input, voice only (learner's safety rule).
 
 ## When things show
@@ -84,7 +84,7 @@ stateDiagram-v2
 ```
 
 - **Planning (at home or at the office):** the virtual table is visible for the whole planning state, including at the start and while the clarifying question is shown, and once the destination is clear the map shows the whole trip on it, with route dots and labels. The table and map hide once a route is picked.
-- **Riding:** the Lens is clear by default (no map, table or road marks). Looking down deliberately can reveal only the compact glance strip, for at most 2 s including fades. Short voice cues and the requested "Where am I?" answer use captions as the existing fallback. Audio must not drown out traffic. An alert, stop or arrival dismisses the strip immediately.
+- **Riding:** the Lens is clear by default (no full planning/stopped map, table or road marks). A deliberate look into the route-peek direction reveals only the compact route map for as long as the user holds that angle. Looking away or using Hide route dismisses it. Short voice cues and the requested Where am I? answer use captions as the existing fallback. An alert, stop or arrival dismisses the map immediately.
 - **Alerted:** a chime plus one short sentence, and the small icon low in the view, which disappears after about 2 seconds. Morning: "Crash ahead on your route, traffic is stalled. Pull over to see options." (default wording). Evening: "Rain on your route in N minutes. Pull over to see options." N is computed from the route timing (initially 8 in the current sample). Keep the tone calm (default).
 - **Stopped:** the full picture. There is no table: the map floats in front of the rider, with the progress marks, the rest of the route with the problem stretch highlighted, the problem card, and a dot and label for each option. The routes are also laid on the mock street ahead, with a pulsing ring where they split. Morning: current route A and reroute B. Evening: the dry reroute (when available; in the sample data it is, at +12 min, a default number) and the rainy route.
 - **After choosing:** a voice says "New route set" (default wording). The chosen route's line on the road glows and the other one fades for about a second (default, hand input is off during it), then the map and the road marks hide, so you're back to riding.
@@ -106,24 +106,24 @@ Each one can be checked in Lens Studio's preview. Updated for the approved consi
 
 10. Preview-only surroundings follow the journey without resetting it: home while planning the morning trip (including clarification), a daytime street while riding/alerted/stopped, then the office on arrival. Planning the return starts at the office in the evening, uses an evening street, and ends at home. Known route-A rain appears ahead before the rain zone and around the rider within it; taking dry B clears that rain context. Scenery has no interactions, stays separate from the Lens layer, and is never built on real glasses.
 
-11. While Riding, looking down at the dashboard spot for about 0.3 s shows a compact, non-interactive glance strip: the active route as one straight line with a yellow rider marker, dim ridden part, known problem interval, endpoint labels, minutes left and the next problem. Looking back up hides it. The anchor stays about 25 degrees below the horizon as head pitch changes.
-12. A glance lasts at most 2 s including its fade, with no repeat while looking down. The rider must look level for 0.5 s before another glance, including after an interruption.
-13. Pressing "Where am I?" while Riding gives the minutes left and next known problem as a caption/optional spoken line, using the same facts as the strip. It shows no Lens visuals and dismisses any active glance. It does not change route, progress or trip state.
-14. No glance appears in Planning, Alerted, Stopped or Arrived. An alert cancels a glance immediately and shows its own icon. Returning to Riding while still looking down cannot reopen the glance; looking level re-arms it.
+11. While Riding, looking into the dashboard direction for about 0.3 s shows a compact route map using the same bent polyline as the planning view, with endpoint labels, a dim ridden path, yellow rider position, known problem interval, minutes left and next problem. The marker follows both coordinates of that path as progress advances. The anchor stays about 25 degrees below the horizon as head pitch changes.
+12. The route map has no duration cap while the user holds the viewing angle. Looking straight or away horizontally/vertically hides it; looking back reopens it after the dwell. Hide route on the simulator dismisses it immediately without changing the trip or progress, and it stays dismissed until a fresh level look. Alerts and other state interruptions also require a fresh level look.
+13. Pressing "Where am I?" while Riding gives the minutes left and next known problem as a caption/optional spoken line, using the same facts as the route map. It shows no Lens visuals and dismisses any active peek. It does not change route, progress or trip state.
+14. No route peek appears in Planning, Alerted, Stopped or Arrived. An alert cancels a route peek immediately and shows its own icon. Returning to Riding while still looking down cannot reopen the route peek; looking level re-arms it.
 
-## Glance while riding (approved 2026-11-20)
+## Route peek refinement (approved 2026-11-20)
 
-This is the author's requested next revision. Reuse the existing remaining-cost
-and problem-timing helpers for the strip and voice answer. Unknown hazards are
-not disclosed: say "No reported problems" before a warning; known rain/crash
-has a countdown before its interval and time to leave within it; after it or
-on the unaffected route, say "Route clear". A known crash delay contributes to
-the remaining estimate. Use one pure pitch/time trigger and a state-owned
-visibility flag, with immediate dismissal outside Riding. Smooth fades must
-fit inside the two-second cap. Preview baseline pitch is level (0 degrees).
-There is no speed input; speed-based voice-only restrictions remain a future
-product note. Real riding safety, posture thresholds and speech recognition
-remain unverified. C11-C14 cover this feature in Preview.
+The author requested a route-shaped overview instead of a straight progress
+strip, and removed the two-second duration cap. Reuse the sample trip geometry
+and shared remaining-cost/problem helpers. Unknown hazards are not disclosed.
+Hold the map heading during viewing so a sideways look actually leaves it.
+Use head/camera direction, with pitch/yaw hysteresis, not eye tracking.
+Natural look-away allows looking back; explicit dismissal and alerts require
+a fresh level look to prevent immediate reopening. Hide route is a simulator
+control, never a route-choice gesture. This does not add live GPS, geographic
+map data or a route overlay on the real road. C11-C14 retain their IDs with
+updated map/visibility criteria. This supersedes the straight-strip/two-second
+rules in the original revision-two plan and decision 0008.
 
 ## Preview context (approved 2026-11-20)
 
@@ -157,7 +157,7 @@ These refine the original nine criteria. The approved glance exception is specif
 - Turn-by-turn directions while riding.
 - Detecting a real table or wall. The preview uses a virtual table for planning, and the map simply floats when I'm stopped.
 - Showing the route on the real road. The mock street is a stand-in; real location, heading and how well a line would sit on the right lane are untested.
-- Any route overlay on the road during the ride. The compact, requested glance strip is the only approved riding visual exception.
+- Any route overlay on the road during the ride. The compact, requested route peek is the only approved riding visual exception.
 - Relying on voice recognition (every voice command has a button).
 - Editing saved shortcuts.
 - Data analytics, such as the best time to leave based on history.
@@ -165,7 +165,7 @@ These refine the original nine criteria. The approved glance exception is specif
 - Separate modes for cars or bicycles.
 
 ## Risks and open questions
-- **Riding with AR glasses is unproven.** The learner's research note found no study of AR glasses on motorcycles or bicycles, and no Snap guidance about vehicles. The three-state design follows car and helmet-HUD evidence, but whether it's safe on a real bike is feel unproven and only real-world testing could tell. The video should say this.
+- **Do not use this while operating a vehicle.** Snap's current [Spectacles best practices](https://support.spectacles.com/hc/en-us/articles/30214013362452-Best-Practices) explicitly advise against using Spectacles while driving any vehicle. This corrects the earlier claim that Snap had no vehicle guidance. This remains a Preview design concept, not a product approved for real motorcycle use.
 - **Two trips is a lot to build.** Both reuse the same map, alert and stop, so the evening trip should be mostly new sample data. Build the morning trip end to end first.
 - **Spoken audio may not work in the preview.** Captions on the simulator panel are the fallback.
 - **Viewers may confuse the demo rig with the Lens.** Keep the Ride simulator clearly labeled and to the side.

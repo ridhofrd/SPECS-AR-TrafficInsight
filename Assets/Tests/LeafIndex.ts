@@ -17,7 +17,7 @@ import { ProgressMarksScenario } from "./ProgressMarksScenario";
 import { RoadViewScenario } from "./RoadViewScenario";
 import { JourneyContextScenario } from "./JourneyContextScenario";
 import { GlanceLookDownScenario } from "./GlanceLookDownScenario";
-import { GlanceCapScenario } from "./GlanceCapScenario";
+import { GlanceViewingAngleScenario } from "./GlanceViewingAngleScenario";
 import { WhereAmIScenario } from "./WhereAmIScenario";
 import { GlancePriorityScenario } from "./GlancePriorityScenario";
 
@@ -42,7 +42,7 @@ export class LeafIndex extends BaseScriptComponent {
         { id: "C9", typename: RoadViewScenario.getTypeName() },
         { id: "C10", typename: JourneyContextScenario.getTypeName() },
         { id: "C11", typename: GlanceLookDownScenario.getTypeName() },
-        { id: "C12", typename: GlanceCapScenario.getTypeName() },
+        { id: "C12", typename: GlanceViewingAngleScenario.getTypeName() },
         { id: "C13", typename: WhereAmIScenario.getTypeName() },
         { id: "C14", typename: GlancePriorityScenario.getTypeName() },
     ];

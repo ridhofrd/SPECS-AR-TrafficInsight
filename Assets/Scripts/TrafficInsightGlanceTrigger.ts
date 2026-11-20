@@ -4,7 +4,10 @@ export interface GlanceConfig {
     showDeg: number;
     hideDeg: number;
     dwellSec: number;
-    capSec: number;
+    maxShowDeg: number;
+    maxHideDeg: number;
+    showYawDeg: number;
+    hideYawDeg: number;
     rearmDeg: number;
     rearmSec: number;
     fadeInSec: number;
@@ -13,7 +16,8 @@ export interface GlanceConfig {
 
 export const DEFAULT_GLANCE_CONFIG: GlanceConfig = {
     baselineDeg: 0, showDeg: 20, hideDeg: 12, dwellSec: 0.3,
-    capSec: 2, rearmDeg: 8, rearmSec: 0.5, fadeInSec: 0.15, fadeOutSec: 0.3,
+    maxShowDeg: 40, maxHideDeg: 45, showYawDeg: 15, hideYawDeg: 22,
+    rearmDeg: 8, rearmSec: 0.5, fadeInSec: 0.15, fadeOutSec: 0.3,
 };
 
 export interface GlanceTriggerState {
@@ -31,18 +35,15 @@ export function spentGlance(): GlanceTriggerState {
 }
 
 export function stepGlance(previous: GlanceTriggerState, pitchDeg: number, now: number,
-    allowed: boolean, config: GlanceConfig = DEFAULT_GLANCE_CONFIG): { state: GlanceTriggerState; visible: boolean; opacity: number } {
-    if (!allowed || !isFinite(pitchDeg) || !isFinite(now)) return { state: spentGlance(), visible: false, opacity: 0 };
+    allowed: boolean, config: GlanceConfig = DEFAULT_GLANCE_CONFIG, yawDeg: number = 0): { state: GlanceTriggerState; visible: boolean; opacity: number } {
+    if (!allowed || !isFinite(pitchDeg) || !isFinite(yawDeg) || !isFinite(now)) return { state: spentGlance(), visible: false, opacity: 0 };
     const s = { ...previous };
     const down = pitchDeg - config.baselineDeg;
-    const cap = Math.min(2, Math.max(0.1, config.capSec));
-    const fadeOut = Math.min(cap, Math.max(0.01, config.fadeOutSec));
+    const fadeOut = Math.max(0.01, config.fadeOutSec);
     let opacity = 0;
 
     if (s.phase === "Spent") {
-        // Early look-up fades are still bounded by the original show deadline.
-        opacity = Math.min(s.fadeFrom * Math.max(0, 1 - (now - s.spentAt) / fadeOut),
-            Math.max(0, (s.shownAt + cap - now) / fadeOut));
+        opacity = s.fadeFrom * Math.max(0, 1 - (now - s.spentAt) / fadeOut);
         if (Math.abs(down) <= config.rearmDeg) {
             if (s.levelAt === null) s.levelAt = now;
             if (now - s.levelAt >= config.rearmSec && opacity <= 0) {
@@ -52,7 +53,8 @@ export function stepGlance(previous: GlanceTriggerState, pitchDeg: number, now: 
         } else s.levelAt = null;
     }
     if (s.phase === "Ready") {
-        if (down >= config.showDeg) {
+        opacity = s.fadeFrom * Math.max(0, 1 - (now - s.spentAt) / fadeOut);
+        if (down >= config.showDeg && down <= config.maxShowDeg && Math.abs(yawDeg) <= config.showYawDeg) {
             if (s.dwellAt === null) s.dwellAt = now;
             if (now - s.dwellAt >= config.dwellSec) {
                 s.phase = "Showing";
@@ -63,9 +65,13 @@ export function stepGlance(previous: GlanceTriggerState, pitchDeg: number, now: 
     }
     if (s.phase === "Showing") {
         const elapsed = Math.max(0, now - s.shownAt);
-        opacity = Math.min(1, elapsed / Math.max(0.01, config.fadeInSec), Math.max(0, (cap - elapsed) / fadeOut));
-        if (down < config.hideDeg || elapsed >= cap) {
-            s.phase = "Spent";
+        opacity = Math.min(1, elapsed / Math.max(0.01, config.fadeInSec));
+        // No duration deadline: remain visible while the user keeps this viewing direction.
+        if (down < config.hideDeg || down > config.maxHideDeg || Math.abs(yawDeg) > config.hideYawDeg) {
+            // A natural look-away permits looking back into the same direction.
+            // Explicit dismissal/interruption uses spentGlance() and needs a level look.
+            s.phase = "Ready";
+            s.dwellAt = null;
             s.spentAt = now;
             s.fadeFrom = opacity;
             s.levelAt = Math.abs(down) <= config.rearmDeg ? now : null;

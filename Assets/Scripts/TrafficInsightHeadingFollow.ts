@@ -6,6 +6,10 @@ export class TrafficInsightHeadingFollow extends BaseScriptComponent {
     @input belowHorizonDeg: number = 25;
     @input smoothing: number = 5;
     private heading: vec3 = new vec3(0, 0, -1);
+    private headingLocked = false;
+
+    /** Hold the viewing direction until the user looks level to re-arm. */
+    setHeadingLocked(locked: boolean): void { this.headingLocked = locked; }
 
     onAwake(): void {
         this.createEvent("OnStartEvent").bind(() => this.updatePose(true));
@@ -17,7 +21,7 @@ export class TrafficInsightHeadingFollow extends BaseScriptComponent {
         const cam = this.cameraObject.getTransform();
         const forward = cam.getWorldRotation().multiplyVec3(new vec3(0, 0, -1));
         const flat = new vec3(forward.x, 0, forward.z);
-        if (flat.length > 0.01) {
+        if ((snap || !this.headingLocked) && flat.length > 0.01) {
             const target = flat.normalize();
             const blend = snap ? 1 : 1 - Math.exp(-Math.max(0, this.smoothing) * getDeltaTime());
             const mixed = vec3.lerp(this.heading, target, blend);

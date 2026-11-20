@@ -88,7 +88,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
     @input glanceShowDeg: number = 20;
     @input glanceHideDeg: number = 12;
     @input glanceDwellSec: number = 0.3;
-    @input glanceCapSec: number = 2;
+    @input glanceMaxShowDeg: number = 40;
+    @input glanceMaxHideDeg: number = 45;
+    @input glanceShowYawDeg: number = 15;
+    @input glanceHideYawDeg: number = 22;
     @input glanceRearmDeg: number = 8;
     @input glanceRearmSec: number = 0.5;
     @input glanceFadeInSec: number = 0.15;
@@ -144,6 +147,20 @@ export class TrafficInsightMain extends BaseScriptComponent {
     private glanceTrigger: GlanceTriggerState = spentGlance();
     private glanceOpacity = 0;
     private pitchOverride: number | null = null;
+    private yawOverride: number | null = null;
+
+    setHeadYawOverrideForTests(degrees: number | null): void {
+        if (global.deviceInfoSystem.isEditor()) this.yawOverride = degrees !== null && isFinite(degrees) ? degrees : null;
+    }
+
+    private headYawToGlance(): number {
+        if (this.yawOverride !== null) return this.yawOverride;
+        if (!this.glanceStrip) return 0;
+        const cam = this.cameraObject.getTransform();
+        const f = cam.getWorldRotation().multiplyVec3(new vec3(0, 0, -1));
+        const d = this.glanceStrip.getSceneObject().getTransform().getWorldPosition().sub(cam.getWorldPosition());
+        return Math.atan2(f.x * d.z - f.z * d.x, f.x * d.x + f.z * d.z) * 180 / Math.PI;
+    }
 
     /** Editor-only head-pose injection for LEAF; null restores the actual camera. */
     setHeadPitchOverrideForTests(degrees: number | null): void {
@@ -158,7 +175,8 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     private glanceConfig(): GlanceConfig {
         return { baselineDeg: this.glanceBaselineDeg, showDeg: this.glanceShowDeg, hideDeg: this.glanceHideDeg,
-            dwellSec: this.glanceDwellSec, capSec: this.glanceCapSec, rearmDeg: this.glanceRearmDeg,
+            dwellSec: this.glanceDwellSec, maxShowDeg: this.glanceMaxShowDeg, maxHideDeg: this.glanceMaxHideDeg,
+            showYawDeg: this.glanceShowYawDeg, hideYawDeg: this.glanceHideYawDeg, rearmDeg: this.glanceRearmDeg,
             rearmSec: this.glanceRearmSec, fadeInSec: this.glanceFadeInSec, fadeOutSec: this.glanceFadeOutSec };
     }
 
@@ -229,6 +247,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         ui.onRide.add(() => this.handle(BUTTON_NAMES.ride, () => this.sm.ride(this.rideStep)));
         ui.onStopped.add(() => this.handle(BUTTON_NAMES.stopped, () => this.sm.stopped()));
         ui.onWhereAmI.add(() => this.handle(BUTTON_NAMES.whereAmI, () => this.sm.whereAmI()));
+        ui.onHideRoute.add(() => this.handle(BUTTON_NAMES.hideRoute, () => this.sm.glanceEnd()));
         ui.onChooseRoute.add((e) =>
             this.handle(e.route === "B" ? BUTTON_NAMES.chooseRouteB : BUTTON_NAMES.chooseRouteA, () =>
                 this.sm.chooseRoute(e.route)
@@ -284,7 +303,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.audio.play("ButtonClick");
         this.sm.noteAudioCue("ButtonClick");
 
-        if (source === BUTTON_NAMES.whereAmI) {
+        if (source === BUTTON_NAMES.whereAmI || source === BUTTON_NAMES.hideRoute) {
             this.glanceTrigger = spentGlance();
             this.glanceOpacity = 0;
         }
@@ -378,7 +397,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     private updateGlance(): void {
         const core = this.sm.getCore();
-        const tick = stepGlance(this.glanceTrigger, this.headPitch(), getTime(), core.state === "Riding", this.glanceConfig());
+        const tick = stepGlance(this.glanceTrigger, this.headPitch(), getTime(), core.state === "Riding", this.glanceConfig(), this.headYawToGlance());
         this.glanceTrigger = tick.state;
         this.glanceOpacity = tick.opacity;
         if (tick.visible !== core.glance) {
@@ -388,6 +407,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     private renderGlance(core: StateCore): void {
         if (!this.glanceStrip) return;
+        this.glanceStrip.setHeadingLocked(core.state === "Riding" &&
+            (this.glanceTrigger.phase !== "Ready" || core.glance || this.headPitch() - this.glanceBaselineDeg >= this.glanceHideDeg));
+        this.simulatorUI.setGlanceVisible(core.glance);
         const facts = core.trip !== "none" && core.activeRoute !== "none"
             ? glanceFacts(core.trip, core.activeRoute, core.progress, core.alertFired) : null;
         this.glanceStrip.applyView(facts, visibilityFor(core).glanceStrip, this.glanceOpacity);

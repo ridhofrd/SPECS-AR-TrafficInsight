@@ -37,14 +37,17 @@
     confirmDurationSec: false
     debugColliders: false
     glanceBaselineDeg: false
-    glanceCapSec: false
     glanceDwellSec: false
     glanceFadeInSec: false
     glanceFadeOutSec: false
     glanceHideDeg: false
+    glanceHideYawDeg: false
+    glanceMaxHideDeg: false
+    glanceMaxShowDeg: false
     glanceRearmDeg: false
     glanceRearmSec: false
     glanceShowDeg: false
+    glanceShowYawDeg: false
     glanceStrip: false
     lensUI: false
     previewContext: false
@@ -76,7 +79,10 @@
       glanceShowDeg: !<float> 20.000000
       glanceHideDeg: !<float> 12.000000
       glanceDwellSec: 0.300000
-      glanceCapSec: !<float> 2.000000
+      glanceMaxShowDeg: !<float> 40.000000
+      glanceMaxHideDeg: !<float> 45.000000
+      glanceShowYawDeg: !<float> 15.000000
+      glanceHideYawDeg: !<float> 22.000000
       glanceRearmDeg: !<float> 8.000000
       glanceRearmSec: 0.500000
       glanceFadeInSec: 0.150000
@@ -105,7 +111,10 @@
     - // @input float glanceShowDeg = 20
     - // @input float glanceHideDeg = 12
     - // @input float glanceDwellSec = 0.3
-    - // @input float glanceCapSec = 2
+    - // @input float glanceMaxShowDeg = 40
+    - // @input float glanceMaxHideDeg = 45
+    - // @input float glanceShowYawDeg = 15
+    - // @input float glanceHideYawDeg = 22
     - // @input float glanceRearmDeg = 8
     - // @input float glanceRearmSec = 0.5
     - // @input float glanceFadeInSec = 0.15

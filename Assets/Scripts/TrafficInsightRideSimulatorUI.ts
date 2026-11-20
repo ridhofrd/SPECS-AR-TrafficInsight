@@ -78,7 +78,7 @@ const CAPTION_H = 5.5
 const CAPTION_PLACEHOLDER = "Captions appear here"
 
 /** Which gate a button obeys besides the global input flag. */
-type ButtonGroup = "trip" | "ride" | "route" | "dialog"
+type ButtonGroup = "trip" | "ride" | "route" | "dialog" | "glance"
 
 interface ButtonSlot {
   name: string
@@ -133,6 +133,15 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     return this.whereAmIEvent.publicApi()
   }
 
+  private readonly hideRouteEvent = new Event<void>()
+  public get onHideRoute(): PublicApi<void> { return this.hideRouteEvent.publicApi() }
+  private glanceVisible = false
+  public setGlanceVisible(visible: boolean): void {
+    if (this.glanceVisible === visible) return
+    this.glanceVisible = visible
+    this.applyButtonStates()
+  }
+
   private readonly chooseRouteEvent = new Event<{route: RouteId}>()
   public get onChooseRoute(): PublicApi<{route: RouteId}> {
     return this.chooseRouteEvent.publicApi()
@@ -169,6 +178,7 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     {name: BUTTON_NAMES.ride, group: "ride", button: null, content: null},
     {name: BUTTON_NAMES.stopped, group: "ride", button: null, content: null},
     {name: BUTTON_NAMES.whereAmI, group: "ride", button: null, content: null},
+    {name: BUTTON_NAMES.hideRoute, group: "glance", button: null, content: null},
     {name: BUTTON_NAMES.chooseRouteA, group: "route", button: null, content: null},
     {name: BUTTON_NAMES.chooseRouteB, group: "route", button: null, content: null},
     {name: BUTTON_NAMES.mainOffice, group: "dialog", button: null, content: null},
@@ -393,8 +403,9 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     )
 
     // Requested voice answer: simulator stand-in only, never a rider hand gesture.
-    const askRow = flexRow(column, ROW_W, BTN_H, {justify: FlexJustify.Center, align: FlexAlign.Center})
-    this.makeButton(askRow, BUTTON_NAMES.whereAmI, "Where am I?", ROW_W, BTN_H, undefined, () => this.whereAmIEvent.invoke())
+    const askRow = flexRow(column, ROW_W, BTN_H, {gap: ROW_GAP, justify: FlexJustify.Center, align: FlexAlign.Center})
+    this.makeButton(askRow, BUTTON_NAMES.whereAmI, "Where am I?", BTN_W, BTN_H, undefined, () => this.whereAmIEvent.invoke())
+    this.makeButton(askRow, BUTTON_NAMES.hideRoute, "Hide route", BTN_W, BTN_H, undefined, () => this.hideRouteEvent.invoke())
 
     // 8. Caption (wrapped) beside the closed-caption icon
     const captionRow = flexRow(column, ROW_W, CAPTION_H, {
@@ -583,7 +594,7 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     const dialogBlocks = this.clarifyVisible && this.dialogPanel !== null
     for (const slot of this.slots) {
       if (!slot.button || isNull(slot.button)) continue
-      const rowFlag = slot.group === "route" ? this.routeChoiceEnabled : true
+      const rowFlag = slot.group === "route" ? this.routeChoiceEnabled : slot.group === "glance" ? this.glanceVisible : true
       const notBlocked = !dialogBlocks || slot.group === "dialog"
       const inactive = !(this.inputEnabled && rowFlag && notBlocked)
       slot.button.inactive = inactive
