@@ -59,6 +59,22 @@ export function newMeshBuilder(): MeshBuilder {
     return mb;
 }
 
+/** Box centred at (x,y,z), for batched, non-interactive Preview scenery. */
+export function addBox(g: GeoBuffer, x: number, y: number, z: number, w: number, h: number, d: number): void {
+    const a = x - w / 2, b = x + w / 2, c = y - h / 2, e = y + h / 2, f = z - d / 2, k = z + d / 2;
+    const face = (points: number[][], nx: number, ny: number, nz: number) => {
+        const ids = points.map((p, i) => g.v(p[0], p[1], p[2], nx, ny, nz, i === 1 || i === 2 ? 1 : 0, i > 1 ? 1 : 0));
+        g.tri(ids[0], ids[1], ids[2], nx, ny, nz);
+        g.tri(ids[0], ids[2], ids[3], nx, ny, nz);
+    };
+    face([[a,c,k],[b,c,k],[b,e,k],[a,e,k]], 0,0,1);
+    face([[b,c,f],[a,c,f],[a,e,f],[b,e,f]], 0,0,-1);
+    face([[b,c,k],[b,c,f],[b,e,f],[b,e,k]], 1,0,0);
+    face([[a,c,f],[a,c,k],[a,e,k],[a,e,f]], -1,0,0);
+    face([[a,e,k],[b,e,k],[b,e,f],[a,e,f]], 0,1,0);
+    face([[a,c,f],[b,c,f],[b,c,k],[a,c,k]], 0,-1,0);
+}
+
 /** Flat cylinder, base at y=0, top at y=h. */
 export function addPuck(g: GeoBuffer, r: number, h: number, seg: number): void {
     const centre = g.v(0, h, 0, 0, 1, 0, 0.5, 0.5);

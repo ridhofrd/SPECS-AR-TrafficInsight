@@ -98,6 +98,20 @@ Each one can be checked in Lens Studio's preview. Updated for the approved consi
 8. When stopped, the part of the route already ridden is shown dim, with a clear "you are here" marker and a progress card, for example "You are here · A / 2 min ridden".
 9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot or at its line brightens that line. Pinching a route's line chooses that route, the same as pinching its dot. Choosing a route makes its line glow and fades the other: for about a second before riding starts, or for as long as the raincoat question is open. Riding hides all of it.
 
+10. Preview-only surroundings follow the journey without resetting it: home while planning the morning trip (including clarification), a daytime street while riding/alerted/stopped, then the office on arrival. Planning the return starts at the office in the evening, uses an evening street, and ends at home. Known route-A rain appears ahead before the rain zone and around the rider within it; taking dry B clears that rain context. Scenery has no interactions, stays separate from the Lens layer, and is never built on real glasses.
+
+## Preview context (approved 2026-11-20)
+
+The background explains the current trip stage. Use one Preview setup with
+lightweight home, street and office scenery, showing only the relevant place
+from the same journey snapshot as the UI. Planning and arrival identify the
+correct origin/destination for each trip; Alerted and Stopped keep the street.
+Day/evening and known rain provide context without adding riding controls.
+This is demo scenery, not GPS, real weather or a replacement for the real
+surroundings on glasses. The editor-only guard must run before building any
+scenery. Keep the existing map and controls readable and the journey's state,
+progress and route intact during a place change. LEAF C10 checks this flow.
+
 ## Consistency rules (approved polish, 2026-11-20)
 
 These refine the existing nine criteria; the glance feature is still outside this build.

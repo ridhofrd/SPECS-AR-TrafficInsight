@@ -26,6 +26,24 @@ export type PlanningStep = "idle" | "clarify" | "map";
 export type ProblemKind = "crash" | "rain";
 export type ProblemKindOrNone = ProblemKind | "none";
 
+/** Preview scenery is simulation scaffolding, separate from LensVisibility. */
+export type PreviewPlace = "home" | "street" | "office";
+export interface PreviewContextView {
+    place: PreviewPlace;
+    light: "day" | "evening";
+    weather: "clear" | "rainAhead" | "rainHere";
+    crashAhead: boolean;
+    planning: boolean;
+}
+export interface PreviewContextSnapshot {
+    enabled: boolean;
+    place: PreviewPlace | "none";
+    light: "day" | "evening";
+    weather: "clear" | "rainAhead" | "rainHere";
+    crashAhead: boolean;
+    visible: { home: boolean; street: boolean; office: boolean };
+}
+
 /** Answer to the clarifying question ("Which office?"). */
 export type OfficeId = "main" | "branch";
 export type OfficeOrNone = OfficeId | "none";

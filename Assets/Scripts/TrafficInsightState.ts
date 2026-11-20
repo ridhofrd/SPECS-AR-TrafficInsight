@@ -19,6 +19,7 @@ import {
     OfficeOrNone,
     PlanningStep,
     ProblemKindOrNone,
+    PreviewContextView,
     RouteId,
     RoadViewState,
     RouteOrNone,
@@ -359,6 +360,25 @@ export function roadViewFor(core: StateCore): RoadViewState {
         shown: stopped,
         targetable: stopped && !core.raincoatPrompt && core.confirmRoute === "none",
         chosen: !stopped ? "none" : core.raincoatPrompt ? core.activeRoute : core.confirmRoute,
+    };
+}
+
+/** The demo surroundings follow the journey, never a separate scene timer. */
+export function previewContextFor(core: StateCore): PreviewContextView {
+    const street = core.state === "Riding" || core.state === "Alerted" || core.state === "Stopped";
+    const evening = core.trip === "evening";
+    const arrived = core.state === "Arrived";
+    const route = core.confirmRoute !== "none" ? core.confirmRoute : core.activeRoute;
+    const affected = street && core.alertFired && route === "A";
+    const span = getTrip(evening ? "evening" : "morning").problem;
+    return {
+        place: street ? "street" : arrived ? (evening ? "home" : "office") : (evening ? "office" : "home"),
+        light: evening ? "evening" : "day",
+        weather: affected && evening && core.progress < span.toFraction
+            ? core.progress < span.fromFraction ? "rainAhead" : "rainHere"
+            : "clear",
+        crashAhead: affected && !evening && core.progress < span.toFraction,
+        planning: core.state === "Planning",
     };
 }
 
