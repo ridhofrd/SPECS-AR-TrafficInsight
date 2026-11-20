@@ -31,6 +31,7 @@
   ScriptInputsHidden:
     alertIconRoot: false
     problemCardRoot: false
+    progressCardRoot: false
     raincoatReminderRoot: false
     routeLabelCardARoot: false
     routeLabelCardBRoot: false
@@ -46,6 +47,7 @@
     - routeLabelCardARoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       routeLabelCardBRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       problemCardRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      progressCardRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       raincoatReminderRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       alertIconRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
@@ -55,5 +57,6 @@
     - '// @input SceneObject routeLabelCardARoot {"hint":"RouteLabelCardARoot (falls back to a name search)"}'
     - '// @input SceneObject routeLabelCardBRoot {"hint":"RouteLabelCardBRoot (falls back to a name search)"}'
     - '// @input SceneObject problemCardRoot {"hint":"ProblemCardRoot (falls back to a name search)"}'
+    - '// @input SceneObject progressCardRoot {"hint":"ProgressCardRoot (falls back to a name search)"}'
     - '// @input SceneObject raincoatReminderRoot {"hint":"RaincoatReminderRoot (falls back to a name search)"}'
     - '// @input SceneObject alertIconRoot {"hint":"AlertIconRoot (falls back to a name search); TrafficInsightLazyFollow moves it"}'

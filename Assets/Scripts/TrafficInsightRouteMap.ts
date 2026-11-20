@@ -2,16 +2,19 @@
  * TrafficInsightRouteMap.ts
  *
  * Owns: everything drawn on the city map — the route A / B ribbons, the
- * problem-stretch glow, the rider marker, the home / office end markers and
- * the two pickable route dots (IK Interactable + sphere collider).
+ * problem-stretch glow, the dim "already ridden" stretch, the rider marker
+ * (a larger bright "you are here" marker while stopped), the home / office end
+ * markers and the two pickable route dots (IK Interactable + sphere collider).
  * Lives on: MapRoot (the map's top-surface centre; map-local x right, z toward
  * the user, y up). MapRoot, RouteDotA and RouteDotB are never disabled.
  * Inputs: cityMap, dotA, dotB, lineMaterial (cloned once per colour), line
  * width, route / highlight colours, dot hover scale.
- * Produces: onDotPicked, applyView(view), getVisibility(), setInputEnabled().
+ * Produces: onDotPicked, onDotHover, applyView(view), getVisibility(),
+ * setInputEnabled().
  * Must not: hold trip state (Main sends a MapView) or touch other scripts.
- * Size reason: the MeshBuilder ribbon/puck geometry helper lives here with the
- * view so the map stays one component; it has no other user.
+ * Size reason: one view over one map: ribbons, markers and dots share the same
+ * materials and the same applyView pass; the mesh helpers are in
+ * TrafficInsightGeometry.ts.
  */
 
 import { Interactable } from "InteractionKit.lspkg/Components/Interaction/Interactable/Interactable";
@@ -19,6 +22,7 @@ import Event, { PublicApi } from "InteractionKit.lspkg/Utils/Event";
 import { MapPoint, MapView, ProblemSpan, RouteId, TripId } from "./TrafficInsightTypes";
 import { MAP_POINTS, pointAt, routePoints, slicePolyline } from "./TrafficInsightTripData";
 import { ROOT_NAMES, tiError, tiLog } from "./TrafficInsightSceneContracts";
+import { GeoBuffer, addPuck, addRibbon, newMeshBuilder } from "./TrafficInsightGeometry";
 
 const ROUTE_LINES_Y = 0.3;
 const GLOW_WIDTH_CM = 1.6;
@@ -33,123 +37,14 @@ const END_RADIUS_CM = 0.75;
 const END_HEIGHT_CM = 0.4;
 const PUCK_SEGMENTS = 24;
 const HOVER_WHITE_MIX = 0.35;
+const RIDDEN_Y = 0.05;
+/** The "you are here" marker is this many times the size of the normal rider marker. */
+const YOU_ARE_HERE_SCALE = 2.6;
+/** Dim, desaturated grey-blue: readable on the additive display but clearly "done". */
+const RIDDEN_COLOR = new vec4(0.5, 0.56, 0.64, 1);
+/** Bright accent that no route or problem colour uses. */
+const YOU_ARE_HERE_COLOR = new vec4(1.0, 0.93, 0.2, 1);
 
-/** Interleaved position / normal / uv buffer with outward-checked triangle winding. */
-class GeoBuffer {
-    private pos: number[] = [];
-    data: number[] = [];
-    idx: number[] = [];
-
-    v(x: number, y: number, z: number, nx: number, ny: number, nz: number, u: number, w: number): number {
-        this.pos.push(x, y, z);
-        this.data.push(x, y, z, nx, ny, nz, u, w);
-        return this.pos.length / 3 - 1;
-    }
-
-    /** Adds a triangle whose front face points along (nx, ny, nz). */
-    tri(a: number, b: number, c: number, nx: number, ny: number, nz: number): void {
-        const p = this.pos;
-        const ux = p[b * 3] - p[a * 3], uy = p[b * 3 + 1] - p[a * 3 + 1], uz = p[b * 3 + 2] - p[a * 3 + 2];
-        const vx = p[c * 3] - p[a * 3], vy = p[c * 3 + 1] - p[a * 3 + 1], vz = p[c * 3 + 2] - p[a * 3 + 2];
-        const cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
-        if (cx * nx + cy * ny + cz * nz < 0) {
-            this.idx.push(a, c, b);
-        } else {
-            this.idx.push(a, b, c);
-        }
-    }
-
-    /** Replaces the builder's data with this buffer. False when there is nothing valid to draw. */
-    writeTo(mb: MeshBuilder): boolean {
-        if (mb.getIndicesCount() > 0) mb.eraseIndices(0, mb.getIndicesCount());
-        if (mb.getVerticesCount() > 0) mb.eraseVertices(0, mb.getVerticesCount());
-        if (this.idx.length === 0) return false;
-        mb.appendVerticesInterleaved(this.data);
-        mb.appendIndices(this.idx);
-        if (!mb.isValid()) return false;
-        mb.updateMesh();
-        return true;
-    }
-}
-
-function newMeshBuilder(): MeshBuilder {
-    const mb = new MeshBuilder([
-        { name: "position", components: 3 },
-        { name: "normal", components: 3, normalized: true },
-        { name: "texture0", components: 2 },
-    ]);
-    mb.topology = MeshTopology.Triangles;
-    mb.indexType = MeshIndexType.UInt16;
-    return mb;
-}
-
-/** Flat cylinder, base at y=0, top at y=h. */
-function addPuck(g: GeoBuffer, r: number, h: number, seg: number): void {
-    const centre = g.v(0, h, 0, 0, 1, 0, 0.5, 0.5);
-    const top: number[] = [];
-    for (let i = 0; i < seg; i++) {
-        const a = (i / seg) * Math.PI * 2;
-        const cx = Math.cos(a), sz = Math.sin(a);
-        top.push(g.v(cx * r, h, sz * r, 0, 1, 0, 0.5 + 0.5 * cx, 0.5 + 0.5 * sz));
-    }
-    for (let i = 0; i < seg; i++) {
-        g.tri(centre, top[i], top[(i + 1) % seg], 0, 1, 0);
-    }
-    for (let i = 0; i < seg; i++) {
-        const a0 = (i / seg) * Math.PI * 2;
-        const a1 = ((i + 1) / seg) * Math.PI * 2;
-        const x0 = Math.cos(a0), z0 = Math.sin(a0), x1 = Math.cos(a1), z1 = Math.sin(a1);
-        const b0 = g.v(x0 * r, 0, z0 * r, x0, 0, z0, i / seg, 0);
-        const t0 = g.v(x0 * r, h, z0 * r, x0, 0, z0, i / seg, 1);
-        const b1 = g.v(x1 * r, 0, z1 * r, x1, 0, z1, (i + 1) / seg, 0);
-        const t1 = g.v(x1 * r, h, z1 * r, x1, 0, z1, (i + 1) / seg, 1);
-        const am = (a0 + a1) * 0.5;
-        const nx = Math.cos(am), nz = Math.sin(am);
-        g.tri(b0, b1, t1, nx, 0, nz);
-        g.tri(b0, t1, t0, nx, 0, nz);
-    }
-}
-
-function unitDir(a: MapPoint, b: MapPoint): MapPoint {
-    const dx = b.x - a.x, dz = b.z - a.z;
-    const len = Math.sqrt(dx * dx + dz * dz);
-    return len > 1e-6 ? { x: dx / len, z: dz / len } : { x: 1, z: 0 };
-}
-
-/** Flat mitred strip at y=0 along a polyline. False when the polyline has no length. */
-function addRibbon(g: GeoBuffer, points: MapPoint[], width: number): boolean {
-    const pts: MapPoint[] = [];
-    for (const p of points) {
-        const last = pts[pts.length - 1];
-        if (!last || Math.abs(last.x - p.x) + Math.abs(last.z - p.z) > 0.01) pts.push(p);
-    }
-    if (pts.length < 2) return false;
-    const half = width * 0.5;
-    const left: number[] = [];
-    const right: number[] = [];
-    let along = 0;
-    for (let i = 0; i < pts.length; i++) {
-        const p = pts[i];
-        const d1 = i > 0 ? unitDir(pts[i - 1], p) : unitDir(p, pts[i + 1]);
-        const d2 = i < pts.length - 1 ? unitDir(p, pts[i + 1]) : d1;
-        const n1x = -d1.z, n1z = d1.x, n2x = -d2.z, n2z = d2.x;
-        let mx = n1x + n2x, mz = n1z + n2z;
-        const ml = Math.sqrt(mx * mx + mz * mz);
-        if (ml < 1e-4) { mx = n1x; mz = n1z; } else { mx /= ml; mz /= ml; }
-        const s = half / Math.max(0.35, mx * n1x + mz * n1z);
-        if (i > 0) {
-            const dx = p.x - pts[i - 1].x, dz = p.z - pts[i - 1].z;
-            along += Math.sqrt(dx * dx + dz * dz);
-        }
-        left.push(g.v(p.x + mx * s, 0, p.z + mz * s, 0, 1, 0, along / width, 0));
-        right.push(g.v(p.x - mx * s, 0, p.z - mz * s, 0, 1, 0, along / width, 1));
-    }
-    for (let i = 0; i < pts.length - 1; i++) {
-        g.tri(left[i], right[i], left[i + 1], 0, 1, 0);
-        g.tri(right[i], right[i + 1], left[i + 1], 0, 1, 0);
-    }
-    return true;
-}
 
 interface RibbonPart {
     obj: SceneObject;
@@ -183,6 +78,7 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
     @input @widget(new SliderWidget(1, 2, 0.05)) dotHoverScale: number = 1.25;
 
     private readonly dotPickedEvent = new Event<{ route: RouteId }>();
+    private readonly dotHoverEvent = new Event<{ route: RouteId; on: boolean }>();
     private ready = false;
     private inputEnabled = true;
     private mapShown = false;
@@ -192,6 +88,11 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
     private ribbonA: RibbonPart;
     private ribbonB: RibbonPart;
     private glow: RibbonPart;
+    private ridden: RibbonPart;
+    private riderRmv: RenderMeshVisual;
+    private riderMat: Material;
+    private youAreHereMat: Material;
+    private youAreHere = false;
     private crashMat: Material;
     private rainMat: Material;
     private rider: SceneObject;
@@ -200,6 +101,10 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
 
     get onDotPicked(): PublicApi<{ route: RouteId }> {
         return this.dotPickedEvent.publicApi();
+    }
+
+    get onDotHover(): PublicApi<{ route: RouteId; on: boolean }> {
+        return this.dotHoverEvent.publicApi();
     }
 
     onAwake(): void {
@@ -248,6 +153,13 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
             } else {
                 this.showRibbon(this.ribbonB, slicePolyline(ptsB, from, 1), this.routeLineWidthCm);
             }
+            // The part already ridden, drawn dim along the route the rider is on (stopped only).
+            const ridingRoute: RouteId = view.activeRoute === "B" ? "B" : "A";
+            if (view.mode !== "planning" && progress > 0) {
+                this.showRibbon(this.ridden, slicePolyline(ridingRoute === "B" ? ptsB : ptsA, 0, progress), this.routeLineWidthCm);
+            } else {
+                this.hideRibbon(this.ridden);
+            }
             if (problem) {
                 this.glow.rmv.mainMaterial = problem.kind === "rain" ? this.rainMat : this.crashMat;
                 const pts = routePoints(trip, problem.route);
@@ -265,6 +177,7 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
             riderAt = pointAt(route === "B" ? ptsB : ptsA, progress);
         }
         this.rider.getTransform().setLocalPosition(new vec3(riderAt.x, 0, riderAt.z));
+        this.setYouAreHere(view.mode !== "planning");
         this.rider.enabled = true;
         for (const m of this.endMarkers) m.enabled = true;
 
@@ -273,9 +186,15 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         this.setDotShown("B", dotsOn);
     }
 
-    getVisibility(): { map: boolean; routeA: boolean; routeB: boolean; dotA: boolean; dotB: boolean; problemHighlight: boolean } {
+    getVisibility(): {
+        map: boolean; routeA: boolean; routeB: boolean; dotA: boolean; dotB: boolean;
+        problemHighlight: boolean; progressMarks: boolean;
+    } {
         if (!this.ready) {
-            return { map: false, routeA: false, routeB: false, dotA: false, dotB: false, problemHighlight: false };
+            return {
+                map: false, routeA: false, routeB: false, dotA: false, dotB: false,
+                problemHighlight: false, progressMarks: false,
+            };
         }
         const lines = this.routeLines.enabled;
         return {
@@ -285,6 +204,7 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
             dotA: this.dots.A.shown,
             dotB: this.dots.B.shown,
             problemHighlight: lines && this.glow.shown,
+            progressMarks: lines && this.ridden.shown && this.youAreHere && this.rider.enabled,
         };
     }
 
@@ -307,11 +227,15 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         this.crashMat = this.colouredMaterial(this.crashHighlightColor);
         this.rainMat = this.colouredMaterial(this.rainHighlightColor);
         this.glow = this.makeRibbon("ProblemGlow", this.crashMat, GLOW_Y);
+        this.ridden = this.makeRibbon(ROOT_NAMES.riddenRoute, this.colouredMaterial(RIDDEN_COLOR), RIDDEN_Y);
 
-        this.rider = this.makePuck("RiderMarker", this.routeLines, RIDER_RADIUS_CM, RIDER_HEIGHT_CM,
-            this.colouredMaterial(new vec4(1, 1, 1, 1))).obj;
+        this.riderMat = this.colouredMaterial(new vec4(1, 1, 1, 1));
+        this.youAreHereMat = this.colouredMaterial(YOU_ARE_HERE_COLOR);
+        this.rider = this.makePuck(ROOT_NAMES.riderMarker, this.routeLines, RIDER_RADIUS_CM, RIDER_HEIGHT_CM,
+            this.riderMat).obj;
+        this.riderRmv = this.rider.getComponent("Component.RenderMeshVisual") as RenderMeshVisual;
         const endMat = this.colouredMaterial(new vec4(0.86, 0.91, 1, 1));
-        const ends: [string, MapPoint][] = [["HomeMarker", MAP_POINTS.home], ["OfficeMarker", MAP_POINTS.office]];
+        const ends: [string, MapPoint][] = [[ROOT_NAMES.homeMarker, MAP_POINTS.home], ["OfficeMarker", MAP_POINTS.office]];
         for (const [name, p] of ends) {
             const m = this.makePuck(name, this.routeLines, END_RADIUS_CM, END_HEIGHT_CM, endMat).obj;
             m.getTransform().setLocalPosition(new vec3(p.x, 0, p.z));
@@ -379,8 +303,12 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         });
         dot.interactable.onHoverEnter.add(() => {
             if (dot.shown && this.inputEnabled) this.setHover(dot, true);
+            this.dotHoverEvent.invoke({ route: route, on: dot.hovered });
         });
-        dot.interactable.onHoverExit.add(() => this.setHover(dot, false));
+        dot.interactable.onHoverExit.add(() => {
+            this.setHover(dot, false);
+            this.dotHoverEvent.invoke({ route: route, on: false });
+        });
     }
 
     private setHover(dot: DotPart, on: boolean): void {
@@ -401,9 +329,19 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         this.hideRibbon(this.ribbonA);
         this.hideRibbon(this.ribbonB);
         this.hideRibbon(this.glow);
+        this.hideRibbon(this.ridden);
+        this.setYouAreHere(false);
         this.lastKey = "hidden";
         this.setDotShown("A", false);
         this.setDotShown("B", false);
+    }
+
+    /** The rider marker becomes the larger bright "you are here" marker while stopped. */
+    private setYouAreHere(on: boolean): void {
+        this.youAreHere = on;
+        const s = on ? YOU_ARE_HERE_SCALE : 1;
+        this.rider.getTransform().setLocalScale(new vec3(s, s, s));
+        this.riderRmv.mainMaterial = on ? this.youAreHereMat : this.riderMat;
     }
 
     private setMapShown(on: boolean): void {

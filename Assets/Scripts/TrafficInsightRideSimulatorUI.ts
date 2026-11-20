@@ -133,6 +133,12 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     return this.chooseRouteEvent.publicApi()
   }
 
+  /** Aiming at a "Choose route X" button (on) or moving off it (off). Lets the road stripe brighten too. */
+  private readonly routeHoverEvent = new Event<{route: RouteId; on: boolean}>()
+  public get onRouteHover(): PublicApi<{route: RouteId; on: boolean}> {
+    return this.routeHoverEvent.publicApi()
+  }
+
   // ─── Cached view state (safe from onAwake onward) ────────────────────────
   private stateName: string = "Planning"
   private tripLabel: string = ""
@@ -359,11 +365,25 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
 
     // 7. Route choice buttons
     const routeRow = flexRow(column, ROW_W, BTN_H, {gap: ROW_GAP, justify: FlexJustify.Center, align: FlexAlign.Center})
-    this.makeButton(routeRow, BUTTON_NAMES.chooseRouteA, "Choose route A", BTN_W, BTN_H, icons.route, () =>
-      this.chooseRouteEvent.invoke({route: "A"})
+    this.makeButton(
+      routeRow,
+      BUTTON_NAMES.chooseRouteA,
+      "Choose route A",
+      BTN_W,
+      BTN_H,
+      icons.route,
+      () => this.chooseRouteEvent.invoke({route: "A"}),
+      (on) => this.routeHoverEvent.invoke({route: "A", on: on})
     )
-    this.makeButton(routeRow, BUTTON_NAMES.chooseRouteB, "Choose route B", BTN_W, BTN_H, icons.route, () =>
-      this.chooseRouteEvent.invoke({route: "B"})
+    this.makeButton(
+      routeRow,
+      BUTTON_NAMES.chooseRouteB,
+      "Choose route B",
+      BTN_W,
+      BTN_H,
+      icons.route,
+      () => this.chooseRouteEvent.invoke({route: "B"}),
+      (on) => this.routeHoverEvent.invoke({route: "B", on: on})
     )
 
     // 8. Caption (wrapped) beside the closed-caption icon
@@ -464,13 +484,18 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     w: number,
     h: number,
     icon: Texture | undefined,
-    fire: () => void
+    fire: () => void,
+    hover?: (on: boolean) => void
   ): void {
     const r = addButton(row, label, w, h, () => this.press(name, fire), {
       variant: {shape: "Rectangle", style: "Secondary"},
       leadingIcon: icon
     })
     r.button.getSceneObject().name = name
+    if (hover) {
+      r.button.onHoverEnter.add(() => hover(true))
+      r.button.onHoverExit.add(() => hover(false))
+    }
     for (const slot of this.slots) {
       if (slot.name === name) {
         slot.button = r.button

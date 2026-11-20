@@ -62,7 +62,7 @@ export interface TripDef {
 }
 
 /** Progress is held here while an alert is unresolved ("Pull over to see options."). */
-export const ALERT_PROGRESS_CAP = 0.15;
+export const ALERT_PROGRESS_CAP = 0.3;
 
 /** Map-cm per km (for reference; labels use the kilometre strings in TRIPS). */
 export const MAP_CM_PER_KM = 6;
@@ -106,7 +106,7 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
         from: "Home",
         to: "Office",
         progressLabel: "Office trip",
-        alertAtProgress: 0.1,
+        alertAtProgress: 0.25,
         alertKind: "crash",
         alertIcon: "car_crash",
         alertLine: "Crash ahead on your route, traffic is stalled. Pull over to see options.",
@@ -134,7 +134,7 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
         from: "Office",
         to: "Home",
         progressLabel: "Home trip",
-        alertAtProgress: 0.1,
+        alertAtProgress: 0.25,
         alertKind: "rain",
         alertIcon: "rainy",
         alertLine: "Rain on your route in 10 minutes. Pull over to see options.",
@@ -320,6 +320,16 @@ export function arrivedLine(trip: TripId, keptProblemRoute: boolean): string {
 
 export function progressLabel(trip: TripId): string {
     return getTrip(trip).progressLabel;
+}
+
+/**
+ * "Ridden 3 of 34 min": minutes ridden so far out of the route's planned time.
+ * The numbers come from the sample data (planned time of the route the rider is on).
+ */
+export function progressCardText(trip: TripId, route: RouteId, progress: number): string {
+    const total = routeStats(trip, "planning", route).timeMin;
+    const ridden = Math.round(clamp01(progress) * total);
+    return "Ridden " + ridden + " of " + total + " min";
 }
 
 /** "Main office trip: pick a route." / "Branch office trip: ..." / "Home trip: ..." */

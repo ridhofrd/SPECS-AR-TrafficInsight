@@ -17,7 +17,9 @@
     - !<own> f29f91bd-a051-495d-b5fd-6270b1d9b82f
     - !<own> 473eeb37-fce4-4810-bacb-53b460f18620
     - !<own> 4f2566b5-8d93-45d0-a268-39f36bfcf2d2
-    - !<own> 943f3aaa-7709-406d-84f1-9bb43473ab07
+    - !<own> bea3e7d7-cca7-4ea0-a61c-2e89ee8651e2
+    - !<own> 56a9ccb1-7d46-4a4d-8a9d-4164f875cca8
+    - !<own> df5b9bee-1e25-4538-9944-cbc7a0ec72bc
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -1225,7 +1227,7 @@
   Enabled: true
   ScriptAsset: !<reference> dc92af3c-bfab-4281-b041-0a0cb2b66117
   ScriptInputsDefault:
-    {}
+    progressCardRoot: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
@@ -1233,6 +1235,7 @@
       routeLabelCardARoot: !<reference.SceneObject> 5390674a-c577-4c61-9be1-2e24ddc4c05a
       routeLabelCardBRoot: !<reference.SceneObject> c3e92e8f-8856-492a-8596-8ca714c45bad
       problemCardRoot: !<reference.SceneObject> 26284d75-4806-443d-bbe7-144cd9588409
+      progressCardRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       raincoatReminderRoot: !<reference.SceneObject> 16c5accf-2abe-43d8-b7d7-e325f49224c3
       alertIconRoot: !<reference.SceneObject> 14888020-da2d-4388-8480-fbfb0d504bfd
   ScriptTypes:
@@ -1298,6 +1301,21 @@
     - !<own> 46b79537-a269-46f1-9483-500d7a4170d6
   Components:
     []
+- !<SceneObject/56a9ccb1-7d46-4a4d-8a9d-4164f875cca8>
+  PrefabRemaps:
+    []
+  Name: RoadViewRoot
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> d4e0d609-5549-498e-bb19-5970030d6405
 - !<SceneObject/58ef319f-850e-40dd-8295-e6dc36ab4854>
   PrefabRemaps:
     []
@@ -1439,6 +1457,22 @@
     - !<own> 3fa03eb4-fb05-4591-9ec2-6eb1c49b2a5c
   Components:
     []
+- !<ScriptComponent/635a6198-2349-4da5-a4a1-5b79646209a3>
+  PrefabRemaps:
+    []
+  Name: MessagingBridge
+  Enabled: true
+  ScriptAsset: !<reference> 9aa407db-2872-4afc-a162-cf7faf2a0f29
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<ScriptComponent/64f27597-c99d-4c59-8a08-05459cc2258d>
   PrefabRemaps:
     []
@@ -2026,21 +2060,6 @@
     - !<own> 8cb3dd13-6ebf-41e6-9a23-94a69dd96f87
   Components:
     []
-- !<SceneObject/943f3aaa-7709-406d-84f1-9bb43473ab07>
-  PrefabRemaps:
-    []
-  Name: LEAF Plugin Bridge
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> bffb5819-06a9-43a9-bf9e-5bda789896b6
 - !<SceneObject/9468c53c-f76f-49b7-8a49-b5ec6af1c5a3>
   PrefabRemaps:
     []
@@ -2664,6 +2683,21 @@
     []
   Components:
     - !<own> 27a492a7-478a-4bf3-8728-60f8679076c1
+- !<SceneObject/bea3e7d7-cca7-4ea0-a61c-2e89ee8651e2>
+  PrefabRemaps:
+    []
+  Name: LEAF Plugin Bridge
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 635a6198-2349-4da5-a4a1-5b79646209a3
 - !<SceneObject/bf2095b6-c6f8-48c8-b840-e0a6cec0dc99>
   PrefabRemaps:
     []
@@ -2679,22 +2713,6 @@
     []
   Components:
     []
-- !<ScriptComponent/bffb5819-06a9-43a9-bf9e-5bda789896b6>
-  PrefabRemaps:
-    []
-  Name: MessagingBridge
-  Enabled: true
-  ScriptAsset: !<reference> 9aa407db-2872-4afc-a162-cf7faf2a0f29
-  ScriptInputsDefault:
-    {}
-  ScriptTypesDefault:
-    {}
-  ScriptInputs:
-    "":
-      {}
-  ScriptTypes:
-    "":
-      {}
 - !<RenderMeshVisual/c1fd1993-e9c4-4541-b95e-a0a573eec5bc>
   PrefabRemaps:
     []
@@ -2772,6 +2790,7 @@
       routeMap: !<MappingBased.AssignableType_3> 818f5316-7305-4496-ad34-9107577b65f5
       audio: !<MappingBased.AssignableType_4> fa9bc580-df81-4654-9979-c1152e12e74d
       alertFollow: !<MappingBased.AssignableType_5> 1a1b0750-69a3-4235-9649-9429219e1276
+      roadView: !<MappingBased.AssignableType_6> d4e0d609-5549-498e-bb19-5970030d6405
       cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
       table: !<reference.SceneObject> b3d40916-edb6-4237-981c-af9eb9a1fbf2
       rideStep: 0.050000
@@ -3054,6 +3073,27 @@
     - !<own> 38562bff-09c5-4232-bff1-7ea62a1e7ec5
   Components:
     []
+- !<ScriptComponent/d4e0d609-5549-498e-bb19-5970030d6405>
+  PrefabRemaps:
+    []
+  Name: TrafficInsightRoadView
+  Enabled: true
+  ScriptAsset: !<reference> 86025569-6d75-407d-b10a-a22eda89f364
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      lineMaterial: !<reference.Material> 7d682b45-501f-4f2e-9503-daaf22918d48
+      floorYCm: !<float> -160.000000
+      nearDistanceCm: !<float> 1050.000000
+      streetWidthCm: !<float> 220.000000
+      streetLengthCm: !<float> 800.000000
+      stripeWidthCm: !<float> 50.000000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/d5f63266-b1ce-419f-847b-3c9f347b3ee2>
   PrefabRemaps:
     []
@@ -3192,6 +3232,21 @@
     HasSegmentScaleCompensation: false
   Children:
     - !<own> d4a9c5e3-fe96-4824-9b20-59f5ad39eabd
+  Components:
+    []
+- !<SceneObject/df5b9bee-1e25-4538-9944-cbc7a0ec72bc>
+  PrefabRemaps:
+    []
+  Name: ProgressCardRoot
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 21.000000, y: -16.000000, z: -106.000000}
+    Rotation: {x: -5.000000, y: -8.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
   Components:
     []
 - !<RenderMeshVisual/e0261cc6-9151-4c69-9125-77f5526620e8>

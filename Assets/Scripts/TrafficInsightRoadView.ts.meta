@@ -1,0 +1,62 @@
+- !<AssetImportMetadata/c51aea41-c181-4133-9ee7-c1bbdde93fb9>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 86025569-6d75-407d-b10a-a22eda89f364
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 86025569-6d75-407d-b10a-a22eda89f364
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> e90f078b-da7d-4a40-8f9f-ace7791dbcb4
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/e90f078b-da7d-4a40-8f9f-ace7791dbcb4>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  RunInEditor: false
+  ComponentUid: b978c105-c995-41d8-8d9b-6dc1afa39cc5
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    floorYCm: false
+    lineMaterial: false
+    nearDistanceCm: false
+    streetLengthCm: false
+    streetWidthCm: false
+    stripeWidthCm: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - lineMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      floorYCm: !<float> -150.000000
+      nearDistanceCm: !<float> 450.000000
+      streetWidthCm: !<float> 300.000000
+      streetLengthCm: !<float> 1000.000000
+      stripeWidthCm: !<float> 40.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.Material lineMaterial
+    - '// @input float floorYCm = -160 {"widget":"slider", "min":-260, "max":-60, "step":5}'
+    - '// @input float nearDistanceCm = 1050 {"widget":"slider", "min":200, "max":2000, "step":10}'
+    - '// @input float streetWidthCm = 220 {"widget":"slider", "min":200, "max":500, "step":10}'
+    - '// @input float streetLengthCm = 800 {"widget":"slider", "min":500, "max":1500, "step":10}'
+    - '// @input float stripeWidthCm = 50 {"widget":"slider", "min":20, "max":80, "step":2}'

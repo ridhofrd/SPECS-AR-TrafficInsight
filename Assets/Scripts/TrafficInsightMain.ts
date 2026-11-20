@@ -10,29 +10,32 @@
  * exposes getState() / static getInstance() for the LEAF tests.
  *
  * Inputs (wired by the bootstrap): simulatorUI, lensUI, routeMap, audio,
- * alertFollow (ScriptComponents), cameraObject and table (SceneObjects); tuning sliders.
+ * alertFollow, roadView (ScriptComponents), cameraObject and table
+ * (SceneObjects); tuning sliders.
  *
  * Must not: hold domain state (TrafficInsightState owns it), create text or
  * UIKit components, call into sibling components from onAwake, or disable a
  * SceneObject that carries a script.
  *
- * Size reason: this file is the single orchestration table (12 view events,
- * one render pass over 4 views, the alert timer, the LEAF snapshot and the
+ * Size reason: this file is the single orchestration table (14 view events,
+ * one render pass over 5 views, the alert timer, the LEAF snapshot and the
  * contract log lines). Splitting it would scatter the one-way render rule.
  */
 
 import { TrafficInsightRideSimulatorUI } from "./TrafficInsightRideSimulatorUI";
 import { TrafficInsightTrafficLensUI } from "./TrafficInsightTrafficLensUI";
 import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
+import { TrafficInsightRoadView } from "./TrafficInsightRoadView";
 import { TrafficInsightAudioController } from "./TrafficInsightAudioController";
 import { TrafficInsightLazyFollow } from "./TrafficInsightLazyFollow";
-import { TrafficInsightStateMachine, mapViewFor, visibilityFor } from "./TrafficInsightState";
-import { labelToText, problemCardText, progressLabel, routeLabel } from "./TrafficInsightTripData";
+import { TrafficInsightStateMachine, mapViewFor, roadViewFor, visibilityFor } from "./TrafficInsightState";
+import { labelToText, problemCardText, progressCardText, progressLabel, routeLabel } from "./TrafficInsightTripData";
 import { BUTTON_NAMES, tiError, tiLog, tiWarn } from "./TrafficInsightSceneContracts";
 import {
     IntentResult,
     LensVisibility,
     RouteId,
+    RouteOrNone,
     StateCore,
     TrafficInsightSnapshot,
     Vec3Like,
@@ -69,6 +72,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
     @input
     alertFollow: TrafficInsightLazyFollow;
 
+    // The mock street with both routes laid on it (shown only while Stopped).
+    @input
+    roadView: TrafficInsightRoadView;
+
     @input
     cameraObject: SceneObject;
 
@@ -102,6 +109,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
     private labelTextA = "";
     private labelTextB = "";
     private problemText = "";
+    private progressText = "";
+    // Which route stripe the dots / buttons are being aimed at (only feeds the road view's highlight).
+    private aimedRoute: RouteOrNone = "none";
 
     private lastStateKey = "";
     private lastVisibleKey = "";
@@ -143,6 +153,9 @@ export class TrafficInsightMain extends BaseScriptComponent {
             labelTextA: this.labelTextA,
             labelTextB: this.labelTextB,
             problemCardText: this.problemText,
+            progressCardText: this.progressText,
+            roadHighlight: this.started ? this.roadView.getHighlight() : "none",
+            roadChosen: this.started ? this.roadView.getChosen() : "none",
             visible: this.readVisibility(core),
             alertIconCameraLocal: this.alertIconCameraLocal(),
         };
@@ -166,6 +179,17 @@ export class TrafficInsightMain extends BaseScriptComponent {
                 this.sm.chooseRoute(e.route)
             )
         );
+
+        // Aiming at a dot or a "Choose route" button brightens that route's stripe on the road.
+        ui.onRouteHover.add((e) => this.aim(e.route, e.on));
+        this.routeMap.onDotHover.add((e: { route: RouteId; on: boolean }) => this.aim(e.route, e.on));
+        // Pinching a stripe on the road is the same intent as pinching a dot.
+        this.roadView.onLinePicked.add((e: { route: RouteId }) =>
+            this.handle(e.route === "B" ? BUTTON_NAMES.roadLineB : BUTTON_NAMES.roadLineA, () =>
+                this.sm.chooseRoute(e.route)
+            )
+        );
+        this.roadView.onLineHover.add((e: { route: RouteId; on: boolean }) => this.aim(e.route, e.on));
 
         this.lensUI.onProceed.add(() => this.handle(BUTTON_NAMES.proceed, () => this.sm.proceed()));
         this.lensUI.onRaincoatOn.add(() => this.handle(BUTTON_NAMES.raincoatOn, () => this.sm.raincoatOn()));
@@ -227,6 +251,15 @@ export class TrafficInsightMain extends BaseScriptComponent {
             this.beginAlert(after);
         }
         this.logState(after, false);
+    }
+
+    /** Remembers which route is being aimed at; render() hands it to the road view. */
+    private aim(route: RouteId, on: boolean): void {
+        if (!this.started) {
+            return;
+        }
+        this.aimedRoute = on ? route : this.aimedRoute === route ? "none" : this.aimedRoute;
+        this.roadView.setExternalHover(this.aimedRoute);
     }
 
     // ---------------------------------------------------------------- alert
@@ -297,6 +330,14 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.routeMap.applyView(mapViewFor(core));
         this.routeMap.setInputEnabled(inputOk);
 
+        // Road view: the mock street with both routes laid on it
+        this.roadView.applyView(roadViewFor(core));
+        this.roadView.setInputEnabled(inputOk);
+        if (!vis.road) {
+            this.aimedRoute = "none";
+            this.roadView.setExternalHover("none");
+        }
+
         // Lens layer cards
         this.lensUI.setInputEnabled(inputOk);
         if (vis.labelA && core.trip !== "none") {
@@ -317,6 +358,13 @@ export class TrafficInsightMain extends BaseScriptComponent {
         } else {
             this.lensUI.hideProblemCard();
             this.problemText = "";
+        }
+        if (vis.progressCard && core.trip !== "none") {
+            this.progressText = progressCardText(core.trip, core.activeRoute === "B" ? "B" : "A", core.progress);
+            this.lensUI.showProgressCard(this.progressText);
+        } else {
+            this.lensUI.hideProgressCard();
+            this.progressText = "";
         }
         if (vis.raincoatReminder) {
             this.lensUI.showRaincoatReminder();
@@ -340,8 +388,15 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
         const map = this.routeMap.getVisibility();
         const lens = this.lensUI.getVisibility();
+        const road = this.roadView.getVisibility();
         return {
             table: this.table.isEnabledInHierarchy,
+            progressMarks: map.progressMarks,
+            progressCard: lens.progressCard,
+            road: road.road,
+            roadLineA: road.roadLineA,
+            roadLineB: road.roadLineB,
+            splitRing: road.splitRing,
             map: map.map,
             routeA: map.routeA,
             routeB: map.routeB,
@@ -402,6 +457,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
             (v.labelA || v.labelB) +
             " problem=" +
             (v.problemCard || v.problemHighlight) +
+            " progress=" +
+            (v.progressMarks && v.progressCard) +
+            " road=" +
+            v.road +
             " raincoat=" +
             v.raincoatReminder +
             " alertIcon=" +
@@ -421,6 +480,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         if (!this.routeMap) missing.push("routeMap");
         if (!this.audio) missing.push("audio");
         if (!this.alertFollow) missing.push("alertFollow");
+        if (!this.roadView) missing.push("roadView");
         if (isNull(this.cameraObject)) missing.push("cameraObject");
         if (isNull(this.table)) missing.push("table");
         if (missing.length > 0) {

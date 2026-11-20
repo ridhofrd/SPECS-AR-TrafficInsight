@@ -20,6 +20,13 @@ export const ROOT_NAMES = {
     routeLines: "RouteLines",
     routeDotA: "RouteDotA",
     routeDotB: "RouteDotB",
+    riderMarker: "RiderMarker",
+    homeMarker: "HomeMarker",
+    riddenRoute: "RiddenRoute",
+    progressCardRoot: "ProgressCardRoot",
+    roadViewRoot: "RoadViewRoot",
+    roadStreet: "RoadStreet",
+    roadSplitRing: "RoadSplitRing",
     routeLabelCardARoot: "RouteLabelCardARoot",
     routeLabelCardBRoot: "RouteLabelCardBRoot",
     problemCardRoot: "ProblemCardRoot",
@@ -43,6 +50,10 @@ export const BUTTON_NAMES = {
     raincoatOn: "RaincoatOnButton",
     routeDotA: "RouteDotA",
     routeDotB: "RouteDotB",
+    /** Route stripes on the mock street. Route B has two pinchable parts: the stem and the side road. */
+    roadLineA: "RoadLineA",
+    roadLineB: "RoadLineB",
+    roadLineBSide: "RoadLineBSide",
 } as const;
 
 /** State names (match TrafficInsightTypes.StateName). */

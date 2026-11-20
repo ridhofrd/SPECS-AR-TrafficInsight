@@ -2,14 +2,14 @@
  * TrafficInsightTrafficLensUI.ts
  *
  * Owns: the LENS layer the rider sees on the glasses — two route label cards,
- * the problem card, the raincoat reminder (Proceed / Raincoat on) and the
- * head-locked alert icon. Passive view: it renders what Main pushes and
+ * the problem card, the progress card ("Ridden 12 of 34 min"), the raincoat
+ * reminder (Proceed / Raincoat on) and the head-locked alert icon. Passive view: it renders what Main pushes and
  * reports button presses as events; it holds no domain state.
- * Inputs: five scene-authored roots (optional @input, name fallback via
+ * Inputs: six scene-authored roots (optional @input, name fallback via
  * ROOT_NAMES). Attach to RouteLabelCardARoot.
  * Must not: decide what a press means, hide the reminder on press, move
  * AlertIconRoot (TrafficInsightLazyFollow owns its pose), or disable a root.
- * Size reason: one passive view over five small Lens surfaces that share the
+ * Size reason: one passive view over six small Lens surfaces that share the
  * same palette, icon set and input gate; splitting would only duplicate them.
  */
 
@@ -85,6 +85,16 @@ const REMINDER_BTN_H = 3.6
 const REMINDER_BTN_GAP = 0.8
 const REMINDER_TEXT = "Rain ahead. Put on your raincoat?"
 
+const PROGRESS_W = 15
+const PROGRESS_H = 4.2
+const PROGRESS_INNER_W = 13.8
+const PROGRESS_INNER_H = 3
+const PROGRESS_ICON = 2.2
+const PROGRESS_GAP = 0.6
+const PROGRESS_TEXT_W = PROGRESS_INNER_W - PROGRESS_ICON - PROGRESS_GAP
+/** The "you are here" accent, the same yellow as the marker on the map. */
+const YOU_ARE_HERE = new vec4(1.0, 0.93, 0.2, 1)
+
 const ALERT_SIZE = 4
 const ALERT_ICON_SIZE = 3.6
 
@@ -119,6 +129,11 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
 
     @input
     @allowUndefined
+    @hint("ProgressCardRoot (falls back to a name search)")
+    private progressCardRoot: SceneObject
+
+    @input
+    @allowUndefined
     @hint("RaincoatReminderRoot (falls back to a name search)")
     private raincoatReminderRoot: SceneObject
 
@@ -143,6 +158,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private visLabelA = false
     private visLabelB = false
     private visProblemCard = false
+    private visProgressCard = false
     private visRaincoatReminder = false
     private visAlertIcon = false
 
@@ -152,6 +168,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private labelTextB = ""
     private problemKind: ProblemKind = "crash"
     private problemText = ""
+    private progressText = ""
     private alertKind: ProblemKind = "crash"
     private alertOpacity = 1
     private inputEnabled = true
@@ -161,6 +178,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private panelLabelA: SceneObject | null = null
     private panelLabelB: SceneObject | null = null
     private panelProblem: SceneObject | null = null
+    private panelProgress: SceneObject | null = null
     private panelReminder: SceneObject | null = null
     private panelAlert: SceneObject | null = null
     private readonly canvases: CanvasController[] = []
@@ -171,6 +189,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private problemIcon: ElementContent | null = null
     private problemHeader: Text | null = null
     private problemTextComp: Text | null = null
+    private progressTextComp: Text | null = null
     private alertIcon: ElementContent | null = null
     private proceedButton: Button | null = null
     private raincoatOnButton: Button | null = null
@@ -222,6 +241,16 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.setProblemCard(false)
     }
 
+    public showProgressCard(text: string): void {
+        this.progressText = text ?? ""
+        this.applyProgress()
+        this.setProgressCard(true)
+    }
+
+    public hideProgressCard(): void {
+        this.setProgressCard(false)
+    }
+
     public showRaincoatReminder(): void {
         this.setRaincoatReminder(true)
     }
@@ -253,6 +282,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.setLabelA(false)
         this.setLabelB(false)
         this.setProblemCard(false)
+        this.setProgressCard(false)
         this.setRaincoatReminder(false)
         this.setAlertIcon(false)
     }
@@ -261,6 +291,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         labelA: boolean
         labelB: boolean
         problemCard: boolean
+        progressCard: boolean
         raincoatReminder: boolean
         alertIcon: boolean
     } {
@@ -268,16 +299,18 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             labelA: this.visLabelA,
             labelB: this.visLabelB,
             problemCard: this.visProblemCard,
+            progressCard: this.visProgressCard,
             raincoatReminder: this.visRaincoatReminder,
             alertIcon: this.visAlertIcon,
         }
     }
 
-    public getTexts(): {labelA: string; labelB: string; problemCard: string} {
+    public getTexts(): {labelA: string; labelB: string; problemCard: string; progressCard: string} {
         return {
             labelA: this.labelTextA,
             labelB: this.labelTextB,
             problemCard: this.problemText,
+            progressCard: this.progressText,
         }
     }
 
@@ -312,6 +345,14 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.showPanel(this.panelProblem, v)
     }
 
+    private setProgressCard(v: boolean): void {
+        if (this.visProgressCard !== v) {
+            this.visProgressCard = v
+            tiLog("ui lens progressCard=" + v)
+        }
+        this.showPanel(this.panelProgress, v)
+    }
+
     private setRaincoatReminder(v: boolean): void {
         if (this.visRaincoatReminder !== v) {
             this.visRaincoatReminder = v
@@ -340,11 +381,13 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         if (this.labelDataA) this.applyLabel(this.labelA, this.labelDataA)
         if (this.labelDataB) this.applyLabel(this.labelB, this.labelDataB)
         this.applyProblem()
+        this.applyProgress()
         this.applyAlert()
         this.applyInputEnabled()
         this.showPanel(this.panelLabelA, this.visLabelA)
         this.showPanel(this.panelLabelB, this.visLabelB)
         this.showPanel(this.panelProblem, this.visProblemCard)
+        this.showPanel(this.panelProgress, this.visProgressCard)
         this.showPanel(this.panelReminder, this.visRaincoatReminder)
         this.showPanel(this.panelAlert, this.visAlertIcon)
     }
@@ -378,6 +421,12 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         }
         if (this.problemTextComp && !isNull(this.problemTextComp)) {
             this.problemTextComp.text = this.problemText
+        }
+    }
+
+    private applyProgress(): void {
+        if (this.progressTextComp && !isNull(this.progressTextComp)) {
+            this.progressTextComp.text = this.progressText
         }
     }
 
@@ -427,6 +476,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         const rootA = this.resolveRoot(this.routeLabelCardARoot, ROOT_NAMES.routeLabelCardARoot)
         const rootB = this.resolveRoot(this.routeLabelCardBRoot, ROOT_NAMES.routeLabelCardBRoot)
         const rootProblem = this.resolveRoot(this.problemCardRoot, ROOT_NAMES.problemCardRoot)
+        const rootProgress = this.resolveRoot(this.progressCardRoot, ROOT_NAMES.progressCardRoot)
         const rootReminder = this.resolveRoot(this.raincoatReminderRoot, ROOT_NAMES.raincoatReminderRoot)
         const rootAlert = this.resolveRoot(this.alertIconRoot, ROOT_NAMES.alertIconRoot)
 
@@ -446,6 +496,12 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             if (rootProblem) {
                 this.panelProblem = this.panelOf(rootProblem)
                 this.buildProblem(this.panelProblem)
+            }
+        })
+        this.safeBuild("progressCard", () => {
+            if (rootProgress) {
+                this.panelProgress = this.panelOf(rootProgress)
+                this.buildProgress(this.panelProgress)
             }
         })
         this.safeBuild("raincoatReminder", () => {
@@ -598,6 +654,37 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         t.horizontalOverflow = HorizontalOverflow.Wrap
         t.verticalOverflow = VerticalOverflow.Shrink
         this.problemTextComp = t
+    }
+
+    /** Progress card: slate plate with a "you are here" yellow border + [clock | "Ridden N of M min"]. */
+    private buildProgress(panel: SceneObject): void {
+        this.canvases.push(this.ensureCanvas(panel, PROGRESS_W, PROGRESS_H))
+
+        const backing = obj(panel, "Backing")
+        const card = makeCardRect(backing, PROGRESS_W, PROGRESS_H, {
+            color: SLATE_PLATE,
+            border: true,
+            cornerRadius: CARD_CORNER,
+        })
+        card.borderColor = YOU_ARE_HERE
+        card.borderSize = CARD_BORDER
+
+        const content = contentHost(panel)
+        const row = flexRow(content, PROGRESS_INNER_W, PROGRESS_INNER_H, {
+            gap: PROGRESS_GAP,
+            padX: 0,
+            padY: 0,
+            justify: FlexJustify.Center,
+            align: FlexAlign.Center,
+        })
+        flexChild(row, {w: PROGRESS_ICON, h: PROGRESS_ICON}, (cell) => {
+            const ec = contentOn(cell, "", "Body", PROGRESS_ICON, PROGRESS_ICON, "center", this.texSchedule)
+            ec.leadingIconSize = PROGRESS_ICON * 0.85
+        })
+        const t = dynamicText(row, this.progressText, "Body", PROGRESS_TEXT_W, PROGRESS_INNER_H, TEXT_PRIMARY)
+        t.horizontalAlignment = HorizontalAlignment.Left
+        t.horizontalOverflow = HorizontalOverflow.Shrink
+        this.progressTextComp = t
     }
 
     /** Raincoat reminder: plate + [umbrella | message] + [Proceed | Raincoat on]. */

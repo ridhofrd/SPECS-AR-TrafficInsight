@@ -1,7 +1,7 @@
 /**
  * TrafficInsightLeafDriver.ts
  *
- * Owns: the shared test helpers for the TrafficInsight LEAF scenarios (C1-C6):
+ * Owns: the shared test helpers for the TrafficInsight LEAF scenarios (C1-C9):
  * a DefaultLeafInteractor subclass that presses buttons / pinches route dots by
  * their stable scene names, plus read-only helpers for the Lens snapshot
  * (TrafficInsightMain.getState()) and for Text shown on the Ride simulator.
@@ -24,6 +24,12 @@ import { LensVisibility, StateName, TrafficInsightSnapshot } from "../Scripts/Tr
 /** Every Lens-layer flag (everything except the simulator's clarify dialog). */
 export const LENS_FLAGS: (keyof LensVisibility)[] = [
     "table",
+    "progressMarks",
+    "progressCard",
+    "road",
+    "roadLineA",
+    "roadLineB",
+    "splitRing",
     "map",
     "routeA",
     "routeB",
@@ -93,6 +99,62 @@ export function simulatorShowsCaption(caption: string): boolean {
     return textsUnder(ROOT_NAMES.rideSimulatorRoot).some((t) => t === caption);
 }
 
+/** The rider's camera object (the Lens's "eye"). */
+export function cameraObject(): SceneObject {
+    const cam = findSceneObjectByName("Camera Object");
+    if (!cam) {
+        throw new Error("Camera Object not found");
+    }
+    return cam;
+}
+
+/** Where the rider's eye is (the camera's position). */
+export function eyePosition(): vec3 {
+    return cameraObject().getTransform().getWorldPosition();
+}
+
+/**
+ * A world point as the rider sees it when looking straight ahead (down the world -z axis) from where
+ * they stand: x = degrees to the right, y = degrees above the horizon. Uses only the camera's position,
+ * so a preview camera that has been turned or tilted does not change the result.
+ */
+export function viewAngles(world: vec3): vec2 {
+    const eye = eyePosition();
+    const dx = world.x - eye.x;
+    const dy = world.y - eye.y;
+    const ahead = eye.z - world.z;
+    const yaw = (Math.atan2(dx, ahead) * 180) / Math.PI;
+    const pitch = (Math.atan2(dy, Math.sqrt(dx * dx + ahead * ahead)) * 180) / Math.PI;
+    return new vec2(yaw, pitch);
+}
+
+/** True when two convex polygons (points in view angles) overlap (separating-axis test). */
+export function convexOverlap(a: vec2[], b: vec2[]): boolean {
+    const axesOf = (poly: vec2[]): vec2[] =>
+        poly.map((p, i) => {
+            const q = poly[(i + 1) % poly.length];
+            return new vec2(-(q.y - p.y), q.x - p.x);
+        });
+    const project = (poly: vec2[], axis: vec2): [number, number] => {
+        let lo = Infinity;
+        let hi = -Infinity;
+        for (const p of poly) {
+            const d = p.x * axis.x + p.y * axis.y;
+            lo = Math.min(lo, d);
+            hi = Math.max(hi, d);
+        }
+        return [lo, hi];
+    };
+    for (const axis of axesOf(a).concat(axesOf(b))) {
+        const [aLo, aHi] = project(a, axis);
+        const [bLo, bHi] = project(b, axis);
+        if (aHi < bLo || bHi < aLo) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export class TrafficInsightLeafDriver extends DefaultLeafInteractor {
     constructor() {
         super("TrafficInsightLeafDriver");
@@ -146,8 +208,18 @@ export class TrafficInsightLeafDriver extends DefaultLeafInteractor {
         expect(snap().planningStep, "planning step after Main office").toBe("map");
     }
 
-    /** Ride presses until the crash/rain alert fires (2 presses at 0.05/step). */
-    async rideUntilAlert(maxPresses: number = 6): Promise<number> {
+    /** Morning trip: pick route A, ride to the crash alert, let it end, then pull over. */
+    async stopAfterCrash(): Promise<void> {
+        await this.planMorningTrip();
+        await this.press(BUTTON_NAMES.routeDotA);
+        await this.rideUntilAlert();
+        await this.waitForState("Riding", 4000);
+        await this.press(BUTTON_NAMES.stopped);
+        expect(snap().state, "state after I've stopped").toBe("Stopped");
+    }
+
+    /** Ride presses until the crash/rain alert fires (5 presses at 0.05/step, alert at 25% of the route). */
+    async rideUntilAlert(maxPresses: number = 10): Promise<number> {
         let presses = 0;
         while (snap().state === "Riding" && presses < maxPresses) {
             await this.press(BUTTON_NAMES.ride, 100);

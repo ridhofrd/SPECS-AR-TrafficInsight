@@ -20,6 +20,7 @@ import {
     PlanningStep,
     ProblemKindOrNone,
     RouteId,
+    RoadViewState,
     RouteOrNone,
     StateCore,
     StateName,
@@ -276,6 +277,12 @@ export class TrafficInsightStateMachine {
 function hiddenVisibility(): LensVisibility {
     return {
         table: false,
+        progressMarks: false,
+        progressCard: false,
+        road: false,
+        roadLineA: false,
+        roadLineB: false,
+        splitRing: false,
         map: false,
         routeA: false,
         routeB: false,
@@ -304,6 +311,9 @@ export function visibilityFor(core: StateCore): LensVisibility {
         }
     } else if (core.state === "Stopped") {
         v.map = v.routeA = v.problemHighlight = v.problemCard = true;
+        // Stopped is the only state that shows where I am and the route on the road.
+        v.progressMarks = v.progressCard = true;
+        v.road = v.roadLineA = v.roadLineB = v.splitRing = true;
         if (core.raincoatPrompt) {
             v.raincoatReminder = true;
         } else {
@@ -313,6 +323,21 @@ export function visibilityFor(core: StateCore): LensVisibility {
         v.alertIcon = true;
     }
     return v;
+}
+
+/**
+ * The road view follows the same rule as the map's dots: it exists only while
+ * Stopped, and its stripes can be aimed at and pinched only while the rider is
+ * still choosing. Once the rider has chosen the route to keep (the raincoat
+ * question), that stripe glows, the other fades, and neither can be pinched.
+ */
+export function roadViewFor(core: StateCore): RoadViewState {
+    const stopped = core.state === "Stopped";
+    return {
+        shown: stopped,
+        targetable: stopped && !core.raincoatPrompt,
+        chosen: stopped && core.raincoatPrompt ? core.activeRoute : "none",
+    };
 }
 
 export function mapViewFor(core: StateCore): MapView {

@@ -1,7 +1,7 @@
 /**
  * LeafIndex.ts — registers the TrafficInsight LEAF scenarios.
  * One scenario per done criterion in devpost/design-brief.md; ids match the
- * criteria (C1-C6). Attached to the root SceneObject "LeafIndex".
+ * criteria (C1-C9). Attached to the root SceneObject "LeafIndex".
  */
 
 import { scenariosIndex } from "Leaf.lspkg/Scenarios/decorator/ScenarioIndexDecorator";
@@ -12,6 +12,9 @@ import { CrashAlertScenario } from "./CrashAlertScenario";
 import { RerouteScenario } from "./RerouteScenario";
 import { RainRaincoatScenario } from "./RainRaincoatScenario";
 import { TableOnlyWhilePlanningScenario } from "./TableOnlyWhilePlanningScenario";
+import { MapPlacementScenario } from "./MapPlacementScenario";
+import { ProgressMarksScenario } from "./ProgressMarksScenario";
+import { RoadViewScenario } from "./RoadViewScenario";
 
 @component
 export class LeafIndex extends BaseScriptComponent {
@@ -29,5 +32,8 @@ export class LeafIndex extends BaseScriptComponent {
             },
         },
         { id: "C6", typename: TableOnlyWhilePlanningScenario.getTypeName() },
+        { id: "C7", typename: MapPlacementScenario.getTypeName() },
+        { id: "C8", typename: ProgressMarksScenario.getTypeName() },
+        { id: "C9", typename: RoadViewScenario.getTypeName() },
     ];
 }

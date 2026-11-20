@@ -31,9 +31,11 @@ export class CrashAlertScenario extends Scenario {
         await driver.press(BUTTON_NAMES.routeDotA);
         expect(snap().state, "riding on route A").toBe("Riding");
 
-        // First Ride press: 5%, no alert. Second: crosses 10% -> Alerted.
-        await driver.press(BUTTON_NAMES.ride, 100);
-        expect(snap().state, "no alert after first Ride").toBe("Riding");
+        // The alert is at 25% of the route and each Ride press is 5%: four quiet presses, the fifth crosses 25% -> Alerted.
+        for (let i = 1; i <= 4; i++) {
+            await driver.press(BUTTON_NAMES.ride, 100);
+            expect(snap().state, "no alert after Ride press " + i).toBe("Riding");
+        }
         await driver.press(BUTTON_NAMES.ride, 0);
         const alertSeenAt = getTime();
 

@@ -86,10 +86,34 @@ export interface MapView {
     problem: ProblemSpan | null;
 }
 
+/**
+ * What the road view (the mock street with both routes laid on it) should show.
+ * Built from the state snapshot; the road view never decides this itself.
+ */
+export interface RoadViewState {
+    /** The street, the stripes and the ring are drawn (Stopped only). */
+    shown: boolean;
+    /** Aiming at a stripe highlights it and pinching it picks that route. */
+    targetable: boolean;
+    /** Route the rider has chosen but is still stopped on (its stripe glows, the other fades). */
+    chosen: RouteOrNone;
+}
+
 /** Visibility flags of everything the LEAF tests assert on. */
 export interface LensVisibility {
     /** The virtual table under the map: shown for the whole Planning state only. */
     table: boolean;
+    /** Progress marks on the map: the ridden part drawn dim and the "you are here" marker (Stopped). */
+    progressMarks: boolean;
+    /** The "Ridden N of M min" card (Stopped). */
+    progressCard: boolean;
+    /** The mock street on the floor ahead (Stopped). */
+    road: boolean;
+    /** Route stripes on the street (Stopped). */
+    roadLineA: boolean;
+    roadLineB: boolean;
+    /** The pulsing ring where the routes split (Stopped). */
+    splitRing: boolean;
     map: boolean;
     routeA: boolean;
     routeB: boolean;
@@ -144,6 +168,11 @@ export interface TrafficInsightSnapshot extends StateCore {
     labelTextA: string;
     labelTextB: string;
     problemCardText: string;
+    /** "Ridden 3 of 34 min" while stopped, else "". */
+    progressCardText: string;
+    /** Road view readback: which stripe is highlighted ('none' when no stripe is) and which is chosen. */
+    roadHighlight: RouteOrNone;
+    roadChosen: RouteOrNone;
     visible: LensVisibility;
     alertIconCameraLocal: Vec3Like;
 }

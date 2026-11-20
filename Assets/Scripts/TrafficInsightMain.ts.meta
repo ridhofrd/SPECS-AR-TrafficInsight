@@ -37,6 +37,7 @@
     debugColliders: false
     lensUI: false
     rideStep: false
+    roadView: false
     routeMap: false
     simulatorUI: false
     table: false
@@ -56,6 +57,7 @@
       routeMap: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
       audio: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
       alertFollow: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+      roadView: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
       cameraObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       table: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       rideStep: 0.050000
@@ -72,6 +74,7 @@
     - // @input AssignableType_3 routeMap
     - // @input AssignableType_4 audio
     - // @input AssignableType_5 alertFollow
+    - // @input AssignableType_6 roadView
     - // @input SceneObject cameraObject
     - // @input SceneObject table
     - '// @input float rideStep = 0.05 {"widget":"slider", "min":0.01, "max":0.25, "step":0.01}'
