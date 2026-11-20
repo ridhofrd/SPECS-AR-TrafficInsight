@@ -158,6 +158,10 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         this.endMarkers[1].getTransform().setLocalPosition(new vec3(0, 0, officeZ));
         this.homeLabel.getSceneObject().getParent().getTransform().setLocalPosition(new vec3(0, 0.3, homeZ + Math.sign(homeZ) * 5));
         this.officeLabel.getSceneObject().getParent().getTransform().setLocalPosition(new vec3(0, 0.3, officeZ + Math.sign(officeZ) * 5));
+        // Once a route is chosen, keep the destination label but make room
+        // below the map for the raincoat controls. The rider card stays visible.
+        this.homeLabel.getSceneObject().getParent().enabled = view.mode !== "raincoat" || trip === "evening";
+        this.officeLabel.getSceneObject().getParent().enabled = view.mode !== "raincoat" || trip === "morning";
 
         if (key !== this.lastKey) {
             this.lastKey = key;

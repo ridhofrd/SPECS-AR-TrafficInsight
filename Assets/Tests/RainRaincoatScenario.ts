@@ -16,7 +16,7 @@ import { ScenarioConfig } from "Leaf.lspkg/Scenarios/scenario/ScenarioConfig";
 import { expect } from "Leaf.lspkg/Utils/common/Expect";
 import { findSceneObjectByName } from "Leaf.lspkg/Utils/common/Utils";
 import { BUTTON_NAMES } from "../Scripts/TrafficInsightSceneContracts";
-import { TrafficInsightLeafDriver, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
+import { TrafficInsightLeafDriver, cameraObject, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
 
 const RAIN_LINE = "Rain on your route in 8 minutes. Pull over to see options.";
 
@@ -89,6 +89,15 @@ export class RainRaincoatScenario extends Scenario {
         expect(s.raincoatPrompt, which + " trip: raincoatPrompt").toBe(true);
         expect(s.visible.raincoatReminder, which + " trip: raincoat reminder visible").toBe(true);
         expect(s.lastCaption, which + " trip: reminder caption").toBe("Route A: rain ahead. Put on your raincoat before riding.");
+        const camera = cameraObject().getComponent("Component.Camera") as Camera;
+        for (const name of [BUTTON_NAMES.proceed, BUTTON_NAMES.raincoatOn]) {
+            const transform = findSceneObjectByName(name).getTransform().getWorldTransform();
+            for (const x of [-4.5, 4.5]) for (const y of [-1.4, 1.4]) {
+                const screen = camera.worldSpaceToScreenSpace(transform.multiplyPoint(new vec3(x, y, 0)));
+                expect(screen.x > 0.02 && screen.x < 0.98 && screen.y > 0.02 && screen.y < 0.98,
+                    name + " corner fully inside the view: " + screen.x + "," + screen.y).toBe(true);
+            }
+        }
     }
 
     private async resolve(driver: TrafficInsightLeafDriver, button: string, caption: string): Promise<void> {
