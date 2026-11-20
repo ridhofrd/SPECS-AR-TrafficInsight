@@ -2,9 +2,9 @@
 
 Ideas that were considered and deliberately not built yet, with the reasoning, so they can be picked up later without starting from scratch.
 
-## A glance at the route while riding (parked 2026-11-20, planned 2026-11-20)
+## A glance at the route while riding (built 2026-11-20)
 
-> **Status: planned, not built.** The open decisions below were settled with the author on 2026-11-20: look down at a "dashboard spot" (main trigger) plus "where am I?" by voice (spoken answer only), a strip with minutes left and the next problem, at most 2 seconds, riding only. The full plan, written for any coding agent, is [plans/glance-while-riding.md](plans/glance-while-riding.md). The notes below are kept as the history of the idea.
+> **Status: built and verified in Preview, 2026-11-20 (C11-C14; C1-C10 regressions pass).** The open decisions below were settled with the author on 2026-11-20: look down at a "dashboard spot" (main trigger) plus "where am I?" by voice (spoken answer only), a strip with minutes left and the next problem, at most 2 seconds, riding only. The full plan, written for any coding agent, is [plans/glance-while-riding.md](plans/glance-while-riding.md). The notes below are kept as the history of the idea. The compact strip and caption answer are built; any route overlay on the road while moving remains out of scope.
 
 ### The idea
 
@@ -40,7 +40,7 @@ None of the studies found tested AR glasses on a motorcycle or bicycle, so the g
 5. One new LEAF scenario per new done criterion, and a re-run of the existing ones.
 6. README and screenshot updates.
 
-### Decisions still open
+### Originally open decisions (settled by the linked plan)
 
 - Which trigger: voice with a button stand-in (recommended), a pinch, or something else.
 - What the glance shows: the progress strip (recommended), a route line, or the overview.

@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Status | **Implementation in progress.** Author requested the build on 2026-11-20 |
+| Status | **Built and verified in Preview on 2026-11-20.** LEAF C1-C14 pass; actual camera tilt and screenshots checked |
 | Depends on | Revision 1 and consistency polish; trip-stage Preview surroundings now occupy C10 (built; LEAF C1 to C10 pass) |
 | Replaces | The parked entry "A glance at the route while riding" in [docs/backlog.md](../backlog.md) |
-| Source of truth | [devpost/design-brief.md](../../devpost/design-brief.md). This plan is **not** the brief. Step 0 updates the brief, and only with the author's approval |
+| Source of truth | [devpost/design-brief.md](../../devpost/design-brief.md). The author requested implementation on 2026-11-20; the brief now includes C11-C14. The steps below preserve the agreed build plan |
 
 This file is written so that any coding agent (Claude Code, Codex, Cursor or another) can pick it up cold. Read [AGENTS.md](../../AGENTS.md) first: its rules apply to every step here.
 
@@ -87,7 +87,7 @@ Build the future `glanceFacts` helper on those functions. Do not reintroduce `ro
 
 - Minutes left: round `remainingStats(...).timeMin`, choosing the incident-aware phase after the warning.
 - Next problem: only known after the warning and only on the active route; compare progress with `problemSpan` and reuse the route timing for the start/end countdown.
-- Before a known problem, report its countdown. Inside it, report time to leave the stretch. After it, or on B, report Route clear.
+- Before a warning, report No reported problems. Before a known problem, report its countdown; inside it, report time to leave the stretch. After it, or on the clear reroute, report Route clear.
 - Both the strip and the voice answer use the same result. The current rain warning starts at 8 minutes, and later cards decrease consistently.
 - At the 10% morning stop, the current sample reroute to B has about 38 minutes left, with no change to the roughly 2 minutes already ridden.
 
@@ -127,7 +127,7 @@ Rules this must keep, already true of the codebase:
 - **The state module stays pure.** `TrafficInsightState.ts` gets no scene code. Head-pitch sampling and timers live in Main, as the alert and confirm timers do today.
 - **Testable trigger logic.** The trigger is a pure function in its own module (proposed: `TrafficInsightGlanceTrigger.ts`), so LEAF tests can drive it without moving the camera.
 
-## 5. Steps
+## 5. Build steps (completed)
 
 Each step ends with a compile and a read of the Lens Studio Logger. Each step that changes behaviour also ends with a LEAF run.
 
@@ -170,10 +170,12 @@ Numbers follow the brief's existing criteria 1 to 10, including Preview surround
 
 | ID | Done criterion (proposed wording for the brief) | How the test checks it |
 |---|---|---|
-| C11 | While riding, looking down at the dashboard spot for about 0.3 s shows the glance strip: the route as a straight line with "you are here", the minutes left and the next problem. Looking back up hides it | Inject a pitch of 25° down: hidden at 0.1 s, shown by 0.5 s; text matches `glanceFacts`; inject 0°: hidden. Check the strip is below the horizon and centred left-right, measured from the eye position as C7 does |
-| C12 | The strip never stays longer than about 2 seconds, and only shows again after the rider has looked back up | Hold 25° down: gone by about 2.3 s; still down at 4 s: not shown; level for 0.6 s, then down again: shown |
+| C11 | While riding, looking down at the dashboard spot for about 0.3 s shows the glance strip: the route as a straight line with "you are here", the minutes left and the next problem. Looking back up hides it | Inject a pitch of 25° down: hidden at 0.1 s, shown by about 0.55 s; text matches `glanceFacts`; inject 0°: hidden. Check the strip is below the horizon and centred left-right, measured from the eye position as C7 does |
+| C12 | The strip never stays longer than about 2 seconds, and only shows again after the rider has looked back up | Hold 25° down: gone within 2 s of showing, including fades; still down at 4 s: not shown; level for 0.6 s, then down again: shown |
 | C13 | Saying "where am I?" (a button in the Preview) gives the minutes left and the next problem as a spoken line (a caption), and shows nothing | Press the button while riding: caption equals the `glanceFacts` sentence; every Lens flag stays false |
 | C14 | No glance outside riding, and an alert wins | Inject 25° down in Planning, Alerted, Stopped and Arrived: never shown. Start a glance, ride to the alert point: the glance ends and the alert icon shows |
+
+The implementation also requires a level look after entering Riding or after any interruption. The caption request dismisses an active glance. Drawn progress and known hazard intervals are checked against the same trip fractions. See [decision 0008](../decisions/0008-requested-route-glance.md) and the [README](../../README.md) for final validation and screenshots.
 
 ## 7. What stays unproven
 
