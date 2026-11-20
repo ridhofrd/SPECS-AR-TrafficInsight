@@ -2,7 +2,9 @@
 
 Ideas that were considered and deliberately not built yet, with the reasoning, so they can be picked up later without starting from scratch.
 
-## A glance at the route while riding (parked 2026-11-20)
+## A glance at the route while riding (parked 2026-11-20, planned 2026-11-20)
+
+> **Status: planned, not built.** The open decisions below were settled with the author on 2026-11-20: look down at a "dashboard spot" (main trigger) plus "where am I?" by voice (spoken answer only), a strip with minutes left and the next problem, at most 2 seconds, riding only. The full plan, written for any coding agent, is [plans/glance-while-riding.md](plans/glance-while-riding.md). The notes below are kept as the history of the idea.
 
 ### The idea
 

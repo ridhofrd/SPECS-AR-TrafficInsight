@@ -240,7 +240,7 @@ These changed a default number from the brief, or settled something the brief le
 | `Packages/` | Spectacles Interaction Kit (SIK), UI Kit, Motion and Icons from the Base Template; LEAF; and the Lens Studio preview-agent helpers. Stored with Git LFS |
 | `tools/asset-generators/` | The scripts that made the models (Blender) and sounds (Node.js) |
 | `devpost/` | The planning documents written by `plan-lens` (required by the hackathon) |
-| `docs/` | Everything beyond this README: [context-engineering.md](docs/context-engineering.md), [submission.md](docs/submission.md), [decision records](docs/decisions/), and `media/` for screenshots |
+| `docs/` | Everything beyond this README: [context-engineering.md](docs/context-engineering.md), [submission.md](docs/submission.md), [decision records](docs/decisions/), [plans](docs/plans/) for work agreed but not built yet, and `media/` for screenshots |
 | `AGENTS.md`, `CLAUDE.md` | Instructions for coding agents (Lens Studio's block plus this project's rules) |
 | `.claude/` | Claude Code settings and path-scoped rules |
 | `skills-lock.json` | Pins the exact version of the `plan-lens` skill |
@@ -317,7 +317,7 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Revision 1, part 2: progress along the path (the ridden part dim, a "you are here" marker, a progress card) (C8, with the map placement check C7)
 - [x] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines) (C9; C1 to C9 pass)
 - [ ] Judge in the Preview and iterate
-- [ ] Parked for later: a brief glance at the route while riding (see [docs/backlog.md](docs/backlog.md))
+- [ ] Planned: a brief glance at the route while riding, by looking down or asking "where am I?" (plan: [docs/plans/glance-while-riding.md](docs/plans/glance-while-riding.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
 
 ## The hackathon
