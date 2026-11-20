@@ -6,8 +6,8 @@
 
 Built for **Learn AR with SPECS, Round 2** (Devpost, sponsored by Snap Inc.). Planned with Devpost's `plan-lens` skill, built by an AI coding agent through Snap's CLAD plugin and the Lens Studio MCP, and demonstrated in Lens Studio's Interactive Preview. No Spectacles hardware is needed.
 
-> **Status: the Lens is built and all six LEAF tests (C1 to C6) pass in the Lens Studio Preview.**
-> Revision 1 is partly done: the table now shows only while planning, and the map floats when you stop. The progress marks and the route on the road ahead are not built yet (see the [Roadmap](#roadmap)).
+> **Status: the Lens is built and all nine LEAF tests (C1 to C9) pass in the Lens Studio Preview.**
+> Revision 1 is done: the table shows only while planning, the map floats when you stop, the map shows how far you have ridden, and both routes are also laid on a mock street ahead of you.
 > It has not been run on Spectacles hardware (none is available), and the demo video is not recorded yet. Everything below was run in the Preview unless it is marked _unverified_.
 
 ## Contents
@@ -33,7 +33,7 @@ Built for **Learn AR with SPECS, Round 2** (Devpost, sponsored by Snap Inc.). Pl
 The demo tells one day in two trips that reuse the same map, alert and stop:
 
 1. **Morning, at home.** A table is in the room and the map on it shows the trip to the office, with two routes compared by time, fuel and weather. The rider picks one.
-2. **On the road.** Nothing on screen, and no table. Then a chime and a short sentence: a crash ahead has stalled traffic, pull over to see options. The rider pulls over, and the map floats in front of them with the crash stretch highlighted and the faster reroute. They pinch it and arrive on time.
+2. **On the road.** Nothing on screen, and no table. Then a chime and a short sentence: a crash ahead has stalled traffic, pull over to see options. The rider pulls over, and the map floats in front of them with the part already ridden shown dim, a "you are here" marker, the crash stretch highlighted and the faster reroute. Both routes are also laid on the street ahead. They pinch a route, on the map or on the road, and arrive on time.
 3. **Evening, going home.** A rain alert comes before the rain zone. The rider pulls over, sees where the rain is and how bad it is, and either takes the dry reroute or stays on the route and is reminded to put on a raincoat.
 
 The Lens only ever shows content in two states, for safety: when the rider is planning and when they have stopped. While riding, it is silent except for short alerts.
@@ -76,19 +76,25 @@ While riding, nothing from the Lens is in view. When the route reaches a problem
 
 ### Stopped after the crash: see the problem, reroute
 
-![Stopped view: route A's crash stretch highlighted in coral, a "Problem ahead" card reading "Crash, traffic stalled, +18 min" above it, route A at 52 min (+18) and route B marked Recommended at 40 min.](docs/media/stopped-crash.jpg)
+![Stopped view: the floating map with route A's crash stretch highlighted in coral, a "Problem ahead" card reading "Crash, traffic stalled, +18 min", route A at 52 min (+18), route B marked Recommended at 40 min, a yellow you-are-here marker with the ridden stretch dim and a "Ridden 9 of 34 min" card, and above the map the mock street with a blue route A stripe, a green route B stripe turning right, and a yellow ring where they split.](docs/media/stopped-crash.jpg)
 
-Pressing **I've stopped** brings back the map, floating where it was with no table under it, with the full picture: the rest of the route, the crash stretch highlighted in coral, a card above it (*"Crash, traffic stalled, +18 min"*), and both options with updated numbers. Route B is now recommended. Pinching route B's dot says *"New route set"* and hides the map. Riding on to the end ends with *"You've arrived, on time."*
+Pressing **I've stopped** brings back the map, floating where it was with no table under it, with the full picture:
+
+- **Where I am.** The part of the route already ridden is drawn dim, a large yellow **you are here** marker sits at the rider's position (bigger than the home and office markers, in a colour no route uses), and a card says how far along the rider is (*"Ridden 9 of 34 min"*).
+- **What is ahead.** The rest of the route, the crash stretch highlighted in coral, a card above it (*"Crash, traffic stalled, +18 min"*), and both options with updated numbers. Route B is now recommended.
+- **The route on the road.** Both routes are also laid on a mock street on the floor ahead, as wide stripes in vivid blue (route A) and green (route B) on a muted grey street, with a pulsing yellow ring where they split. Route B turns off to the right at the junction. The street, the stripes and the map are all in view together and do not cover each other. This street is a stand-in: the real product would draw the route on the real road from the rider's location and heading, which the Preview cannot do.
+
+Aiming at a route's dot, its **Choose route** button or its stripe on the road brightens that stripe. Pinching a stripe chooses that route, exactly like pinching its dot: pinching route B says *"New route set"* and hides the map, the street and the cards. Riding on to the end ends with *"You've arrived, on time."*
 
 ### Evening: rain ahead and the raincoat reminder
 
 ![Stopped view on the evening trip: route A's rain stretch highlighted in amber, a "Weather ahead" card reading "Rain km 4–7: 24 °C, heavy, windy rain", route A marked Recommended with windy rain, and route B at 48 min (+12), dry. There is no table: the map floats.](docs/media/stopped-floating-map.jpg)
 
-On the way home, the alert is *"Rain on your route in 10 minutes. Pull over to see options."* Stopped, the rider sees the rain stretch in amber with its temperature, intensity and type, and a dry reroute that costs 12 minutes more.
+On the way home, the alert is *"Rain on your route in 10 minutes. Pull over to see options."* Stopped, the rider sees the rain stretch in amber with its temperature, intensity and type, a dry reroute that costs 12 minutes more, and the same progress marks and road view as in the morning (*"Ridden 11 of 36 min"*).
 
-![Raincoat reminder above the map: "Rain ahead. Put on your raincoat?" with Proceed and Raincoat on buttons; only route A and its rain stretch remain on the map.](docs/media/raincoat-reminder.jpg)
+![Raincoat reminder above the map: "Rain ahead. Put on your raincoat?" with Proceed and Raincoat on buttons; only route A and its rain stretch remain on the map, and on the road route A's stripe is bright while route B's has faded.](docs/media/raincoat-reminder.jpg)
 
-Choosing to stay on the rainy route shows a small reminder just above the map with **Proceed** and **Raincoat on**. Either one hides everything and returns to riding: the rider goes through the rain prepared, which is the point of being warned in time.
+Choosing to stay on the rainy route (by its dot or its stripe on the road) shows a small reminder just above the map with **Proceed** and **Raincoat on**. The chosen route's stripe on the road glows and the other one fades. Either button hides everything and returns to riding: the rider goes through the rain prepared, which is the point of being warned in time.
 
 ### The Ride simulator (preview only)
 
@@ -105,6 +111,7 @@ The Preview has no road, no GPS and no microphone, so a separate panel to the ri
 | Live traffic, weather and routing | Hard-coded sample data (see below) |
 | Spoken alerts and confirmations | The caption line at the bottom of the panel |
 | A real table or wall at home, or the map floating about 1 m ahead without one | A virtual table for the planning view at home. At the roadside the map floats, with no table |
+| The route drawn on the real road ahead | A mock street on the floor of the Preview room with both routes laid on it, shown only while stopped |
 
 The sample data lives in [`Assets/Scripts/TrafficInsightTripData.ts`](Assets/Scripts/TrafficInsightTripData.ts):
 
@@ -126,7 +133,11 @@ Each done criterion in the design brief has one [LEAF](https://developers.snap.c
 | C5 | Evening: rain stretch and a card with temperature, intensity and type; picking the rainy route shows the raincoat reminder; Proceed or Raincoat on hides it | **Pass** (both buttons tested) |
 | C6 | The virtual table is visible during the whole Planning state and hidden in every other state | **Pass** (checked at the start, during the clarifying question, with the map, then Riding, Alerted, Stopped, Arrived, and Planning again after "Go home") |
 
-C2 and C4 were extended for the table: C2 also checks that the table is off while riding, and C4 checks that the map floats with no table when stopped. Each check reads both the snapshot flag and the real `MapTable` object in the scene.
+| C7 | When stopped, the map is about 1 m ahead and a little below eye level, in view | **Pass** (measured from the rider's eye looking straight ahead: 110 cm ahead, 22.6 cm below eye level, centred, which is 11.6° below the horizon) |
+| C8 | When stopped, the ridden part is dim, with a clear "you are here" marker and a progress card | **Pass** (card reads "Ridden 9 of 34 min"; the ridden stretch is dimmer than the route ahead, 0.57 against 0.74; the marker is more than twice the home marker's size and bright yellow; all of it is gone once riding) |
+| C9 | When stopped, both routes are laid on the mock street in vivid colours with a pulsing ring; street and map do not cover each other; aiming at a dot, a button or a line brightens the line; pinching a line chooses that route; the chosen line glows and the other fades; riding hides it all | **Pass** (seen from the start position the street spans 4.9° to 8.6° below the horizon and the map 9.9° to 14.1°, so they do not overlap; stripes are 2.7° wide at the near end; aiming at route B's line, route A's dot and the Choose route B button each brighten the right line; pinching route B's side-road stripe says "New route set"; in the evening pinching route A's stripe asks about the raincoat with A chosen and B faded) |
+
+C2 and C4 were extended for the table: C2 also checks that the table is off while riding, and C4 checks that the map floats with no table when stopped. Each check reads both the snapshot flag and the real `MapTable` object in the scene. C7 and C9 measure from the rider's eye position looking straight ahead, so they give the same answer even if the Preview's camera has been turned. C3 changed only because the alert now comes later in the trip (see the design decisions below).
 
 What the tests cannot check, and so remains unverified:
 
@@ -134,7 +145,7 @@ What the tests cannot check, and so remains unverified:
 - **The icon's size on screen and its fade.** Its position and timing are tested; its look was checked by eye in the screenshot above.
 - **Reach and comfort on real glasses**, and anything about riding a real motorcycle.
 
-To run them: open the project in Lens Studio, open the LEAF panel, and run C1 to C6 against the Preview.
+To run them: open the project in Lens Studio, open the LEAF panel, and run C1 to C9 against the Preview.
 
 ## Why it belongs on glasses
 
@@ -163,11 +174,13 @@ flowchart LR
 ```mermaid
 flowchart LR
     SIM["Ride simulator panel\n(buttons, preview only)"] --> MAIN
-    DOTS["Route dots\n(pinch)"] --> MAIN
+    DOTS["Route dots\n(pinch, aim)"] --> MAIN
+    LINES["Route stripes on the road\n(pinch, aim)"] --> MAIN
     MAIN["TrafficInsightMain\nwires input to state"] --> STATE["TrafficInsightState\nthe rules, no scene code"]
     STATE -->|snapshot| MAIN
-    MAIN --> MAP["Route map\nlines, highlight, dots"]
-    MAIN --> CARDS["Lens cards\nlabels, problem card,\nreminder, alert icon"]
+    MAIN --> MAP["Route map\nlines, highlight, dots,\nridden stretch, you-are-here"]
+    MAIN --> ROAD["Road view\nmock street, stripes, ring"]
+    MAIN --> CARDS["Lens cards\nlabels, problem card, progress card,\nreminder, alert icon"]
     MAIN --> AUDIO["Audio + captions"]
     MAIN --> LEAF["getState()\nfor LEAF tests"]
 ```
@@ -179,8 +192,10 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 | `TrafficInsightState.ts` | The five states, every transition, and which parts are visible in each (including the table) |
 | `TrafficInsightTripData.ts` | Sample routes per trip and the "Recommended" rule |
 | `TrafficInsightMain.ts` | Connects input to the state, redraws the views (and shows or hides the table), runs the 2 s alert timer |
-| `TrafficInsightRouteMap.ts` | Builds the route lines, problem highlight and pinchable dots at runtime |
-| `TrafficInsightTrafficLensUI.ts` | The Lens layer: label cards, problem card, raincoat reminder, alert icon (UI Kit) |
+| `TrafficInsightRouteMap.ts` | Builds the route lines, problem highlight, dim ridden stretch, "you are here" marker and pinchable dots at runtime |
+| `TrafficInsightRoadView.ts` | Builds the mock street, the two route stripes (aimable and pinchable) and the pulsing ring at runtime |
+| `TrafficInsightGeometry.ts` | The small mesh helpers the map and the road view share (ribbon, puck, ring, rectangle) |
+| `TrafficInsightTrafficLensUI.ts` | The Lens layer: label cards, problem card, progress card, raincoat reminder, alert icon (UI Kit) |
 | `TrafficInsightRideSimulatorUI.ts` | The demo panel (UI Kit) |
 | `TrafficInsightLazyFollow.ts` | Lets the alert icon follow the head gently |
 | `TrafficInsightAudioController.ts` | Plays the four sound effects |
@@ -193,6 +208,10 @@ These changed a default number from the brief, or settled something the brief le
 - **Mid-tone panels with white text.** The first version used near-white panels with light text, which could not be read. The Spectacles display is additive (black shows as transparent), so the panels are now a mid-tone slate blue (the Lens) or warm grey (the simulator): light enough to show, dark enough for white text to read.
 - **The problem card floats just above the highlighted stretch**, not on top of it, so the card never hides the stretch it describes.
 - **Captions carry every spoken line.** See [Known limitations](#known-limitations).
+- **The alert comes later in the trip.** It was at 10% of the route, so the "ridden" stretch was too short to see. It is now at 25% (about 9 of 34 minutes), which also puts the rider before the crash stretch and clear of route A's dot, so the marker never hides a dot.
+- **The street is far enough away to sit above the map.** Near the rider it ran behind and under the floating map, so the street starts about 10.5 m ahead, is 2.2 m wide and 8 m long, and its floor is 1.6 m below eye level. That puts the whole street above the map in the view, clear of the cards. The stripes are 50 cm wide, which is 2.7° across at the near end (the brief asked for at least about 2°), and about 1.5° at the far end.
+- **The "you are here" marker is yellow.** No route or problem colour is yellow, so it cannot be mistaken for one. The progress card has the same yellow border.
+- **Stripes can be pinched, with one caveat.** Pinching a stripe works in the LEAF tests and picks the route like the dot. Whether a long thin target several metres away is easy to hit by hand is untested, so the dots and the Choose route buttons stay the dependable way to choose.
 - **Sample numbers.** The brief fixed the crash delay (+18 min), the rain details and the reroute cost (+12 min). The other route times and fuel values are defaults chosen during the build.
 
 ## Known limitations
@@ -200,6 +219,9 @@ These changed a default number from the brief, or settled something the brief le
 - **Riding with AR glasses is unproven.** No study of AR glasses on motorcycles was found, and there is no Snap guidance about vehicles. The three-state design follows car and helmet head-up display research; whether it is safe on a real bike can only be found out by real-world testing.
 - **No spoken voice.** The Lens plays its chime and tones, but the text-to-speech module is deprecated in this SDK, so the spoken lines appear as captions on the simulator panel instead. The brief planned captions as the fallback for exactly this case.
 - **Preview only.** Hand tracking, comfort over time and readability in daylight are untested on real Spectacles.
+- **The road view is a stand-in.** It is a model of a street in the Preview room. How accurately a route line would sit on a real road, and how it would look in daylight, is untested.
+- **The raincoat reminder covers part of the street.** The brief puts the reminder just above the map, and it also says the street and the map must not cover each other. In the raincoat step the reminder hides the upper part of the street (the stripes stay visible below it). This is a conflict inside the brief that needs a design decision, for example moving the reminder below the map.
+- **No glow on a reroute.** Choosing route B while stopped goes straight back to riding, so everything hides at once and the stripe's glow is never seen. The glow and the faded stripe show in the raincoat step, where the rider stays stopped after choosing.
 - **Tooling left in the scene.** The scene contains an `AiPreviewAgent Handler` object, added by the Lens Studio preview tools the agent used. It renders nothing and may be removed before submission.
 
 ## Repository layout
@@ -208,7 +230,7 @@ These changed a default number from the brief, or settled something the brief le
 |---|---|
 | `TrafficInsight.esproj` | The Lens Studio project file |
 | `Assets/Scripts/` | The Lens's TypeScript components (see [Inside the Lens](#inside-the-lens)) |
-| `Assets/Tests/` | LEAF scenarios C1 to C6 and their shared driver |
+| `Assets/Tests/` | LEAF scenarios C1 to C9 and their shared driver |
 | `Assets/GeneratedMeshes/`, `Assets/GeneratedSFX/` | The table and city map models and the four sound effects, all made in code (no third-party assets) |
 | `Assets/Icons/`, `Assets/Materials/` | Material icons and the route line material |
 | `Packages/` | Spectacles Interaction Kit (SIK), UI Kit, Motion and Icons from the Base Template; LEAF; and the Lens Studio preview-agent helpers. Stored with Git LFS |
@@ -285,11 +307,11 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Pin the `plan-lens` skill
 - [x] Brainstorm the idea
 - [x] Run `plan-lens` and approve `devpost/design-brief.md`
-- [x] Build with CLAD and test with LEAF (C1 to C5 pass in the Preview)
+- [x] Build with CLAD and test with LEAF (C1 to C5 passed at the first build)
 - [x] Screenshots in `docs/media/` and the feature walkthrough
-- [x] Revision 1, part 1: the table shows only while planning, and the map floats when stopped (C6 added; C1 to C6 pass)
-- [ ] Revision 1, part 2: progress along the path (the ridden part dim, a "you are here" marker, a progress card)
-- [ ] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines)
+- [x] Revision 1, part 1: the table shows only while planning, and the map floats when stopped (C6)
+- [x] Revision 1, part 2: progress along the path (the ridden part dim, a "you are here" marker, a progress card) (C8, with the map placement check C7)
+- [x] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines) (C9; C1 to C9 pass)
 - [ ] Judge in the Preview and iterate
 - [ ] Parked for later: a brief glance at the route while riding (see [docs/backlog.md](docs/backlog.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
