@@ -51,11 +51,11 @@ The demo tells this as one day, in two trips that reuse the same map, alert and 
 - **Ride simulator panel:** to the user's right, about 1 m away, angled toward them (default). It holds a route progress bar, the "Ride" button, the "I've stopped" button, the trip buttons, the voice-command buttons and the caption line.
 - **Floating map (stopped):** the same map, dots, labels and cards, with no table. About 1.1 m in front of the rider (default) and about 20 cm below eye level (default), facing the rider. It stays still once it appears.
 - **Progress marks (stopped):** the part of the route already ridden is drawn dim. A clear "you are here" marker, larger than the home and office markers and in a bright accent colour (default). A small progress card, for example "Ridden 12 of 34 min" (default wording, numbers from the sample data).
-- **Route on the road (stopped):** a mock street on the floor of the room a few metres ahead (default: straight, about 3 m wide, about 10 m long, one junction where route B turns off). Both route lines lie on it in vivid, saturated colours that stand out on the muted street (default). A pulsing ring marks where the routes split (default). The street, the lines and the floating map are all in view at the same time and must not cover each other; adjust their positions in the preview until they don't.
+- **Route on the road (stopped):** a mock street on the floor of the room a few metres ahead (default: straight, about 3 m wide, about 10 m long, one junction where route B turns off). Both route lines lie on it as wide stripes (default about 40 cm, so each is at least about 2 degrees wide from where I stand, which makes it easy to aim at) in vivid, saturated colours that stand out on the muted street (default). A pulsing ring marks where the routes split (default). The street, the lines and the floating map are all in view at the same time and must not cover each other; adjust their positions in the preview until they don't.
 
 ## Hands and input
 - Choose destination: pinch "Go to office" or "Go home" (stand-ins for voice or a saved shortcut). If the destination is unclear, pinch the answer to the clarifying question.
-- Choose a route: pinch the route's dot. Dragging isn't needed. The route lines on the road react to this: when I aim at a dot or a "Choose route" button, that route's line on the road brightens, and when I pick one, its line glows and the other fades.
+- Choose a route: pinch the route's dot, or, when I'm stopped, pinch the route's line on the road ahead. Dragging isn't needed. The route lines react: when I aim at a dot, a "Choose route" button or the line itself, that route's line brightens, and when I pick one, its line glows and the other fades.
 - Raincoat reminder: pinch "Proceed" or "Raincoat on".
 - Simulate the ride: pinch "Ride" on the Ride simulator to move along the route, and "I've stopped" to pull over.
 - Targets are big and highlight when aimed at.
@@ -77,7 +77,7 @@ stateDiagram-v2
     Arrived --> Planning: "Go home"
 ```
 
-- **Planning (at home or at the office):** the virtual table is visible for the whole planning state, and once the destination is clear the map shows the whole trip on it, with route dots and labels. The table and map hide once a route is picked.
+- **Planning (at home or at the office):** the virtual table appears together with the map, once the destination is clear, and the map lies on it with route dots and labels. Before that, at the start and while the clarifying question is shown, there is no table. The table and map hide once a route is picked.
 - **Riding:** nothing from the Lens on screen (no map, no table, no marks on the road), only short voice cues. Audio must not drown out traffic.
 - **Alerted:** a chime plus one short sentence, and the small icon low in the view, which disappears after about 2 seconds. Morning: "Crash ahead on your route, traffic is stalled. Pull over to see options." (default wording). Evening: "Rain on your route in 10 minutes. Pull over to see options." Keep the tone calm (default).
 - **Stopped:** the full picture. There is no table: the map floats in front of the rider, with the progress marks, the rest of the route with the problem stretch highlighted, the problem card, and a dot and label for each option. The routes are also laid on the mock street ahead, with a pulsing ring where they split. Morning: current route A and reroute B. Evening: the dry reroute (when available; in the sample data it is, at +12 min, a default number) and the rainy route.
@@ -93,10 +93,10 @@ Each one can be checked in Lens Studio's preview. Drafted from the learner's sto
 3. At the crash point a chime plays, the alert sentence plays (and shows as a caption), and a small icon appears low in the view, not in the center, then disappears after about 2 seconds.
 4. Pressing "I've stopped" after the crash alert shows the map floating in front of me (no table), with the rest of route A and the crash stretch highlighted, a delay card, plus route B. Pinching route B's dot plays "New route set" and hides the map, and riding on to the end plays the on-time arrival line.
 5. On the evening trip, after the rain alert, pressing "I've stopped" shows the rainy stretch highlighted with a card for temperature, rain intensity and type. Pinching the rainy route's dot shows the raincoat reminder, and pinching "Proceed" or "Raincoat on" hides it and returns to riding.
-6. The virtual table is visible while planning and hidden in every other state.
+6. The virtual table appears only together with the planning map, after the destination is clear. It is hidden at the start, while the clarifying question is shown, and in every other state.
 7. Pressing "I've stopped" puts the map about 1 m ahead and a little below eye level, in view.
 8. When stopped, the part of the route already ridden is shown dim, with a clear "you are here" marker and a progress card, for example "Ridden 12 of 34 min".
-9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot brightens its line. Choosing a route makes its line glow and fades the other. Riding hides all of it.
+9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot or at its line brightens that line. Pinching a route's line chooses that route, the same as pinching its dot. Choosing a route makes its line glow and fades the other. Riding hides all of it.
 
 ## Out of scope
 - Real GPS, real navigation, live traffic and live weather (all hard-coded sample data).
@@ -119,6 +119,7 @@ Each one can be checked in Lens Studio's preview. Drafted from the learner's sto
 - **A floating map at the roadside is unproven on a real bike.** The research found no study of AR glasses on two-wheelers. The map appears only after I've stopped and hides as soon as I ride on.
 - **The road view is a stand-in.** How accurately a route line would sit on the real road is untested. The README and the video must say so.
 - **The map and the road view could cover each other.** Both are shown when stopped, so check their positions in the preview.
+- **Pinching a line several metres away is untested.** Aiming at a long, thin target from a distance can be fiddly. If it proves unreliable in the preview, the dots and the "Choose route" buttons remain the dependable way to choose, and the line stays highlight-only.
 
 ## Build notes for CLAD
 - Build for SPECS so it runs and can be demonstrated in Lens Studio's preview. No SPECS device is available.
@@ -127,6 +128,7 @@ Each one can be checked in Lens Studio's preview. Drafted from the learner's sto
 - Use real-world scale in centimeters. Keep content inside the user's view during the main task.
 - Use vivid, saturated colours for the route lines and marks, because the display is additive and bright colours read best. Keep the mock street itself muted so the lines stand out.
 - Show or hide the table, the floating map, the progress marks and the road view from the state machine's snapshot, like everything else, so the tests can check them.
+- The route lines on the road are targetable (collider and Interactable) only while the Stopped state shows them, the same way the route dots are gated. Picking a line calls the same choose-route intent as the dots.
 - The display is additive: black renders as transparent. Don't rely on black or very dark content to be seen; keep text light and readable from where the user stands.
 - Get the basic flow working first, then add detail.
 - Write LEAF scenarios for each done criterion, run them in preview, and report which pass. Say which criteria have no test.
