@@ -47,7 +47,7 @@ stateDiagram-v2
     Riding --> Alerted: crash or rain ahead on the route
     Alerted --> Riding: icon fades after about 2 s
     Riding --> Stopped: "I've stopped"
-    Stopped --> Riding: pick a route (or Proceed / Raincoat on)
+    Stopped --> Riding: pick a route, after its line glows for about 1 s (or Proceed / Raincoat on)
     Riding --> Arrived: end of route
     Arrived --> Planning: "Go home"
 ```
@@ -84,7 +84,11 @@ Pressing **I've stopped** brings back the map, floating where it was with no tab
 - **What is ahead.** The rest of the route, the crash stretch highlighted in coral, a card above it (*"Crash, traffic stalled, +18 min"*), and both options with updated numbers. Route B is now recommended.
 - **The route on the road.** Both routes are also laid on a mock street on the floor ahead, as wide stripes in vivid blue (route A) and green (route B) on a muted grey street, with a pulsing yellow ring where they split. Route B turns off to the right at the junction. The street, the stripes and the map are all in view together and do not cover each other. This street is a stand-in: the real product would draw the route on the real road from the rider's location and heading, which the Preview cannot do.
 
-Aiming at a route's dot, its **Choose route** button or its stripe on the road brightens that stripe. Pinching a stripe chooses that route, exactly like pinching its dot: pinching route B says *"New route set"* and hides the map, the street and the cards. Riding on to the end ends with *"You've arrived, on time."*
+Aiming at a route's dot, its **Choose route** button or its stripe on the road brightens that stripe. Pinching a stripe chooses that route, exactly like pinching its dot.
+
+![Rerouting: the rider pinched route B, so its stripe on the road glows bright green and route A's blue stripe has faded into the street; the map and cards stay for a moment.](docs/media/reroute-glow.jpg)
+
+When a route is picked, the rider hears *"New route set"*, the chosen route's stripe glows and the other one fades for about a second (hand input is off during it), and then the map, the street and the cards hide and riding starts. Riding on to the end ends with *"You've arrived, on time."*
 
 ### Evening: rain ahead and the raincoat reminder
 
@@ -94,7 +98,7 @@ On the way home, the alert is *"Rain on your route in 10 minutes. Pull over to s
 
 ![Raincoat reminder above the map: "Rain ahead. Put on your raincoat?" with Proceed and Raincoat on buttons; only route A and its rain stretch remain on the map, and on the road route A's stripe is bright while route B's has faded.](docs/media/raincoat-reminder.jpg)
 
-Choosing to stay on the rainy route (by its dot or its stripe on the road) shows a small reminder just above the map with **Proceed** and **Raincoat on**. The chosen route's stripe on the road glows and the other one fades. Either button hides everything and returns to riding: the rider goes through the rain prepared, which is the point of being warned in time.
+Choosing to stay on the rainy route (by its dot or its stripe on the road) shows a small reminder just below the map, centred in front of the rider, with **Proceed** and **Raincoat on**. It sits below the map so it never covers the map or the street. The chosen route's stripe on the road glows and the other one fades for as long as the question is open. Either button hides everything and returns to riding: the rider goes through the rain prepared, which is the point of being warned in time.
 
 ### The Ride simulator (preview only)
 
@@ -129,13 +133,13 @@ Each done criterion in the design brief has one [LEAF](https://developers.snap.c
 | C1 | "Go to office" shows the map with two routes, each with a dot and a time/fuel/weather label, one marked Recommended; pinching a dot picks the route and hides the map | **Pass** |
 | C2 | "Ride" moves the progress bar, and nothing from the Lens is in view | **Pass** |
 | C3 | At the crash point: chime, alert sentence as a caption, a small icon low and off-centre, gone after about 2 s | **Pass** (icon measured 16 cm below and 10 cm right of the line of sight, 1 m ahead; gone after about 1.9 s) |
-| C4 | "I've stopped" shows the crash stretch highlighted, the delay card and route B; pinching B says "New route set" and riding on ends with the on-time arrival line | **Pass** |
+| C4 | "I've stopped" shows the crash stretch highlighted, the delay card and route B; pinching B says "New route set", route B's line glows for a moment, then the map hides, and riding on ends with the on-time arrival line | **Pass** (while the pick glows the rider is still stopped, route B's stripe is the chosen one and the street is still drawn; then everything hides) |
 | C5 | Evening: rain stretch and a card with temperature, intensity and type; picking the rainy route shows the raincoat reminder; Proceed or Raincoat on hides it | **Pass** (both buttons tested) |
 | C6 | The virtual table is visible during the whole Planning state and hidden in every other state | **Pass** (checked at the start, during the clarifying question, with the map, then Riding, Alerted, Stopped, Arrived, and Planning again after "Go home") |
 
 | C7 | When stopped, the map is about 1 m ahead and a little below eye level, in view | **Pass** (measured from the rider's eye looking straight ahead: 110 cm ahead, 22.6 cm below eye level, centred, which is 11.6° below the horizon) |
 | C8 | When stopped, the ridden part is dim, with a clear "you are here" marker and a progress card | **Pass** (card reads "Ridden 9 of 34 min"; the ridden stretch is dimmer than the route ahead, 0.57 against 0.74; the marker is more than twice the home marker's size and bright yellow; all of it is gone once riding) |
-| C9 | When stopped, both routes are laid on the mock street in vivid colours with a pulsing ring; street and map do not cover each other; aiming at a dot, a button or a line brightens the line; pinching a line chooses that route; the chosen line glows and the other fades; riding hides it all | **Pass** (seen from the start position the street spans 4.9° to 8.6° below the horizon and the map 9.9° to 14.1°, so they do not overlap; stripes are 2.7° wide at the near end; aiming at route B's line, route A's dot and the Choose route B button each brighten the right line; pinching route B's side-road stripe says "New route set"; in the evening pinching route A's stripe asks about the raincoat with A chosen and B faded) |
+| C9 | When stopped, both routes are laid on the mock street in vivid colours with a pulsing ring; street and map do not cover each other; aiming at a dot, a button or a line brightens the line; pinching a line chooses that route; the chosen line glows and the other fades; riding hides it all | **Pass** (seen from the start position the street spans 4.9° to 8.6° below the horizon and the map 9.9° to 14.1°, so they do not overlap; stripes are 2.7° wide at the near end; aiming at route B's line, route A's dot and the Choose route B button each brighten the right line; pinching route B's side-road stripe says "New route set", glows B and fades A with nothing left to pinch for a moment, then starts riding; in the evening pinching route A's stripe asks about the raincoat with A chosen and B faded) |
 
 C2 and C4 were extended for the table: C2 also checks that the table is off while riding, and C4 checks that the map floats with no table when stopped. Each check reads both the snapshot flag and the real `MapTable` object in the scene. C7 and C9 measure from the rider's eye position looking straight ahead, so they give the same answer even if the Preview's camera has been turned. C3 changed only because the alert now comes later in the trip (see the design decisions below).
 
@@ -210,6 +214,8 @@ These changed a default number from the brief, or settled something the brief le
 - **Captions carry every spoken line.** See [Known limitations](#known-limitations).
 - **The alert comes later in the trip.** It was at 10% of the route, so the "ridden" stretch was too short to see. It is now at 25% (about 9 of 34 minutes), which also puts the rider before the crash stretch and clear of route A's dot, so the marker never hides a dot.
 - **The street is far enough away to sit above the map.** Near the rider it ran behind and under the floating map, so the street starts about 10.5 m ahead, is 2.2 m wide and 8 m long, and its floor is 1.6 m below eye level. That puts the whole street above the map in the view, clear of the cards. The stripes are 50 cm wide, which is 2.7° across at the near end (the brief asked for at least about 2°), and about 1.5° at the far end.
+- **The glow on a reroute lasts about a second.** Choosing a route used to go straight back to riding, so the glow was never seen. Now the pick is confirmed first: the chosen stripe glows and the other fades for 1.2 seconds (a slider on `TrafficInsightMain`), hand input is off during it, and then riding starts. Picking a route while planning is unchanged: it hides the table and map at once.
+- **The raincoat reminder is below the map.** Just above the map it covered the upper part of the street, which the brief also forbids. Below the map, centred, tilted to face the rider, nothing overlaps it, and it is the closest spot to the hands. The brief was updated to match.
 - **The "you are here" marker is yellow.** No route or problem colour is yellow, so it cannot be mistaken for one. The progress card has the same yellow border.
 - **Stripes can be pinched, with one caveat.** Pinching a stripe works in the LEAF tests and picks the route like the dot. Whether a long thin target several metres away is easy to hit by hand is untested, so the dots and the Choose route buttons stay the dependable way to choose.
 - **Sample numbers.** The brief fixed the crash delay (+18 min), the rain details and the reroute cost (+12 min). The other route times and fuel values are defaults chosen during the build.
@@ -220,8 +226,6 @@ These changed a default number from the brief, or settled something the brief le
 - **No spoken voice.** The Lens plays its chime and tones, but the text-to-speech module is deprecated in this SDK, so the spoken lines appear as captions on the simulator panel instead. The brief planned captions as the fallback for exactly this case.
 - **Preview only.** Hand tracking, comfort over time and readability in daylight are untested on real Spectacles.
 - **The road view is a stand-in.** It is a model of a street in the Preview room. How accurately a route line would sit on a real road, and how it would look in daylight, is untested.
-- **The raincoat reminder covers part of the street.** The brief puts the reminder just above the map, and it also says the street and the map must not cover each other. In the raincoat step the reminder hides the upper part of the street (the stripes stay visible below it). This is a conflict inside the brief that needs a design decision, for example moving the reminder below the map.
-- **No glow on a reroute.** Choosing route B while stopped goes straight back to riding, so everything hides at once and the stripe's glow is never seen. The glow and the faded stripe show in the raincoat step, where the rider stays stopped after choosing.
 - **Tooling left in the scene.** The scene contains an `AiPreviewAgent Handler` object, added by the Lens Studio preview tools the agent used. It renders nothing and may be removed before submission.
 
 ## Repository layout

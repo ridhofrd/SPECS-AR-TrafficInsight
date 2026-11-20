@@ -40,13 +40,13 @@ The demo tells this as one day, in two trips that reuse the same map, alert and 
 **Two layers in the scene.** The *Lens* is what the rider would see on real glasses. The *Ride simulator* is demo scaffolding that only exists because the preview has no road. Keep them clearly separate: the simulator panel sits off to one side, labeled "Ride simulator (preview only)" (default). The "nothing on screen while riding" rule applies to the Lens layer only. The mock street stands in for the real road and exists only in the preview; the Lens's route lines and marks are drawn on it, and only while I'm stopped.
 
 ## Where things live
-- Where the user is looking during the main task: in the stopped state, down at the map on the table in front of them. While riding, straight ahead at the road.
+- Where the user is looking during the main task: in the stopped state, at the floating map in front of them, a little below eye level. While riding, straight ahead at the road.
 - **Route map (planning):** flat on a virtual table, about 60 × 40 cm (default), table top about 75 cm high (default), about 1 m in front of the user's start position (default) and a little below eye level. A simple, light-colored city map: roads as thin light lines, routes as thicker colored lines raised slightly off the map. No dark backgrounds, because black renders as transparent.
 - **Route dots:** one big dot per route, about 4 cm across (default). Each sits on its own route line where the routes are furthest apart (default).
 - **Route labels:** a small card next to each dot showing that route's time, fuel and weather. The recommended route (best time first, then fuel) is marked "Recommended".
 - **Problem stretch highlight:** the crashed or rainy part of the remaining route gets a border or glow along the line.
 - **Problem card:** sits on the highlighted stretch. Crash: "Crash, traffic stalled, +18 min" (default wording). Rain: temperature, rain intensity, and type (storm, windy rain, light rain).
-- **Raincoat reminder:** a small panel just above the map, near the chosen route, with "Proceed" and "Raincoat on" buttons.
+- **Raincoat reminder:** a small panel just below the map, centred in front of the rider (default), with "Proceed" and "Raincoat on" buttons. It sits below the map so it never covers the street ahead or the map.
 - **Alert icon:** small, about 4 cm (default), low in the view and never in the center, about 1 m away (default). It gently follows where the user looks so it stays in view (default).
 - **Ride simulator panel:** to the user's right, about 1 m away, angled toward them (default). It holds a route progress bar, the "Ride" button, the "I've stopped" button, the trip buttons, the voice-command buttons and the caption line.
 - **Floating map (stopped):** the same map, dots, labels and cards, with no table. About 1.1 m in front of the rider (default) and about 20 cm below eye level (default), facing the rider. It stays still once it appears.
@@ -81,7 +81,7 @@ stateDiagram-v2
 - **Riding:** nothing from the Lens on screen (no map, no table, no marks on the road), only short voice cues. Audio must not drown out traffic.
 - **Alerted:** a chime plus one short sentence, and the small icon low in the view, which disappears after about 2 seconds. Morning: "Crash ahead on your route, traffic is stalled. Pull over to see options." (default wording). Evening: "Rain on your route in 10 minutes. Pull over to see options." Keep the tone calm (default).
 - **Stopped:** the full picture. There is no table: the map floats in front of the rider, with the progress marks, the rest of the route with the problem stretch highlighted, the problem card, and a dot and label for each option. The routes are also laid on the mock street ahead, with a pulsing ring where they split. Morning: current route A and reroute B. Evening: the dry reroute (when available; in the sample data it is, at +12 min, a default number) and the rainy route.
-- **After choosing:** a voice says "New route set" (default wording) and the map and the road marks hide, so you're back to riding.
+- **After choosing:** a voice says "New route set" (default wording). The chosen route's line on the road glows and the other one fades for about a second (default, hand input is off during it), then the map and the road marks hide, so you're back to riding.
 - **Raincoat reminder:** shows only if the rainy route is chosen. Hides when "Proceed" or "Raincoat on" is pinched, and everything goes back to normal riding.
 - **Arrived:** a short voice line, "You've arrived, on time." (default wording). Nothing stays on screen.
 - If something needs attention out of view: the chime and voice do that job; the map only appears when the rider has stopped.
@@ -91,12 +91,12 @@ Each one can be checked in Lens Studio's preview. Drafted from the learner's sto
 1. Pressing "Go to office" shows the map on the virtual table with two routes. Each has a big dot and a label with time, fuel and weather, and one is marked "Recommended". Pinching a dot picks that route and the map hides.
 2. While riding, pressing "Ride" moves the progress bar on the Ride simulator, and nothing from the Lens is in view, including the table, until an alert.
 3. At the crash point a chime plays, the alert sentence plays (and shows as a caption), and a small icon appears low in the view, not in the center, then disappears after about 2 seconds.
-4. Pressing "I've stopped" after the crash alert shows the map floating in front of me (no table), with the rest of route A and the crash stretch highlighted, a delay card, plus route B. Pinching route B's dot plays "New route set" and hides the map, and riding on to the end plays the on-time arrival line.
+4. Pressing "I've stopped" after the crash alert shows the map floating in front of me (no table), with the rest of route A and the crash stretch highlighted, a delay card, plus route B. Pinching route B's dot plays "New route set", its line glows for about a second, and then the map hides, and riding on to the end plays the on-time arrival line.
 5. On the evening trip, after the rain alert, pressing "I've stopped" shows the rainy stretch highlighted with a card for temperature, rain intensity and type. Pinching the rainy route's dot shows the raincoat reminder, and pinching "Proceed" or "Raincoat on" hides it and returns to riding.
 6. The virtual table is visible during the whole planning state, including at the start and while the clarifying question is shown, and is hidden in every other state.
 7. Pressing "I've stopped" puts the map about 1 m ahead and a little below eye level, in view.
 8. When stopped, the part of the route already ridden is shown dim, with a clear "you are here" marker and a progress card, for example "Ridden 12 of 34 min".
-9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot or at its line brightens that line. Pinching a route's line chooses that route, the same as pinching its dot. Choosing a route makes its line glow and fades the other. Riding hides all of it.
+9. When stopped, both routes are also shown laid on the mock street ahead, in vivid colours, with a pulsing ring where they split, and the street and the map do not cover each other. Aiming at a route's dot or at its line brightens that line. Pinching a route's line chooses that route, the same as pinching its dot. Choosing a route makes its line glow and fades the other: for about a second before riding starts, or for as long as the raincoat question is open. Riding hides all of it.
 
 ## Out of scope
 - Real GPS, real navigation, live traffic and live weather (all hard-coded sample data).
