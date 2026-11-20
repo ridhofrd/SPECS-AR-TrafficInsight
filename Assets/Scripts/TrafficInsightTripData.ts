@@ -14,6 +14,7 @@
  */
 
 import {
+    GlanceFacts,
     MapPoint,
     OfficeOrNone,
     ProblemKind,
@@ -276,6 +277,31 @@ export function remainingStats(trip: TripId, phase: TripPhase, route: RouteId, p
         deltaMin: delay,
         fuelL: Math.max(0, planned.fuelL - sharedLegValueAt(trip, progress, planned.fuelL, 0.05)),
         weather: updated.weather,
+    };
+}
+
+/** One account of the remaining trip, shared by the glance and voice/caption. */
+export function glanceFacts(trip: TripId, route: RouteId, progress: number, hazardKnown: boolean): GlanceFacts {
+    const def = getTrip(trip);
+    const p = clamp01(progress);
+    const phase = hazardKnown ? "stopped" : "planning";
+    const remaining = remainingStats(trip, phase, route, p).timeMin;
+    const minutesLeft = Math.round(remaining);
+    const span = problemSpan(trip);
+    const affected = hazardKnown && route === span.route && p < span.toFraction;
+    let next = hazardKnown ? "Route clear" : "No reported problems";
+    if (affected) {
+        const before = p < span.fromFraction;
+        const target = before ? span.fromFraction : span.toFraction;
+        const minutes = Math.max(1, Math.round(remaining - remainingStats(trip, phase, route, target).timeMin));
+        const name = span.kind === "rain" ? "Rain" : "Crash";
+        next = name + (before ? " in " : span.kind === "rain" ? " ends in " : " clears in ") + minutes + " min";
+    }
+    return {
+        from: def.from, to: def.to, route, progress: p, minutesLeft, next,
+        text: minutesLeft + " min left · " + next,
+        sentence: minutesLeft + " minutes to " + (trip === "morning" ? "the office" : "home") + ". " + next.replace(/ min$/, " minutes") + ".",
+        problem: affected ? span : null,
     };
 }
 

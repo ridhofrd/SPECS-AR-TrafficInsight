@@ -78,6 +78,19 @@ export interface ProblemSpan {
     kind: ProblemKind;
 }
 
+/** Shared facts for a requested glance and the eyes-free answer. */
+export interface GlanceFacts {
+    from: string;
+    to: string;
+    route: RouteId;
+    progress: number;
+    minutesLeft: number;
+    next: string;
+    text: string;
+    sentence: string;
+    problem: ProblemSpan | null;
+}
+
 /** A point in map-local cm on MapRoot (x right, z toward the user). */
 export interface MapPoint {
     x: number;
