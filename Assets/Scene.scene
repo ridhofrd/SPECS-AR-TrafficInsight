@@ -21,6 +21,7 @@
     - !<own> df5b9bee-1e25-4538-9944-cbc7a0ec72bc
     - !<own> 9dafd6a8-9536-481e-82c9-ec48cab742d8
     - !<own> 280e1cd8-3a33-4079-9862-830b1ac24fbe
+    - !<own> 6465f6e2-281b-412c-87aa-5c23e1fc7e17
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -208,6 +209,27 @@
     - !<own> 276368e3-f687-4cc6-947d-24de3a78c9af
   Components:
     []
+- !<ScriptComponent/044ec3d7-e531-4b0a-983c-600c624f3b94>
+  PrefabRemaps:
+    []
+  Name: TrafficInsightHeadingFollow
+  Enabled: true
+  ScriptAsset: !<reference> 7bc4bfcd-686a-4f09-84a0-c9e69f681a3e
+  ScriptInputsDefault:
+    distanceCm: true
+    belowHorizonDeg: true
+    smoothing: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
+      distanceCm: !<float> 100.000000
+      belowHorizonDeg: !<float> 25.000000
+      smoothing: !<float> 5.000000
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/0451d993-a1f7-464e-9b69-32c0d9af8ed7>
   PrefabRemaps:
     []
@@ -1473,6 +1495,22 @@
     - !<own> 3fa03eb4-fb05-4591-9ec2-6eb1c49b2a5c
   Components:
     []
+- !<SceneObject/6465f6e2-281b-412c-87aa-5c23e1fc7e17>
+  PrefabRemaps:
+    []
+  Name: GlanceStripRoot
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: -42.261799, z: -90.630798}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 044ec3d7-e531-4b0a-983c-600c624f3b94
+    - !<own> ed47c280-4063-4735-aeb0-0597efaf2ba8
 - !<ScriptComponent/64f27597-c99d-4c59-8a08-05459cc2258d>
   PrefabRemaps:
     []
@@ -2790,6 +2828,15 @@
   ScriptAsset: !<reference> d8a79b04-871f-404b-9238-92e4e7189280
   ScriptInputsDefault:
     debugColliders: true
+    glanceBaselineDeg: true
+    glanceShowDeg: true
+    glanceHideDeg: true
+    glanceDwellSec: true
+    glanceCapSec: true
+    glanceRearmDeg: true
+    glanceRearmSec: true
+    glanceFadeInSec: true
+    glanceFadeOutSec: true
     rideStep: true
     alertDurationSec: true
     alertFadeSec: true
@@ -2807,6 +2854,16 @@
       alertFollow: !<MappingBased.AssignableType_5> 1a1b0750-69a3-4235-9649-9429219e1276
       roadView: !<MappingBased.AssignableType_6> d4e0d609-5549-498e-bb19-5970030d6405
       previewContext: !<MappingBased.AssignableType_7> 9f4ff1ce-0a82-4e0d-b0a8-77008ea62508
+      glanceStrip: !<MappingBased.AssignableType_8> ed47c280-4063-4735-aeb0-0597efaf2ba8
+      glanceBaselineDeg: !<float> 0.000000
+      glanceShowDeg: !<float> 20.000000
+      glanceHideDeg: !<float> 12.000000
+      glanceDwellSec: 0.300000
+      glanceCapSec: !<float> 2.000000
+      glanceRearmDeg: !<float> 8.000000
+      glanceRearmSec: 0.500000
+      glanceFadeInSec: 0.150000
+      glanceFadeOutSec: 0.300000
       cameraObject: !<reference.SceneObject> 00000000-0000-0065-0000-000000000064
       table: !<reference.SceneObject> b3d40916-edb6-4237-981c-af9eb9a1fbf2
       rideStep: 0.050000
@@ -3498,6 +3555,22 @@
     []
   Components:
     - !<own> 59c480ac-29e7-4b74-a6fa-4219a98a1e9a
+- !<ScriptComponent/ed47c280-4063-4735-aeb0-0597efaf2ba8>
+  PrefabRemaps:
+    []
+  Name: TrafficInsightGlanceStripUI
+  Enabled: true
+  ScriptAsset: !<reference> bc9ea152-0085-4765-80b2-8e3f75078e4e
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/f0394c5d-4c44-4c65-a77c-e1c7e05ca905>
   PrefabRemaps:
     []

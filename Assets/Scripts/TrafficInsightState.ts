@@ -34,6 +34,7 @@ import {
     alertLine,
     arrivedLine,
     getTrip,
+    glanceFacts,
     planningMapCaption,
     problemSpan,
     recommend,
@@ -47,6 +48,7 @@ function round4(v: number): number {
 }
 
 export class TrafficInsightStateMachine {
+    private glance = false;
     private state: StateName = "Planning";
     private planningStep: PlanningStep = "idle";
     private trip: TripOrNone = "none";
@@ -71,6 +73,10 @@ export class TrafficInsightStateMachine {
         const recommendedRoute: RouteOrNone =
             this.trip === "none" ? "none" : recommend(this.trip, this.alertFired ? "stopped" : "planning");
         return {
+            glance: this.glance,
+            glanceText: this.glance && this.trip !== "none" && this.activeRoute !== "none"
+                ? glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired).text : "",
+            glanceSource: this.glance ? "lookDown" : "none",
             state: this.state,
             planningStep: this.planningStep,
             trip: this.trip,
@@ -257,6 +263,29 @@ export class TrafficInsightStateMachine {
         return this.resolveRaincoat(CAPTIONS.raincoatOn);
     }
 
+    glanceStart(): IntentResult {
+        if (this.state !== "Riding" || this.trip === "none" || this.activeRoute === "none") return this.idleResult();
+        const changed = !this.glance;
+        this.glance = true;
+        return this.apply({ changed });
+    }
+
+    glanceEnd(): IntentResult {
+        const changed = this.glance;
+        this.glance = false;
+        return this.apply({ changed });
+    }
+
+    whereAmI(): IntentResult {
+        if (this.state === "Alerted") return this.idleResult();
+        this.glance = false;
+        if (this.state !== "Riding" || this.trip === "none" || this.activeRoute === "none") {
+            return this.apply({ changed: false, caption: "Ask while riding." });
+        }
+        return this.apply({ changed: true,
+            caption: glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired).sentence, speak: true });
+    }
+
     /** Records a cue played outside an intent (Main records ButtonClick before an intent). */
     noteAudioCue(cue: AudioCue): void {
         this.lastAudioCue = cue;
@@ -290,6 +319,7 @@ export class TrafficInsightStateMachine {
     }
 
     private apply(result: IntentResult): IntentResult {
+        if (this.state !== "Riding") this.glance = false;
         if (result.caption !== undefined) this.lastCaption = result.caption;
         if (result.cue !== undefined) this.lastAudioCue = result.cue;
         return result;
@@ -298,6 +328,7 @@ export class TrafficInsightStateMachine {
 
 function hiddenVisibility(): LensVisibility {
     return {
+        glanceStrip: false,
         table: false,
         progressMarks: false,
         progressCard: false,
@@ -343,6 +374,8 @@ export function visibilityFor(core: StateCore): LensVisibility {
         }
     } else if (core.state === "Alerted") {
         v.alertIcon = true;
+    } else if (core.state === "Riding") {
+        v.glanceStrip = core.glance;
     }
     return v;
 }

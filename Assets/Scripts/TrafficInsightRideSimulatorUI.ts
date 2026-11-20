@@ -52,9 +52,9 @@ const INACTIVE_LABEL_OPACITY = 1.8
 
 // ─── Plan sizes (cm, full extent) ───────────────────────────────────────────
 const SIM_W = 34
-const SIM_H = 40
+const SIM_H = 45
 const SIM_INNER_W = 31
-const SIM_INNER_H = 37
+const SIM_INNER_H = 42
 const SIM_GAP = 0.8
 const BTN_W = 14.5
 const BTN_H = 4
@@ -128,6 +128,11 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     return this.stoppedEvent.publicApi()
   }
 
+  private readonly whereAmIEvent = new Event<void>()
+  public get onWhereAmI(): PublicApi<void> {
+    return this.whereAmIEvent.publicApi()
+  }
+
   private readonly chooseRouteEvent = new Event<{route: RouteId}>()
   public get onChooseRoute(): PublicApi<{route: RouteId}> {
     return this.chooseRouteEvent.publicApi()
@@ -163,6 +168,7 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     {name: BUTTON_NAMES.goHome, group: "trip", button: null, content: null},
     {name: BUTTON_NAMES.ride, group: "ride", button: null, content: null},
     {name: BUTTON_NAMES.stopped, group: "ride", button: null, content: null},
+    {name: BUTTON_NAMES.whereAmI, group: "ride", button: null, content: null},
     {name: BUTTON_NAMES.chooseRouteA, group: "route", button: null, content: null},
     {name: BUTTON_NAMES.chooseRouteB, group: "route", button: null, content: null},
     {name: BUTTON_NAMES.mainOffice, group: "dialog", button: null, content: null},
@@ -385,6 +391,10 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
       () => this.chooseRouteEvent.invoke({route: "B"}),
       (on) => this.routeHoverEvent.invoke({route: "B", on: on})
     )
+
+    // Requested voice answer: simulator stand-in only, never a rider hand gesture.
+    const askRow = flexRow(column, ROW_W, BTN_H, {justify: FlexJustify.Center, align: FlexAlign.Center})
+    this.makeButton(askRow, BUTTON_NAMES.whereAmI, "Where am I?", ROW_W, BTN_H, undefined, () => this.whereAmIEvent.invoke())
 
     // 8. Caption (wrapped) beside the closed-caption icon
     const captionRow = flexRow(column, ROW_W, CAPTION_H, {

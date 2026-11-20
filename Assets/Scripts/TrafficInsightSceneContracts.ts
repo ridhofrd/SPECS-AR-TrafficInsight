@@ -32,6 +32,7 @@ export const ROOT_NAMES = {
     problemCardRoot: "ProblemCardRoot",
     raincoatReminderRoot: "RaincoatReminderRoot",
     alertIconRoot: "AlertIconRoot",
+    glanceStripRoot: "GlanceStripRoot",
     rideSimulatorRoot: "RideSimulatorRoot",
     clarifyDialogRoot: "ClarifyDialogRoot",
 } as const;
@@ -44,6 +45,7 @@ export const BUTTON_NAMES = {
     branchOffice: "BranchOfficeButton",
     ride: "RideButton",
     stopped: "StoppedButton",
+    whereAmI: "WhereAmIButton",
     chooseRouteA: "ChooseRouteAButton",
     chooseRouteB: "ChooseRouteBButton",
     proceed: "ProceedButton",

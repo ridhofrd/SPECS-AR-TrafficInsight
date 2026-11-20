@@ -134,6 +134,7 @@ export interface RoadViewState {
 
 /** Visibility flags of everything the LEAF tests assert on. */
 export interface LensVisibility {
+    glanceStrip: boolean;
     /** The virtual table under the map: shown for the whole Planning state only. */
     table: boolean;
     /** Progress marks on the map: the ridden part drawn dim and the "you are here" marker (Stopped). */
@@ -163,6 +164,9 @@ export interface LensVisibility {
 
 /** Domain state owned by TrafficInsightStateMachine. */
 export interface StateCore {
+    glance: boolean;
+    glanceText: string;
+    glanceSource: "lookDown" | "none";
     state: StateName;
     planningStep: PlanningStep;
     trip: TripOrNone;
@@ -203,6 +207,9 @@ export interface IntentResult {
 
 /** Full LEAF snapshot returned by TrafficInsightMain.getState(). */
 export interface TrafficInsightSnapshot extends StateCore {
+    glanceOpacity: number;
+    glancePhase: "Ready" | "Showing" | "Spent";
+    headPitchDeg: number;
     previewContext: PreviewContextSnapshot | null;
     labelTextA: string;
     labelTextB: string;

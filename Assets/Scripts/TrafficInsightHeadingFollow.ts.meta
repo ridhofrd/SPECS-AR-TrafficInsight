@@ -25,11 +25,14 @@
   VersionPrerelease: ""
   UpdateOrder: 0
   RunInEditor: false
-  ComponentUid: 00000000-0000-0000-0000-000000000000
+  ComponentUid: da2f1e18-90ba-433f-b7e3-8eaad2580693
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    {}
+    belowHorizonDeg: false
+    cameraObject: false
+    distanceCm: false
+    smoothing: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -39,10 +42,15 @@
   Attachments:
     []
   DefaultScriptInputs:
-    -
-      {}
+    - cameraObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      distanceCm: !<float> 100.000000
+      belowHorizonDeg: !<float> 25.000000
+      smoothing: !<float> 5.000000
   ScriptTypes:
     -
       {}
   InputLines:
-    []
+    - // @input SceneObject cameraObject
+    - // @input float distanceCm = 100
+    - // @input float belowHorizonDeg = 25
+    - // @input float smoothing = 5

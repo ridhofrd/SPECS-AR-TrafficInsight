@@ -29,8 +29,10 @@ import { TrafficInsightRoadView } from "./TrafficInsightRoadView";
 import { TrafficInsightAudioController } from "./TrafficInsightAudioController";
 import { TrafficInsightLazyFollow } from "./TrafficInsightLazyFollow";
 import { TrafficInsightPreviewContext } from "./TrafficInsightPreviewContext";
+import { TrafficInsightGlanceStripUI } from "./TrafficInsightGlanceStripUI";
+import { GlanceConfig, GlanceTriggerState, spentGlance, stepGlance } from "./TrafficInsightGlanceTrigger";
 import { TrafficInsightStateMachine, mapViewFor, previewContextFor, roadViewFor, visibilityFor } from "./TrafficInsightState";
-import { labelToText, problemCardText, progressCardText, progressLabel, routeLabel } from "./TrafficInsightTripData";
+import { glanceFacts, labelToText, problemCardText, progressCardText, progressLabel, routeLabel } from "./TrafficInsightTripData";
 import { BUTTON_NAMES, tiError, tiLog, tiWarn } from "./TrafficInsightSceneContracts";
 import {
     IntentResult,
@@ -81,6 +83,17 @@ export class TrafficInsightMain extends BaseScriptComponent {
     @input @allowUndefined
     previewContext: TrafficInsightPreviewContext;
 
+    @input @allowUndefined glanceStrip: TrafficInsightGlanceStripUI;
+    @input glanceBaselineDeg: number = 0;
+    @input glanceShowDeg: number = 20;
+    @input glanceHideDeg: number = 12;
+    @input glanceDwellSec: number = 0.3;
+    @input glanceCapSec: number = 2;
+    @input glanceRearmDeg: number = 8;
+    @input glanceRearmSec: number = 0.5;
+    @input glanceFadeInSec: number = 0.15;
+    @input glanceFadeOutSec: number = 0.3;
+
     @input
     cameraObject: SceneObject;
 
@@ -128,6 +141,26 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
     private lastStateKey = "";
     private lastVisibleKey = "";
+    private glanceTrigger: GlanceTriggerState = spentGlance();
+    private glanceOpacity = 0;
+    private pitchOverride: number | null = null;
+
+    /** Editor-only head-pose injection for LEAF; null restores the actual camera. */
+    setHeadPitchOverrideForTests(degrees: number | null): void {
+        if (global.deviceInfoSystem.isEditor()) this.pitchOverride = degrees !== null && isFinite(degrees) ? degrees : null;
+    }
+
+    private headPitch(): number {
+        if (this.pitchOverride !== null) return this.pitchOverride;
+        const f = this.cameraObject.getTransform().getWorldRotation().multiplyVec3(new vec3(0, 0, -1));
+        return Math.atan2(-f.y, Math.sqrt(f.x * f.x + f.z * f.z)) * 180 / Math.PI;
+    }
+
+    private glanceConfig(): GlanceConfig {
+        return { baselineDeg: this.glanceBaselineDeg, showDeg: this.glanceShowDeg, hideDeg: this.glanceHideDeg,
+            dwellSec: this.glanceDwellSec, capSec: this.glanceCapSec, rearmDeg: this.glanceRearmDeg,
+            rearmSec: this.glanceRearmSec, fadeInSec: this.glanceFadeInSec, fadeOutSec: this.glanceFadeOutSec };
+    }
 
     onAwake(): void {
         TrafficInsightMain.instance = this;
@@ -148,6 +181,12 @@ export class TrafficInsightMain extends BaseScriptComponent {
             return null;
         }
         return {
+            glance: core.glance,
+            glanceText: this.started && this.glanceStrip ? this.glanceStrip.getText() : core.glanceText,
+            glanceSource: core.glanceSource,
+            glanceOpacity: this.glanceStrip ? this.glanceStrip.getOpacity() : 0,
+            glancePhase: this.glanceTrigger.phase,
+            headPitchDeg: this.started ? this.headPitch() : 0,
             state: core.state,
             planningStep: core.planningStep,
             trip: core.trip,
@@ -189,6 +228,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         );
         ui.onRide.add(() => this.handle(BUTTON_NAMES.ride, () => this.sm.ride(this.rideStep)));
         ui.onStopped.add(() => this.handle(BUTTON_NAMES.stopped, () => this.sm.stopped()));
+        ui.onWhereAmI.add(() => this.handle(BUTTON_NAMES.whereAmI, () => this.sm.whereAmI()));
         ui.onChooseRoute.add((e) =>
             this.handle(e.route === "B" ? BUTTON_NAMES.chooseRouteB : BUTTON_NAMES.chooseRouteA, () =>
                 this.sm.chooseRoute(e.route)
@@ -244,6 +284,11 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.audio.play("ButtonClick");
         this.sm.noteAudioCue("ButtonClick");
 
+        if (source === BUTTON_NAMES.whereAmI) {
+            this.glanceTrigger = spentGlance();
+            this.glanceOpacity = 0;
+        }
+
         const res = intent();
         this.applyResult(before, res);
     }
@@ -261,6 +306,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
 
         const after = this.sm.getCore();
+        if (after.state !== before.state) {
+            this.glanceTrigger = spentGlance();
+            this.glanceOpacity = 0;
+        }
         this.render();
         if (after.state === "Alerted" && before.state !== "Alerted") {
             this.beginAlert(after);
@@ -304,6 +353,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             const before = this.sm.getCore();
             this.applyResult(before, this.sm.finishConfirm());
         }
+        this.updateGlance();
         if (!this.alertActive) {
             return;
         }
@@ -326,6 +376,23 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
     }
 
+    private updateGlance(): void {
+        const core = this.sm.getCore();
+        const tick = stepGlance(this.glanceTrigger, this.headPitch(), getTime(), core.state === "Riding", this.glanceConfig());
+        this.glanceTrigger = tick.state;
+        this.glanceOpacity = tick.opacity;
+        if (tick.visible !== core.glance) {
+            this.applyResult(core, tick.visible ? this.sm.glanceStart() : this.sm.glanceEnd());
+        } else this.renderGlance(core);
+    }
+
+    private renderGlance(core: StateCore): void {
+        if (!this.glanceStrip) return;
+        const facts = core.trip !== "none" && core.activeRoute !== "none"
+            ? glanceFacts(core.trip, core.activeRoute, core.progress, core.alertFired) : null;
+        this.glanceStrip.applyView(facts, visibilityFor(core).glanceStrip, this.glanceOpacity);
+    }
+
     // --------------------------------------------------------------- render
 
     /** Paint every view from the snapshot. Lens-layer visibility = visibilityFor(core). */
@@ -335,6 +402,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
         const core = this.sm.getCore();
         const vis = visibilityFor(core);
+        this.renderGlance(core);
         if (this.previewContext) this.previewContext.applyView(previewContextFor(core));
         // No hand input while an alert shows or while a just-picked route is being confirmed.
         const inputOk = core.state !== "Alerted" && core.confirmRoute === "none";
@@ -420,6 +488,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         const lens = this.lensUI.getVisibility();
         const road = this.roadView.getVisibility();
         return {
+            glanceStrip: !!this.glanceStrip && this.glanceStrip.isVisible(),
             table: this.table.isEnabledInHierarchy,
             progressMarks: map.progressMarks,
             progressCard: lens.progressCard,
@@ -495,7 +564,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             " raincoat=" +
             v.raincoatReminder +
             " alertIcon=" +
-            v.alertIcon;
+            v.alertIcon + " glance=" + v.glanceStrip;
         if (key !== this.lastVisibleKey) {
             this.lastVisibleKey = key;
             tiLog(key);
@@ -512,6 +581,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         if (!this.audio) missing.push("audio");
         if (!this.alertFollow) missing.push("alertFollow");
         if (!this.roadView) missing.push("roadView");
+        if (!this.glanceStrip) missing.push("glanceStrip");
         if (isNull(this.cameraObject)) missing.push("cameraObject");
         if (isNull(this.table)) missing.push("table");
         if (missing.length > 0) {
