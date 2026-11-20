@@ -121,3 +121,4 @@ the block above. Never edit it.
 - Screenshots and GIFs go in docs/media/ and are linked from README.md.
 - Commit messages follow Conventional Commits (feat:, fix:, docs:, test:,
   chore:) with a short imperative subject. No co-author or "generated with" lines.
+- Keep commits small and focused on one purpose so changes are easy to trace and review.

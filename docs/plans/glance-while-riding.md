@@ -79,26 +79,17 @@ The 20° threshold also keeps a slightly tilted Preview camera from triggering a
 - **Nothing is shown in the Lens layer.**
 - **Availability:** in Riding only (not Alerted). Elsewhere the button gives a short caption such as "Ask while riding.".
 
-### 3.5 The facts, computed (one shared helper so the strip and the voice can never disagree)
+### 3.5 The facts, computed (one shared helper)
 
-Proposed pure helper in `TrafficInsightTripData.ts`: `glanceFacts(core) -> { minutesLeft, next, nextKind }`.
+The current consistency pass already provides `remainingStats`, `plannedMinutesAt`, `sharedApproachFraction`, `problemSpan` and dynamic alert/card timing in `TrafficInsightTripData.ts`.
 
-- **`T`, the active route's time:**
-  - If the alert has fired, the **stopped**-phase time of `activeRoute`. That includes the +18 min delay when the rider kept the crash route.
-  - Otherwise the **planning**-phase time.
-- **`minutesLeft`** = `round((1 - progress) × T)`.
-- **The next problem is known** only if `alertFired` and `activeRoute === problem.route`. The Lens knows nothing before the alert.
-  - If `progress < problem.fromFraction`: "Rain in N min" or "Slow traffic in N min", with `N = max(1, round((fromFraction - progress) × T))`.
-  - If inside the stretch: "In the rain, N min to go" or "In slow traffic, N min to go", with `N = max(1, round((toFraction - progress) × T))`.
-  - Otherwise: "Route clear".
+Build the future `glanceFacts` helper on those functions. Do not reintroduce `round((1 - progress) * wholeTripTime)`: the shared approach has the same elapsed cost on A and B, and a crash delay belongs to the affected stretch still ahead.
 
-Worked examples with today's sample data:
-
-| Situation | Text line |
-|---|---|
-| Morning, route A, 10% ridden, no alert yet (T = 34) | `31 min left · Route clear` |
-| Morning, rerouted to B at 25% (T = 40) | `30 min left · Route clear` |
-| Evening, kept rainy route A, 35% ridden (T = 36) | `23 min left · In the rain, 8 min to go` |
+- Minutes left: round `remainingStats(...).timeMin`, choosing the incident-aware phase after the warning.
+- Next problem: only known after the warning and only on the active route; compare progress with `problemSpan` and reuse the route timing for the start/end countdown.
+- Before a known problem, report its countdown. Inside it, report time to leave the stretch. After it, or on B, report Route clear.
+- Both the strip and the voice answer use the same result. The current rain warning starts at 8 minutes, and later cards decrease consistently.
+- At the 10% morning stop, the current sample reroute to B has about 38 minutes left, with no change to the roughly 2 minutes already ridden.
 
 ## 4. How it fits the Lens
 
@@ -146,11 +137,10 @@ Each step ends with a compile and a read of the Lens Studio Logger. Each step th
    - Add two stand-in rows: "Looking down at the dashboard spot" = right-drag to look down in Interactive Preview, and "Saying 'where am I?'" = a button.
    - Add done criteria 10 to 13 (section 6).
    - Confirm D8 (speed rule).
-   - **Fix the data inconsistency first** (see 0b).
+   - Preserve the current consistency rules in the brief.
 
-   **0b. The evening alert's "10 minutes".** The alert sentence says "Rain on your route in 10 minutes". Since revision 1 the evening alert fires at 25% of the route and the rain starts at 32.8%, which is about 3 minutes later (T = 36). The glance would say "Rain in 3 min" and contradict the alert. **Recommended:** build the minutes in the alert sentence from the same `glanceFacts` helper, so they can never disagree. Then the author picks one:
-   - (a) keep the data, so the alert says "in 3 minutes";
-   - (b) move the evening rain stretch later so it says about 10 again. That also changes `fromFraction`/`toFraction`, the "km 4–7" text and the problem card anchor for the evening trip in `TrafficInsightTripData.ts`.
+   **0b. Resolved by the consistency pass (2026-11-20).** The old fixed ten-minute rain line was removed. The active-route warning now fires before the fork, and warning/card countdowns come from shared route timing. Reuse the existing helpers; do not restore the old 25% trigger or a fixed ten-minute sentence.
+
 1. **Pure logic.**
    - `glanceFacts` in `TrafficInsightTripData.ts`.
    - `TrafficInsightGlanceTrigger.ts`: given pitch, baseline, time and its previous state, return Ready/Showing/Spent plus show/hide events.
