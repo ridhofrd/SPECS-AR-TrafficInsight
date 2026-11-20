@@ -50,7 +50,7 @@ export class ProgressMarksScenario extends Scenario {
         expect(s.state, "state after I've stopped").toBe("Stopped");
         expect(s.visible.progressMarks, "dim ridden stretch and you-are-here marker visible").toBe(true);
         expect(s.visible.progressCard, "progress card visible").toBe(true);
-        expect(s.progressCardText, "progress card text").toBe("Ridden 9 of 34 min");
+        expect(s.progressCardText, "progress card text").toBe("Ridden 3 of 34 min");
 
         // The ridden stretch is drawn, and dimmer than the route lines still to ride.
         const ridden = findSceneObjectByName(ROOT_NAMES.riddenRoute);

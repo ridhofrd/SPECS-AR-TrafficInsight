@@ -68,7 +68,7 @@ export class TrafficInsightStateMachine {
     /** Fresh copy every call. */
     getCore(): StateCore {
         const recommendedRoute: RouteOrNone =
-            this.trip === "none" ? "none" : recommend(this.trip, this.state === "Stopped" ? "stopped" : "planning");
+            this.trip === "none" ? "none" : recommend(this.trip, this.alertFired ? "stopped" : "planning");
         return {
             state: this.state,
             planningStep: this.planningStep,
@@ -183,12 +183,14 @@ export class TrafficInsightStateMachine {
 
         const p = round4(this.progress + s);
         const def = getTrip(trip);
-        if (!this.alertFired && p >= def.alertAtProgress - EPS) {
-            this.progress = Math.min(p, ALERT_PROGRESS_CAP);
+        if (!this.alertFired && this.activeRoute === def.problem.route && p >= def.alertAtProgress - EPS) {
+            // Stop at the warning point even if a large simulator step crosses it.
+            // Both choices must still be ahead of the rider on their shared road.
+            this.progress = def.alertAtProgress;
             this.state = "Alerted";
             this.alertFired = true;
             this.alertKind = def.alertKind;
-            return this.apply({ changed: true, caption: alertLine(trip), cue: CUES.alert, speak: true });
+            return this.apply({ changed: true, caption: alertLine(trip, this.progress), cue: CUES.alert, speak: true });
         }
         if (p >= 1 - EPS) {
             this.progress = 1;

@@ -224,7 +224,7 @@ export class TrafficInsightLeafDriver extends DefaultLeafInteractor {
         expect(snap().state, "state after I've stopped").toBe("Stopped");
     }
 
-    /** Ride presses until the crash/rain alert fires (5 presses at 0.05/step, alert at 25% of the route). */
+    /** Ride presses until the route-A crash/rain alert fires, before the fork. */
     async rideUntilAlert(maxPresses: number = 10): Promise<number> {
         let presses = 0;
         while (snap().state === "Riding" && presses < maxPresses) {

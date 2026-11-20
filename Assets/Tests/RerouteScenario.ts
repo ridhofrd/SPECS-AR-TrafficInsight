@@ -12,6 +12,7 @@ import { Scenario } from "Leaf.lspkg/Scenarios/scenario/Scenario";
 import { expect } from "Leaf.lspkg/Utils/common/Expect";
 import { findSceneObjectByName } from "Leaf.lspkg/Utils/common/Utils";
 import { BUTTON_NAMES, ROOT_NAMES } from "../Scripts/TrafficInsightSceneContracts";
+import { ALERT_PROGRESS_CAP, plannedMinutesAt, pointAt, routePoints, sharedApproachFraction } from "../Scripts/TrafficInsightTripData";
 import { TrafficInsightLeafDriver, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
 
 @component
@@ -43,6 +44,16 @@ export class RerouteScenario extends Scenario {
         expect(s.recommendedRoute, "recommended after the crash").toBe("B");
         expect(s.labelTextB.includes("Recommended"), "label B marked Recommended").toBe(true);
 
+        // The alternate route must start at the rider, not at an unrelated
+        // equal-percentage point on the other side of the map.
+        expect(ALERT_PROGRESS_CAP, "even the latest sample stop is before the fork").toBeLessThan(sharedApproachFraction("morning"));
+        const hereA = pointAt(routePoints("morning", "A"), s.progress);
+        const hereB = pointAt(routePoints("morning", "B"), s.progress);
+        expect(hereB.x, "both remaining options start at the rider x").toBeCloseTo(hereA.x, 4);
+        expect(hereB.z, "both remaining options start at the rider z").toBeCloseTo(hereA.z, 4);
+        expect(plannedMinutesAt("morning", "B", s.progress), "time already ridden cannot change on selection").toBeCloseTo(plannedMinutesAt("morning", "A", s.progress), 4);
+        const stoppedProgress = s.progress;
+
         await driver.press(BUTTON_NAMES.routeDotB);
         s = snap();
         expect(s.lastCaption, "caption after pinching dot B").toBe("New route set");
@@ -59,6 +70,8 @@ export class RerouteScenario extends Scenario {
         expect(visibleLensFlags(s).length, "Lens layer empty after reroute").toBe(0);
         expect(s.state, "riding again").toBe("Riding");
         expect(s.activeRoute, "now on route B").toBe("B");
+        expect(s.progress, "rerouting preserves rider progress").toBeCloseTo(stoppedProgress, 4);
+        expect(s.recommendedRoute, "incident-aware recommendation persists after leaving the stopped view").toBe("B");
         expect(s.roadChosen, "no stripe chosen once riding").toBe("none");
 
         let presses = 0;
@@ -70,7 +83,7 @@ export class RerouteScenario extends Scenario {
         leafLog("arrived after " + presses + " Ride presses, caption='" + s.lastCaption + "'");
         expect(s.state, "state at the end of the trip").toBe("Arrived");
         expect(s.progress, "progress at arrival").toBeCloseTo(1, 3);
-        expect(s.lastCaption, "arrival line").toBe("You've arrived, on time.");
+        expect(s.lastCaption, "arrival line does not claim an unmodelled deadline").toBe("You've arrived.");
         expect(s.lastAudioCue, "arrival tone").toBe("ArrivedTone");
         leafLog("C4 done");
     }

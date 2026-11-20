@@ -17,7 +17,7 @@ import { expect } from "Leaf.lspkg/Utils/common/Expect";
 import { BUTTON_NAMES } from "../Scripts/TrafficInsightSceneContracts";
 import { TrafficInsightLeafDriver, leafLog, snap, visibleLensFlags } from "./TrafficInsightLeafDriver";
 
-const RAIN_LINE = "Rain on your route in 10 minutes. Pull over to see options.";
+const RAIN_LINE = "Rain on your route in 8 minutes. Pull over to see options.";
 
 @component
 export class RainRaincoatScenario extends Scenario {

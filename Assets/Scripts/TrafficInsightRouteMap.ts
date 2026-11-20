@@ -137,7 +137,7 @@ export class TrafficInsightRouteMap extends BaseScriptComponent {
         const trip = view.trip as TripId;
         const progress = Math.round(Math.max(0, Math.min(1, view.progress)) * 1000) / 1000;
         const problem: ProblemSpan | null = view.mode === "planning" ? null : view.problem;
-        const key = [view.mode, trip, progress, problem ? problem.route + problem.kind + problem.fromFraction + "-" + problem.toFraction : "-"].join("|");
+        const key = [view.mode, trip, view.activeRoute, progress, problem ? problem.route + problem.kind + problem.fromFraction + "-" + problem.toFraction : "-"].join("|");
 
         this.setMapShown(true);
         this.routeLines.enabled = true;

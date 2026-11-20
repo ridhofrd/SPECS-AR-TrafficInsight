@@ -25,9 +25,9 @@ export class RideHidesLensScenario extends Scenario {
         await driver.waitForLens();
 
         await driver.planMorningTrip();
-        await driver.press(BUTTON_NAMES.routeDotA);
+        await driver.press(BUTTON_NAMES.routeDotB);
         let s = snap();
-        expect(s.state, "state after picking route A").toBe("Riding");
+        expect(s.state, "state after picking route B").toBe("Riding");
 
         const progressBefore = s.progress;
         const textBefore = simulatorProgressText();
@@ -52,6 +52,21 @@ export class RideHidesLensScenario extends Scenario {
         expect(!!table && table.isEnabledInHierarchy, "MapTable object is off while riding").toBe(false);
         expect(s.visible.clarifyQuestion, "clarify dialog hidden while riding").toBe(false);
         expect(s.alertFired, "no alert yet").toBe(false);
-        leafLog("C2 done");
+        // Both sample hazards belong to A. B must complete either trip without
+        // a false warning, a forced stop, or any Lens visuals appearing.
+        await this.finishClearTrip(driver);
+        await driver.press(BUTTON_NAMES.goHome);
+        await driver.press(BUTTON_NAMES.routeDotB);
+        await this.finishClearTrip(driver);
+        leafLog("C2 done (both trips on unaffected route B)");
+    }
+
+    private async finishClearTrip(driver: TrafficInsightLeafDriver): Promise<void> {
+        for (let i = 0; snap().state === "Riding" && i < 25; i++) {
+            await driver.press(BUTTON_NAMES.ride, 0);
+            expect(snap().alertFired, "no alert on unaffected route B").toBe(false);
+            expect(visibleLensFlags(snap()).length, "clear ride has no Lens visuals").toBe(0);
+        }
+        expect(snap().state, "unaffected trip reaches its destination").toBe("Arrived");
     }
 }

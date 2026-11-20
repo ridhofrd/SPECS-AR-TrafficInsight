@@ -52,7 +52,6 @@ export interface TripDef {
     alertAtProgress: number;
     alertKind: ProblemKind;
     alertIcon: string;
-    alertLine: string;
     problem: TripProblem;
     planning: { A: RouteStats; B: RouteStats };
     stopped: { A: RouteStats; B: RouteStats };
@@ -62,7 +61,7 @@ export interface TripDef {
 }
 
 /** Progress is held here while an alert is unresolved ("Pull over to see options."). */
-export const ALERT_PROGRESS_CAP = 0.3;
+export const ALERT_PROGRESS_CAP = 0.14;
 
 /** Map-cm per km (for reference; labels use the kilometre strings in TRIPS). */
 export const MAP_CM_PER_KM = 6;
@@ -93,7 +92,7 @@ const ROUTE_B_HOME_TO_OFFICE: MapPoint[] = [
     { x: 0, z: 19 },
     { x: 0, z: 7 },
     { x: 14, z: 7 },
-    { x: 24, z: 0 },
+    { x: 22, z: 0 },
     { x: 14, z: -7 },
     { x: 0, z: -7 },
     { x: 0, z: -19 },
@@ -106,14 +105,13 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
         from: "Home",
         to: "Office",
         progressLabel: "Office trip",
-        alertAtProgress: 0.25,
+        alertAtProgress: 0.1,
         alertKind: "crash",
         alertIcon: "car_crash",
-        alertLine: "Crash ahead on your route, traffic is stalled. Pull over to see options.",
         problem: {
             route: "A",
-            fromFraction: 0.491,
-            toFraction: 0.655,
+            fromFraction: 6 * MAP_CM_PER_KM / polylineLength(ROUTE_A_HOME_TO_OFFICE),
+            toFraction: 8 * MAP_CM_PER_KM / polylineLength(ROUTE_A_HOME_TO_OFFICE),
             km: "6-8",
             cardText: "Crash, traffic stalled, +18 min",
             cardAnchor: { x: -18.5, z: -3 },
@@ -126,7 +124,7 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
             A: { timeMin: 52, deltaMin: 18, fuelL: 0.5, weather: "Dry, 27 °C" },
             B: { timeMin: 40, deltaMin: 0, fuelL: 0.6, weather: "Dry, 27 °C" },
         },
-        arrivedLine: "You've arrived, on time.",
+        arrivedLine: "You've arrived.",
         arrivedLineKeptProblemRoute: "You've arrived.",
     },
     evening: {
@@ -134,14 +132,13 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
         from: "Office",
         to: "Home",
         progressLabel: "Home trip",
-        alertAtProgress: 0.25,
+        alertAtProgress: 0.1,
         alertKind: "rain",
         alertIcon: "rainy",
-        alertLine: "Rain on your route in 10 minutes. Pull over to see options.",
         problem: {
             route: "A",
-            fromFraction: 0.328,
-            toFraction: 0.573,
+            fromFraction: 4 * MAP_CM_PER_KM / polylineLength(ROUTE_A_HOME_TO_OFFICE),
+            toFraction: 7 * MAP_CM_PER_KM / polylineLength(ROUTE_A_HOME_TO_OFFICE),
             km: "4-7",
             cardText: "Rain km 4–7: 24 °C, heavy, windy rain",
             cardAnchor: { x: -18.5, z: -3 },
@@ -152,10 +149,10 @@ export const TRIPS: { morning: TripDef; evening: TripDef } = {
         },
         stopped: {
             A: { timeMin: 36, deltaMin: 0, fuelL: 0.5, weather: "Windy rain, 24 °C" },
-            B: { timeMin: 48, deltaMin: 12, fuelL: 0.6, weather: "Dry, 26 °C" },
+            B: { timeMin: 48, deltaMin: 0, fuelL: 0.6, weather: "Dry, 26 °C" },
         },
-        arrivedLine: "You've arrived, on time.",
-        arrivedLineKeptProblemRoute: "You've arrived, on time.",
+        arrivedLine: "You've arrived.",
+        arrivedLineKeptProblemRoute: "You've arrived.",
     },
 };
 
@@ -165,7 +162,7 @@ export const CAPTIONS = {
     clarify: "Which office: Main office or Branch office?",
     rideHint: "Riding. Press Ride to move along the route.",
     stoppedBeforeAlert: "Nothing ahead yet. Keep riding.",
-    stoppedAfterResolved: "Your route is clear. Keep riding.",
+    stoppedAfterResolved: "Your route is set. Keep riding.",
     capUnresolved: "Pull over to see options.",
     stoppedEnter: "Stopped. Pick a route.",
     reroute: "New route set",
@@ -309,8 +306,39 @@ export function problemCardText(trip: TripId): string {
     return getTrip(trip).problem.cardText;
 }
 
-export function alertLine(trip: TripId): string {
-    return getTrip(trip).alertLine;
+export function alertLine(trip: TripId, progress: number = getTrip(trip).alertAtProgress): string {
+    const def = getTrip(trip);
+    if (def.alertKind === "crash") {
+        return "Crash ahead on your route, traffic is stalled. Pull over to see options.";
+    }
+    const minutes = Math.max(1, Math.round(
+        plannedMinutesAt(trip, def.problem.route, def.problem.fromFraction) -
+        plannedMinutesAt(trip, def.problem.route, progress)
+    ));
+    return "Rain on your route in " + minutes + " minutes. Pull over to see options.";
+}
+
+/** Both options share the same approach and final road, in both travel directions. */
+export function sharedApproachFraction(trip: TripId): number {
+    const points = routePoints(trip, "A");
+    return segLength(points[0], points[1]) / polylineLength(points);
+}
+
+/**
+ * Four sample minutes on each shared end road; the route's remaining time is
+ * spent on its branch. Changing routes before the fork cannot change time
+ * already ridden. These are simulation estimates, not a real routing service.
+ */
+export function plannedMinutesAt(trip: TripId, route: RouteId, progress: number): number {
+    return sharedLegValueAt(trip, progress, getTrip(trip).planning[route].timeMin, 4);
+}
+
+function sharedLegValueAt(trip: TripId, progress: number, total: number, shared: number): number {
+    const p = clamp01(progress);
+    const fork = sharedApproachFraction(trip);
+    if (p <= fork) return shared * p / fork;
+    if (p >= 1 - fork) return total - shared + shared * (p - (1 - fork)) / fork;
+    return shared + (total - 2 * shared) * (p - fork) / (1 - 2 * fork);
 }
 
 export function arrivedLine(trip: TripId, keptProblemRoute: boolean): string {
