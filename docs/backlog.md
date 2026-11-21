@@ -4,7 +4,8 @@ Ideas that were considered and deliberately not built yet, with the reasoning, s
 
 ## A glance at the route while riding (built 2026-11-20)
 
-> **Status: built and verified in Preview, 2026-11-20 (C11-C14; C1-C10 regressions pass).** The open decisions below were settled with the author on 2026-11-20: look down at a "dashboard spot" (main trigger) plus "where am I?" by voice (spoken answer only), a strip with minutes left and the next problem, at most 2 seconds, riding only. The full plan, written for any coding agent, is [plans/glance-while-riding.md](plans/glance-while-riding.md). The notes below are kept as the history of the idea. The compact strip and caption answer are built; any route overlay on the road while moving remains out of scope.
+> **Status: implemented; current validation is recorded in the README.** The author revised the original strip into a bent route map with the rider's position, visible while its viewing angle is held without a duration cap. Natural look-away and explicit Hide route dismiss it. The caption-only Where am I? alternative remains. Updated C11-C14 pass; earlier-suite regressions and fresh captures are pending MCP reconnection. See [the current plan](plans/glance-while-riding.md) and [decision 0009](decisions/0009-route-peek-viewing-angle.md). The notes below preserve the original idea; its proposed straight strip and two-second cap have been superseded. A route overlay on the real road while moving remains out of scope.
+
 
 ### The idea
 

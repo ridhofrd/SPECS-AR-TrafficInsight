@@ -6,8 +6,8 @@
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
-> **Verified in Interactive Preview on 2026-11-20:** TypeScript compiles, runtime startup was checked, and LEAF C1-C14 pass with the requested riding glance. The strip was also triggered using the actual tilted Preview camera, and fresh strip/caption screenshots were inspected.
-> This is a simulation: routes, movement, traffic, weather and fuel are sample data. No Spectacles hardware has been tested. The requested glance strip and caption answer are built; the submission video is still outstanding.
+> **Route-peek revision, 2026-11-20:** TypeScript compilation and runtime startup checks succeeded. Updated LEAF C11-C14 passed; the interrupted C14 result was recovered from Lens Studio's log. A further 30 local logic checks and syntax checks on seven scripts passed. C1-C10 passed on the previous revision; their new regression run and fresh route-map screenshots are pending because this session lost Lens Studio MCP access.
+> Routes, movement, traffic, weather and fuel remain sample data. No Spectacles hardware has been tested. The route peek uses a bent schematic map and has no duration cap while the viewing angle is held. The submission video is still outstanding.
 
 ## Contents
 
@@ -35,7 +35,7 @@ The demo follows one day in two trips:
 1. **Home to office:** compare two routes, choose one, then respond to a crash on route A by pulling over and choosing again.
 2. **Office to home:** respond to rain on route A by comparing the fastest rainy route with the longer dry alternative, or prepare a raincoat before continuing.
 
-The Lens shows the full interface only while Planning or Stopped. Riding clears the table, map, labels and road marks. A deliberate look down can briefly reveal a compact progress strip; an eyes-free request reports the same facts through the simulator caption fallback. An affected-route alert briefly shows a small icon, with a chime and a caption on the separate simulator panel.
+The Lens shows the full interface only while Planning or Stopped. Riding clears the table, map, labels and road marks. A deliberate look into the dashboard direction reveals a compact route map while that angle is held; an eyes-free request reports the same facts through the simulator caption fallback. An affected-route alert briefly shows a small icon, with a chime and a caption on the separate simulator panel.
 
 ```mermaid
 stateDiagram-v2
@@ -73,21 +73,25 @@ On A, a warning fires at 10%, before the fork. The icon is low and off-centre an
 
 Until the simulated problem is resolved, progress is held at 14%, still before the fork. This is demo scaffolding that keeps both choices reachable, not a model of real vehicle behaviour.
 
-### Glance while riding: a brief look down
+### Route peek while riding: the route and your position
 
-![Requested route glance, with endpoint labels, a yellow rider marker and remaining trip facts.](docs/media/glance-riding.png)
+![Reference: the planning map whose route geometry the compact route peek now reuses. A fresh route-peek capture is pending.](docs/media/context-home-planning.png)
 
-After choosing a route, look level for half a second to arm the glance. **Look down at least 20 degrees for 0.3 seconds** to reveal a small dashboard strip about 1 m away and 25 degrees below the horizon. It follows heading with smoothing and stays at that height as your head tilts. In Interactive Preview, use right-drag to tilt the camera.
+After choosing a route, look level for half a second, then **look down 20-40 degrees for 0.3 seconds** toward the dashboard spot. The compact map sits about 1 m away and 25 degrees below the horizon. This uses head/camera direction, not eye tracking. In Interactive Preview, right-drag to tilt and turn the camera.
 
-The active route becomes one straight line: blue A or green B, a dim ridden section, a yellow **you** marker, Home/Office endpoints and any known problem interval. One line reports **minutes left** and the next problem. The strip has no hand targets and the full map remains hidden.
+The map shows the **same bent route as the planning view**, with Home/Office endpoints, a yellow **you** marker, the ridden path dimmed, and any known problem interval. The marker follows both coordinates of the route as progress advances. A stays blue and B stays green. Remaining minutes and the next problem stay below the map. This is the existing sample route geometry, not a real GPS map.
 
-Look up to dismiss it. The complete visual lasts **at most two seconds, including fades**, even if you keep looking down. Look level within 8 degrees for half a second to re-arm it. Alerts, stops and arrival dismiss it immediately; returning to Riding with your head still down cannot reopen it.
+**There is no duration limit while you hold the viewing angle.** The heading stays fixed during the peek so looking sideways actually leaves the map. Looking straight, too far down or more than 22 degrees sideways hides it with a short fade. Looking back into its direction reveals it again after the dwell. Slight pitch/yaw changes use hysteresis to avoid flicker.
+
+**Hide route** on the simulator dismisses it immediately. After an explicit dismissal, a Where am I? request, or a state interruption, look level within 8 degrees for half a second before reopening. Alerts, stops and arrival always dismiss the map immediately. The compact map itself has no hand targets; route selection remains in Planning or Stopped.
+
+The previous straight-strip capture is retained as [revision history](docs/media/glance-riding.png). It does not depict the current map. A new map capture and visual layout check are pending MCP reconnection.
 
 ### Where am I: the same facts by caption
 
-![Where am I button and its answer on the separate Ride simulator.](docs/media/glance-caption.png)
+![Previous simulator capture showing the caption answer; the current control row also includes Hide route.](docs/media/glance-caption.png)
 
-The simulator's **Where am I?** button stands in for a voice request. While Riding it reports the remaining minutes and next problem using the same `glanceFacts` helper as the strip. It clears any active glance and leaves the Lens view empty. Outside Riding it says **Ask while riding.**; during an alert it is disabled so the warning stays in charge. Speech recognition is not implemented, and this SDK uses the existing caption fallback for spoken sentences.
+The simulator's **Where am I?** button stands in for a voice request. **Hide route** now sits beside it; an updated simulator capture is pending. While Riding it reports the remaining minutes and next problem using the same `glanceFacts` helper as the route map. It clears any active route peek and leaves the Lens view empty. Outside Riding it says **Ask while riding.**; during an alert it is disabled so the warning stays in charge. Speech recognition is not implemented, and this SDK uses the existing caption fallback for spoken sentences.
 
 Unknown hazards are not disclosed: before a warning the answer says **No reported problems**. A known hazard has a countdown before its interval and a time to leave while inside it. After passing it, or after rerouting to dry B, the answer says **Route clear**. Remaining minutes reuse the stopped cards' cost calculation, including an unpassed crash delay.
 
@@ -121,7 +125,7 @@ The selected road stripe remains highlighted while this question is open. The st
 
 ### Ride simulator: preview only
 
-![The separate, warm-grey Ride simulator panel.](docs/media/glance-caption.png)
+![Earlier capture of the separate simulator; the current row pairs Where am I? with Hide route.](docs/media/glance-caption.png)
 
 The panel to the rider's right is labelled **Ride simulator (preview only)**. Its buttons substitute for destination/route voice commands, GPS movement and stopping detection. Spoken sentences currently appear as captions; the chime and confirmation tones have audio tracks. It is scaffolding, not a rider-facing control panel while moving.
 
@@ -143,28 +147,30 @@ The scenery makes the journey stage visible: plan at home, compare routes on the
 
 These are lightweight, stylised demo surroundings. They follow the same state as the UI, without refreshing the Preview or resetting progress. Scenery has no colliders or hand interactions. A known crash appears ahead on A; known evening rain stays in the distant A corridor before the rain interval, surrounds the rider inside it, and clears after it or when choosing dry B. The street remains visible during the warning and raincoat reminder.
 
-**Editor only:** the component checks `isEditor()` before building scenery. On real glasses, the rider's actual surroundings would provide this context. This does not add GPS, live weather, geographic road alignment or a riding HUD; the glance strip is a separate, requested Lens visual.
+**Editor only:** the component checks `isEditor()` before building scenery. On real glasses, the rider's actual surroundings would provide this context. This does not add GPS, live weather, geographic road alignment or a riding HUD; the route peek is a separate, requested Lens visual.
 
 For the demo, use **Interactive > Plane** with the **SPECS27** device in Preview. The authored scenery appears inside the simulated display; the neutral Plane and its grid can remain visible through the additive display and around its edges. This is a staged Preview environment rather than a full replacement of Lens Studio's camera background. Preview input selection is local workspace state; choose Plane again in a fresh workspace.
 
 ## Tests
 
-C1-C14 were run in Preview on 2026-11-20. **All pass.** C5 initially failed its projected-corner check while the Preview camera was turned away from the map; it passed after resetting the camera to the intended forward view. C11, C13 and C14 passed again after adding drawn-progress, hazard-interval and active-glance arrival checks. Scenarios use real Interactables, editor-only pitch injection and scene readback. A separate visual check used actual camera tilt.
+Updated **C11-C14 pass** for the route-shaped map and viewing-angle behavior. Compilation and Logger checks were completed before those runs. C14's successful completion was confirmed in the editor log after the tool call was interrupted. Thirty additional local assertions cover route branches, endpoint identity, hazard timing, look-away/re-entry, explicit dismissal and a 24-hour simulated hold without a timeout. Syntax checks on seven changed scripts also pass.
+
+**C1-C10 passed on the previous revision.** Their regression run on this revision, fresh screenshots and visual layout review are pending MCP reconnection; do not treat the earlier full-suite result or straight-strip screenshots as verification of this map revision.
 
 | ID | Verified behaviour | Result |
 |---|---|---|
-| C1 | Destination clarification, two route dots, explicit total estimates, Fastest reason and destination ahead | Pass |
-| C2 | Ride advances progress; both trips on unaffected B reach arrival with no false alerts or Lens visuals | Pass |
-| C3 | Crash warning, chime request, caption, low/off-centre icon and approximately two-second expiry | Pass |
-| C4 | Reachable alternatives at one position, remaining costs, reroute without a progress jump, persistent recommendation, glow and arrival | Pass |
-| C5 | Matching rain countdown, fastest/rain versus dry/+12 trade-off, home ahead, both reminder actions and every button corner inside the view | Pass |
-| C6 | Table visible throughout Planning and hidden in every other state | Pass |
-| C7 | Floating map about 1.1 m ahead and below eye level | Pass |
-| C8 | Dim ridden stretch, larger yellow rider marker, explicit rider/route/elapsed card, hidden when riding | Pass |
-| C9 | Road/map separation, usable stripe width, hover, pinch, chosen glow, other-route fade and hidden riding view | Pass |
-| C10 | Home/street/office across both trips, day/evening, actual scene visibility, weather boundaries, dry reroute and preserved progress | Pass |
-| C11 | Look-down dwell, actual strip text, route progress, dashboard placement and no hand targets | Pass |
-| C12 | Threshold/hysteresis, two-second cap, held-down blocking and level-look re-arming | Pass |
+| C1 | Destination clarification, two route dots, explicit total estimates, Fastest reason and destination ahead | Prior pass; rerun pending |
+| C2 | Ride advances progress; both trips on unaffected B reach arrival with no false alerts or Lens visuals | Prior pass; rerun pending |
+| C3 | Crash warning, chime request, caption, low/off-centre icon and approximately two-second expiry | Prior pass; rerun pending |
+| C4 | Reachable alternatives at one position, remaining costs, reroute without a progress jump, persistent recommendation, glow and arrival | Prior pass; rerun pending |
+| C5 | Matching rain countdown, fastest/rain versus dry/+12 trade-off, home ahead, both reminder actions and every button corner inside the view | Prior pass; rerun pending |
+| C6 | Table visible throughout Planning and hidden in every other state | Prior pass; rerun pending |
+| C7 | Floating map about 1.1 m ahead and below eye level | Prior pass; rerun pending |
+| C8 | Dim ridden stretch, larger yellow rider marker, explicit rider/route/elapsed card, hidden when riding | Prior pass; rerun pending |
+| C9 | Road/map separation, usable stripe width, hover, pinch, chosen glow, other-route fade and hidden riding view | Prior pass; rerun pending |
+| C10 | Home/street/office across both trips, day/evening, actual scene visibility, weather boundaries, dry reroute and preserved progress | Prior pass; rerun pending |
+| C11 | Look-down dwell, bent route mesh, two-coordinate rider position, dashboard placement and no hand targets | Pass |
+| C12 | No duration cap, pitch/yaw look-away and re-entry, explicit Hide route and re-arming | Pass |
 | C13 | Shared remaining estimates and hazard boundaries; actual caption button; no visual or progress change | Pass |
 | C14 | Blocked states, immediate alert/stop/arrival dismissal and no automatic reopening | Pass |
 
@@ -172,7 +178,7 @@ Sound audibility, hardware hand tracking, daylight readability and real riding c
 
 ## Why it belongs on glasses
 
-- **Hands and eyes stay on the road.** A rider's hands are on the handlebars and their eyes must stay ahead, so a phone is not an option while moving. The full route comparison appears after stopping. While riding, the prototype keeps the view clear by default and offers a short, requested look-down strip or a caption/optional spoken answer.
+- **Requested context in the view.** Full route comparison is reserved for planning or stopping. The prototype clears it during Riding and offers the compact route peek only when requested by viewing direction, plus a caption/optional spoken answer. The intended voice interactions currently use simulator buttons as stand-ins.
 - **The routes are laid out in your space.** When stopped, the options float in front of you at a readable size, side by side, instead of on a small flat map.
 
 ## How this project is built
@@ -205,7 +211,7 @@ flowchart LR
     MAIN --> ROAD["Road view\nmock street, stripes, ring"]
     MAIN --> CARDS["Lens cards\nlabels, problem card, progress card,\nreminder, alert icon"]
     MAIN --> CONTEXT["Preview surroundings\neditor only: home, street, office"]
-    MAIN --> GLANCE["Glance strip\nrequested, Riding only"]
+    MAIN --> GLANCE["Route peek map\nrequested, Riding only"]
     MAIN --> AUDIO["Audio + captions"]
     MAIN --> LEAF["getState()\nfor LEAF tests"]
 ```
@@ -223,9 +229,9 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 | `TrafficInsightGeometry.ts` | The small mesh helpers the map and the road view share (ribbon, puck, ring, rectangle, box) |
 | `TrafficInsightTrafficLensUI.ts` | The Lens layer: label cards, problem card, progress card, raincoat reminder, alert icon (UI Kit) |
 | `TrafficInsightRideSimulatorUI.ts` | The demo panel (UI Kit) |
-| `TrafficInsightGlanceTrigger.ts` | Pure pitch/time logic: dwell, hysteresis, fade, cap and re-arm |
-| `TrafficInsightHeadingFollow.ts` | Positions the dashboard spot using camera yaw, with fixed depth and height |
-| `TrafficInsightGlanceStripUI.ts` | Non-interactive UI Kit card with a straight route, rider marker and shared facts |
+| `TrafficInsightGlanceTrigger.ts` | Pure pitch/yaw/time logic: dwell, viewing-angle hysteresis, fade and re-arm; no duration cap |
+| `TrafficInsightHeadingFollow.ts` | Positions the dashboard spot from yaw, holding heading while viewing and during re-entry |
+| `TrafficInsightGlanceStripUI.ts` | Non-interactive UI Kit route map using the trip polyline, dim ridden path, position and shared facts |
 | `TrafficInsightLazyFollow.ts` | Lets the alert icon follow the head gently |
 | `TrafficInsightAudioController.ts` | Plays the four sound effects |
 
@@ -240,13 +246,13 @@ Every press goes to one place, `TrafficInsightState`, a plain state machine with
 - **Confirmation before moving:** a 1.2-second route glow; hand input is gated during alert/confirmation. Raincoat preparation keeps the rider stopped.
 - **Reminder stays in view:** a compact panel below the map, with no redundant start label beneath it; C5 checks projected button corners.
 
-The route reasoning and validation are recorded in [decision 0006](docs/decisions/0006-consistent-route-story.md). The trip-stage scenery and its Preview limitations are recorded in [decision 0007](docs/decisions/0007-preview-journey-surroundings.md). The requested glance and its timing rules are recorded in [decision 0008](docs/decisions/0008-requested-route-glance.md).
+The route reasoning and validation are recorded in [decision 0006](docs/decisions/0006-consistent-route-story.md). The trip-stage scenery and its Preview limitations are recorded in [decision 0007](docs/decisions/0007-preview-journey-surroundings.md). The original strip is recorded in [decision 0008](docs/decisions/0008-requested-route-glance.md); the author's route-map and duration changes supersede it in [decision 0009](docs/decisions/0009-route-peek-viewing-angle.md).
 
 ## Known limitations
 
-- **Riding with AR glasses is unproven.** No study of AR glasses on motorcycles was found, and there is no Snap guidance about vehicles. The three-state design follows car and helmet head-up display research; whether it is safe on a real bike can only be found out by real-world testing.
+- **Vehicle use is outside this prototype.** Snap's [Spectacles best practices](https://support.spectacles.com/hc/en-us/articles/30214013362452-Best-Practices) explicitly advise against using Spectacles while driving any vehicle. This corrects our earlier claim that Snap had no vehicle guidance. This remains a Preview design concept.
 - **No spoken voice.** The Lens plays its chime and tones, but the text-to-speech module is deprecated in this SDK, so the spoken lines appear as captions on the simulator panel instead. The brief planned captions as the fallback for exactly this case.
-- **Preview only.** Hand tracking, comfort over time and readability in daylight are untested on real Spectacles. The two-second glance cap and pitch thresholds are prototype choices; real riding posture and the comfort of a heading-following anchor remain unverified. Speed-based voice-only restrictions are a future-product idea; this simulator has no speed input.
+- **Preview only.** Hand tracking, comfort over time and readability in daylight are untested on real Spectacles. The viewing-angle thresholds and unrestricted hold duration are prototype choices; real riding posture and the comfort of a heading-following anchor remain unverified. Speed-based voice-only restrictions are a future-product idea; this simulator has no speed input.
 - **The road view and map are schematic stand-ins.** The route corridors and surrounding street are illustrative models in Preview. How accurately a route line would sit on a real road, and how it would look in daylight, is untested.
 - **Tooling left in the scene.** The scene contains an `AiPreviewAgent Handler` object, added by the Lens Studio preview tools the agent used. It renders nothing and may be removed before submission.
 
@@ -283,7 +289,7 @@ The large files (the environment map, the packages and the generated assets) are
    - right-drag (or hold Shift) to look around
    - a mouse click acts as a pinch
 4. Turn right to find the Ride simulator. Press **Go to office**, answer the question, look back at the table and click a route dot. Then press **Ride** a few times.
-5. While Riding, look level for half a second, then right-drag to look down about 25 degrees. The strip appears after a short dwell and disappears within two seconds. Look level again before retrying. Turn right to the simulator and use **Where am I?** for the caption-only alternative.
+5. While Riding, look level for half a second, then right-drag to look down about 25 degrees. The route map appears after a short dwell and remains while the viewing angle is held. Look straight or aside to hide it; return to its direction to reopen. Hide route dismisses it explicitly and then requires a fresh level look. Turn right to the simulator and use **Where am I?** for the caption-only alternative.
 6. To work on it with a coding agent, see [How the agents are configured](#how-the-agents-are-configured).
 
 _Unverified: these clone steps have not been tested from a fresh clone, because the repository has no remote yet._
@@ -341,7 +347,7 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Revision 1, part 3: the route marked on the road ahead (a mock street with pinchable route lines) (C9; C1 to C9 pass)
 - [x] Consistency polish: route reachability, timing, ranking explanation, map labels, unified symbols and reminder layout (C1-C9 pass)
 - [x] Preview surroundings: home, street and office follow both trips, with day/evening and route-aware rain (C10; C1-C9 regression pass)
-- [x] Revision 2: requested look-down route strip and caption-only "Where am I?" answer (plan: [docs/plans/glance-while-riding.md](docs/plans/glance-while-riding.md))
+- [x] Revision 2: route-shaped peek held by viewing angle, explicit dismissal and caption-only "Where am I?" answer (plan: [docs/plans/glance-while-riding.md](docs/plans/glance-while-riding.md))
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
 
 ## The hackathon
