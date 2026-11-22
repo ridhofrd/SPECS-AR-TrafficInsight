@@ -204,6 +204,13 @@ export class TrafficInsightRoadView extends BaseScriptComponent {
         const streetGeo = new GeoBuffer();
         addRect(streetGeo, -half, -near, half, -far);
         addRect(streetGeo, half, zJunction + half, half + SIDE_ROAD_LENGTH_CM, zJunction - half);
+        if (global.deviceInfoSystem.isEditor()) {
+            // Match the surrounding asphalt's 2 m tiles, including the branch.
+            for (let i = 0; i < streetGeo.data.length; i += 8) {
+                streetGeo.data[i + 6] = streetGeo.data[i] / 200;
+                streetGeo.data[i + 7] = -streetGeo.data[i + 2] / 200;
+            }
+        }
         this.footprints = [
             [{ x: -half, z: -near }, { x: half, z: -near }, { x: half, z: -far }, { x: -half, z: -far }],
             [
@@ -256,8 +263,13 @@ export class TrafficInsightRoadView extends BaseScriptComponent {
         obj.setParent(this.group);
         obj.getTransform().setLocalPosition(new vec3(0, y, 0));
         const rmv = obj.createComponent("Component.RenderMeshVisual") as RenderMeshVisual;
-        const mat = this.lineMaterial.clone();
-        mat.mainPass.baseColor = color;
+        const previewStreet = name === ROOT_NAMES.roadStreet && global.deviceInfoSystem.isEditor();
+        const mat = previewStreet ? (requireAsset("../Materials/PreviewRoadSurface.mat") as Material).clone() : this.lineMaterial.clone();
+        mat.mainPass.baseColor = previewStreet ? new vec4(0.92,0.94,0.97,1) : color;
+        if (previewStreet) {
+            mat.mainPass.samplers.baseTex.wrap = WrapMode.Repeat;
+            mat.mainPass.samplers.baseTex.filtering = FilteringMode.Trilinear;
+        }
         rmv.mainMaterial = mat;
         return { obj: obj, rmv: rmv, mb: newMeshBuilder(), mat: mat };
     }
