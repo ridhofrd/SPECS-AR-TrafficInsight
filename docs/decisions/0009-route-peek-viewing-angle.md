@@ -1,7 +1,7 @@
 # 0009. Show the route while its viewing angle is held
 
 Date: 2026-11-21; author requested the revision on 2026-11-20.
-Status: implemented; visual review and earlier-suite regressions pending.
+Status: implemented; full Preview regression and visual review completed 2026-11-22.
 
 ## Context
 
@@ -51,12 +51,14 @@ The saved scene diff replaces the obsolete cap input with pitch/yaw bounds.
 It also contains Lens Studio's regenerated LEAF bridge identifiers. No
 connection files or unrelated package assets are part of these changes.
 
-C1-C10 passed on the earlier revision and must be rerun against this one.
-Fresh map/control screenshots and actual-camera visual review are pending
-because Lens Studio MCP tools disappeared from the session again. The
-README labels earlier images as historical/reference material rather than
-presenting them as captures of the new map. The [current plan](../plans/glance-while-riding.md)
-records the remaining checks.
+After MCP reconnection, C1-C14 all returned `succeeded` on 2026-11-22 with
+the refined Preview surroundings installed. Fresh route-map and simulator
+screenshots are linked in the README. Actual-camera checks confirmed a
+sideways look hides the map, returning reveals it, and Hide route dismisses
+it while still looking down. Both bent routes and rider positions were
+visually inspected. The historical straight-strip capture remains labelled
+as revision history. See [decision 0010](0010-realistic-preview-surfaces.md)
+for the surrounding scene refinement and remaining display limitations.
 
 ## Consequences
 

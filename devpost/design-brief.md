@@ -137,6 +137,17 @@ surroundings on glasses. The editor-only guard must run before building any
 scenery. Keep the existing map and controls readable and the journey's state,
 progress and route intact during a place change. LEAF C10 checks this flow.
 
+### Surface realism (approved polish, 2026-11-22)
+
+Refine C10 with photographic asphalt, masonry and wood textures, PBR shading,
+rounded furniture and architectural detail, and a photographic sky. Inspect
+the street and UI readability first, then apply the treatment to home and
+office. Preserve trip-stage/weather meaning, the editor-only guard, current
+controls and progress. Keep route colours distinct from the muted scenery.
+This remains a staged 3D Preview, subject to additive-display limitations;
+it does not promise photorealism or geographic accuracy. Record asset sources
+and licenses and keep commits focused.
+
 ## Consistency rules (approved polish, 2026-11-20)
 
 These refine the original nine criteria. The approved glance exception is specified separately above.

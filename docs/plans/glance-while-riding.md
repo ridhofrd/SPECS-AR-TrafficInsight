@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Implemented in `45dd3e0`; C11-C14 passed on 2026-11-20. Earlier-suite regressions and fresh visual review remain pending MCP reconnection |
+| Status | Implemented in `45dd3e0`; C1-C14 passed and fresh actual-camera visual review completed on 2026-11-22 |
 | Source of truth | [Design brief](../../devpost/design-brief.md), criteria 11-14 |
 | Supersedes | The straight progress strip and two-second limit in [decision 0008](../decisions/0008-requested-route-glance.md) |
 | Current decision | [0009: route map and viewing angle](../decisions/0009-route-peek-viewing-angle.md) |
@@ -92,13 +92,13 @@ hold, both route branches, both trips, hazard boundaries and explicit
 re-arming. Syntax checks on seven scripts passed. These local checks do not
 replace Preview rendering or the previous scenarios.
 
-Pending when Lens Studio MCP is available again:
+Completed after MCP reconnection on 2026-11-22:
 
-- Reset the Preview camera and rerun C1-C10 against this revision.
-- Inspect both route shapes and rider positions, text readability, panel
-  boundaries, actual-camera look-away/re-entry and the Hide route control.
-- Capture the new route peek and simulator row into `docs/media/`, then
-  replace the README's clearly labelled historical/reference screenshots.
+- Reset the Preview camera and ran all C1-C14 successfully.
+- Inspected both route shapes and rider positions, readable text and panel
+  boundaries. Actual-camera look-away/re-entry and Hide route behaved as specified.
+- Captured the new route peek and simulator row into `docs/media/` and linked
+  them in the README. The straight-strip capture remains revision history.
 
 The unrestricted viewing duration is an author-requested prototype choice,
 not a validated safe glance duration. Snap's [Spectacles best practices](https://support.spectacles.com/hc/en-us/articles/30214013362452-Best-Practices)
