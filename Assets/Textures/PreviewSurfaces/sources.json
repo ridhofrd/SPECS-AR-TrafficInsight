@@ -1,0 +1,58 @@
+[
+  {
+    "file": "asphalt_02_diff.jpg",
+    "asset": "asphalt_02",
+    "map": "diff",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "1aa5ce99f58a625c71d48cfc3e68b65ca85ccb00f39e045c0a928608a0ea25ed"
+  },
+  {
+    "file": "asphalt_02_nor_gl.jpg",
+    "asset": "asphalt_02",
+    "map": "nor_gl",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_02/asphalt_02_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "42a1c381b53204e83a982db2864479a30bc127bbdeebb1006f8ee51bff099df3"
+  },
+  {
+    "file": "concrete_wall_001_diff.jpg",
+    "asset": "concrete_wall_001",
+    "map": "diff",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_wall_001/concrete_wall_001_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "c3c936da86d57997d9fc4022371c3798c8d438aeecb8f41546104da6d3947c02"
+  },
+  {
+    "file": "concrete_wall_001_nor_gl.jpg",
+    "asset": "concrete_wall_001",
+    "map": "nor_gl",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_wall_001/concrete_wall_001_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "6f10711d123c8dff26375555196eae9e16d874c137acdacd44d1ba90168b6d46"
+  },
+  {
+    "file": "wood_floor_diff.jpg",
+    "asset": "wood_floor",
+    "map": "diff",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_floor/wood_floor_diff_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "2a1c07687b6dbb214c4b9213739c6d92d425f1f0fc8ab3ac157f105d78240789"
+  },
+  {
+    "file": "wood_floor_nor_gl.jpg",
+    "asset": "wood_floor",
+    "map": "nor_gl",
+    "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_floor/wood_floor_nor_gl_1k.jpg",
+    "license": "CC0-1.0",
+    "sha256": "452247f0d0d1b7fc7f8324ff3b6ed60bcc6de1405f4284eeb8d9bce90d4939c2"
+  },
+  {
+    "file": "preview_sky.jpg",
+    "asset": "kloofendal_48d_partly_cloudy_puresky",
+    "map": "tonemapped",
+    "source": "https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/kloofendal_48d_partly_cloudy_puresky.jpg",
+    "license": "CC0-1.0",
+    "sha256": "2bdd7abe32f1d2f7a626e0a6e45bb808313f29bd41d758eacbdba91560e93f04"
+  }
+]
