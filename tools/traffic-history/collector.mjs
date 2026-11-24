@@ -10,7 +10,7 @@ const database = resolve(root, '.traffic-history/observations.sqlite');
 const asset = resolve(root, 'Assets/TrafficHistory.json');
 export const corridor = 'bcn-via-julia-dfactory-v1';
 const home = '41.44385,2.17860';
-const office = '41.33632,2.13802';
+const office = '41.33583,2.13824';
 // Public road waypoints separate the waterfront and inland corridors in both directions.
 const via = { A: '41.38055,2.18170', B: '41.37512,2.14908' };
 const directions = ['morning', 'evening'];
