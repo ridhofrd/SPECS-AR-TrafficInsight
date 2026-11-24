@@ -7,7 +7,7 @@
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
 > **Preview realism revision, 2026-11-22:** Home, street and office now have photographic surfaces, PBR shading and more detailed geometry. TypeScript compilation, runtime startup and all 14 LEAF scenarios passed, including the route-shaped peek and viewing-angle behavior.
-> Routes, movement, traffic, weather and fuel remain sample data. No Spectacles hardware has been tested. The route peek uses a bent schematic map and has no duration cap while the viewing angle is held. The submission video is still outstanding.
+> Traffic Insight now supports historical motorcycle travel estimates for the Barcelona main-office commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated. No Spectacles hardware has been tested. The route peek uses a bent schematic map and has no duration cap while the viewing angle is held. The submission video is still outstanding.
 
 ## Contents
 
@@ -55,7 +55,20 @@ stateDiagram-v2
 
 ![The map on the table with Home as Start, Office as Destination, labelled A/B dots and explicit total estimates.](docs/media/realistic-home-planning.png)
 
-**Go to office** asks which office, then displays the map. **Go home** opens the evening trip. The destination clarification is a fixed sample question; both office choices use the sample corridor.
+**Go to office** asks which office, then displays the map. **Go home** opens the evening trip. The main-office commute runs between Via Júlia in Nou Barris and DFactory in Zona Franca. Branch office uses the sample trip estimates and shows that it has no traffic history.
+
+The departure card compares leaving now with a lighter departure in the next hour. Each option shows ride duration and arrival time. A route pinch leaves immediately, including during a busy period. The chosen estimate carries through to the route peek, stopped cards and **Where am I?**.
+
+In the bundled Preview, use **Change sample time** while the map is open. The morning examples illustrate the decision.
+
+| Tuesday departure | What the rider sees |
+| --- | --- |
+| 07:30 | Good time to go. A takes 34 minutes. |
+| 08:00 | Busy. B takes 43 minutes and arrives at 08:43. Waiting until 08:30 gives a 34-minute ride on A and arrival at 09:04. |
+| 08:15 | Busy on both corridors. A takes 53 minutes and arrives at 09:08. Leaving at 08:30 would arrive four minutes earlier. |
+| 09:30 | Too little history to recommend a time. Either route can still be selected using the sample estimates. |
+
+The photo above shows the planning map from the previous Preview revision. An updated capture and in-editor verification of the departure card are pending. The collector can run with Lens Studio closed and export weekday estimates for both directions. [Collector setup and data sources](tools/traffic-history/README.md)
 
 The map is a **heading-up schematic**: the start is near the rider and the destination is ahead in either trip. Labels change from Home to Office to Office to Home. This is an illustrative layout, not a north-up geographic map.
 
@@ -177,6 +190,7 @@ All seven photographic source files passed SHA-256 verification. Earlier local r
 | C12 | No duration cap, pitch/yaw look-away and re-entry, explicit Hide route and re-arming | Pass |
 | C13 | Shared remaining estimates and hazard boundaries; actual caption button; no visual or progress change | Pass |
 | C14 | Blocked states, immediate alert/stop/arrival dismissal and no automatic reopening | Pass |
+| C15 | Departure advice, both busy-hour choices, sparse history and rider override | Pending Interactive Preview |
 
 Sound audibility, hardware hand tracking, daylight readability and real riding comfort are unverified. Logger checks still report existing SDK deprecation and renderer batching warnings; no runtime exceptions were observed during verification.
 
@@ -267,7 +281,7 @@ The route reasoning and validation are recorded in [decision 0006](docs/decision
 |---|---|
 | `TrafficInsight.esproj` | The Lens Studio project file |
 | `Assets/Scripts/` | The Lens's TypeScript components (see [Inside the Lens](#inside-the-lens)) |
-| `Assets/Tests/` | LEAF scenarios C1 to C14 and their shared driver |
+| `Assets/Tests/` | LEAF scenarios C1 to C15 and their shared driver |
 | `Assets/GeneratedMeshes/`, `Assets/GeneratedSFX/` | The table and city map models and the four sound effects, all made in code (no third-party assets) |
 | `Assets/Icons/`, `Assets/Materials/` | Material icons, route accents and native Preview PBR materials |
 | `Assets/Textures/PreviewSurfaces/` | CC0 photographic surfaces and sky, source manifest and texture credits |
@@ -355,6 +369,8 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Preview surroundings: home, street and office follow both trips, with day/evening and route-aware rain (C10; C1-C9 regression pass)
 - [x] Revision 2: route-shaped peek held by viewing angle, explicit dismissal and caption-only "Where am I?" answer (plan: [docs/plans/glance-while-riding.md](docs/plans/glance-while-riding.md))
 - [x] Preview realism: photographic surfaces, PBR shading and more detailed home, street and office geometry
+- [x] Add Barcelona weekday departure advice and an independent traffic collector
+- [ ] Run C15 and capture the departure card in Interactive Preview
 - [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
 
 ## The hackathon

@@ -31,7 +31,7 @@ The demo tells this as one day, in two trips that reuse the same map, alert and 
 | The Lens detects that I've pulled over | An "I've stopped" button on the Ride simulator panel |
 | Live traffic and crash reports | Hard-coded: a crash on morning route A that adds +18 min (default number) |
 | Live weather along the route | Hard-coded: rain on evening route A between km 4 and 7, 24 °C, heavy, "windy rain" (temperature, intensity and type are defaults) |
-| Route time and fuel from a routing service | Hard-coded sample values for 2 routes per trip (default numbers) |
+| Typical route time and fuel | Labeled sample times by default, or collected weekday motorcycle time estimates for the Barcelona main office. Fuel uses the two sample routes. |
 | Choosing a route by voice ("route B") | A button for every voice command, next to the pinch dots |
 | The map lies flat on a real table or wall, or floats about 1 m in front of me if there's no flat surface | A virtual table in the room for the planning view at home. At the roadside the map simply floats about 1 m in front of me, with no table |
 | The route drawn on the real road ahead (the real version needs my location and heading) | A mock street in the room with the route lines laid on it, shown only when I've stopped |
@@ -125,6 +125,12 @@ map data or a route overlay on the real road. C11-C14 retain their IDs with
 updated map/visibility criteria. This supersedes the straight-strip/two-second
 rules in the original revision-two plan and decision 0008.
 
+## Departure planning (approved 2026-11-24)
+
+15. After a destination is chosen, show a departure card on the planning map. In a good window recommend the quickest current route. During a busy window show a lighter departure and the quickest choice if leaving now, including A when B offers no improvement. Compare ride times and arrival clocks. Let the rider leave on either route in one pinch. Suppress timing advice for sparse history. Hide the card during the ride and use the chosen estimate for the route peek, caption and stopped comparison. LEAF C15 exercises the labeled sample scenarios through the normal controls.
+
+An independent collector samples each Barcelona corridor and direction every 15 minutes. Use weekday and local time to compare departures within the coming hour. At least three distinct matching dates support each estimate. The main-office commute connects Nou Barris and Zona Franca. The branch office uses its own fallback. [Collector and route details](../tools/traffic-history/README.md)
+
 ## Preview context (approved 2026-11-20)
 
 The background explains the current trip stage. Use one Preview setup with
@@ -157,21 +163,20 @@ These refine the original nine criteria. The approved glance exception is specif
 - Stop before the fork so both choices begin at the rider's actual position. The warning is at 10%, and unresolved simulator progress is capped at 14%, before the split. Picking B preserves position, elapsed cost and progress.
 - Only a hazard on the active route triggers an alert. B completes either sample trip without A's warning.
 - Planning cards report total time/fuel; stopped cards report remaining time/fuel. The rider card identifies the current route and elapsed minutes. Shared-end costs are equal across the two choices.
-- The recommendation is marked Fastest (time first, fuel second). Current and Alternative are separate labels. Rainy A remains fastest in the evening; dry B explicitly costs +12 min.
+- The recommendation is marked Fastest (time first, fuel second). Current and Alternative are separate labels. At the default evening sample time rainy A is fastest and dry B costs 12 minutes more. The comparison uses the selected departure time.
 - Hazard placement, kilometre labels and countdowns agree. The warning and rain card use the same timing helper; the card counts down if the rider advances before stopping.
 - Rain-cloud imagery consistently means rain. The preparation prompt says to put on a raincoat before riding; Skip reminder resumes without confirming preparation.
 - The compact reminder is below the map with both actions fully visible. While it is open, hide the start label below the map; keep the destination and rider card. C5 checks button corners in screen space.
 - Arrival says You've arrived. No arrival deadline is simulated.
 
 ## Out of scope
-- Real GPS, real navigation, live traffic and live weather (all hard-coded sample data).
+- Real GPS, turn guidance, live incident alerts and live weather. The crash and rain events are scripted.
 - Turn-by-turn directions while riding.
 - Detecting a real table or wall. The preview uses a virtual table for planning, and the map simply floats when I'm stopped.
 - Showing the route on the real road. The mock street is a stand-in; real location, heading and how well a line would sit on the right lane are untested.
 - Any route overlay on the road during the ride. The compact, requested route peek is the only approved riding visual exception.
 - Relying on voice recognition (every voice command has a button).
 - Editing saved shortcuts.
-- Data analytics, such as the best time to leave based on history.
 - Mood music. (Calm wording in the alert voice is in scope.)
 - Separate modes for cars or bicycles.
 
