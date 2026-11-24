@@ -1,6 +1,10 @@
 # TrafficInsight
 
-**A commute co-pilot for motorcycle riders on Snap Spectacles.** Plan a trip in your space, receive a brief warning when your route is affected, and pull over to compare the options before continuing.
+**TrafficInsight is an augmented-reality prototype for Snap Spectacles AR glasses.** It helps motorcycle commuters decide when to leave and which route to take. Before departure, the wearer can compare traffic and pinch a route on a map placed above the table.
+
+![Concept illustration of a commuter wearing black AR glasses while using a floating route map at home, with a motorcycle helmet on the table.](docs/media/ar-glasses-commute-planning.png)
+
+*Concept illustration of planning before a ride. The demo and screenshots below show the wearer’s view in Lens Studio’s Spectacles simulator. Hardware testing is pending.*
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
@@ -13,7 +17,7 @@ Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens St
 Follow a sample return commute from departure planning and the weekday graph through the riding glance, a rain alert, rerouting, and arrival.
 
 > **Preview realism revision, 2026-11-22.** Home, street and office now have photographic surfaces, PBR shading and more detailed geometry. TypeScript compilation, runtime startup and all 14 LEAF scenarios passed, including the route-shaped peek and viewing-angle behavior.
-> [Traffic Insight departure planning](#traffic-insight-departure-planning) adds a leave-now versus wait comparison for the Barcelona commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated. No Spectacles hardware has been tested.
+> [Traffic Insight departure planning](#traffic-insight-departure-planning) adds a leave-now versus wait comparison for the Barcelona commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated.
 
 ## Contents
 
