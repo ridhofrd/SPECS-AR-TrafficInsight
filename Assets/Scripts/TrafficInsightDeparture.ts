@@ -40,6 +40,13 @@ export interface WeekdayTraffic {
     minuteTicks: number[];
 }
 
+export function defaultTrafficWeekday(history: TrafficHistory, now: number): number {
+    if (history?.source === "sample") return WEEKDAYS.indexOf("Tue");
+    const slot = now - now % SLOT;
+    const day = history?.frames?.[slot]?.day;
+    return Math.max(0, WEEKDAYS.indexOf(day));
+}
+
 /** Axes are shared across all weekdays for this trip direction. */
 export function weekdayTraffic(history: TrafficHistory, trip: TripId, weekday: number, now: number): WeekdayTraffic {
     const sample = history && history.source === "sample";

@@ -160,14 +160,18 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     // ─── Cached pushed state (valid from onAwake, before the build) ────────
     private readonly departureDayEvent = new Event<number>()
     public get onDepartureDay(): PublicApi<number> { return this.departureDayEvent.publicApi() }
+    private readonly departureGraphToggle = new Event<boolean>()
+    public get onDepartureGraphToggle(): PublicApi<boolean> { return this.departureGraphToggle.publicApi() }
     private departure: DepartureAdvice | null = null
+    private showGraphRow: SceneObject | null = null
+    private graphToggleButtons: Button[] = []
     private departureNav: SceneObject | null = null
     private departureButtons: Button[] = []
     private outlook: WeekdayTraffic | null = null
     private weekdayChart: TrafficInsightWeekdayChart | null = null
     private departureNow: SceneObject | null = null
     private selectedWeekday = -1
-    private showWeekdays = false
+    private canShowGraph = false
     private departurePanel: SceneObject | null = null
     private departureLines: Text[] = []
     private visLabelA = false
@@ -239,12 +243,13 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.setLabelB(true)
     }
 
-    public setDeparture(advice: DepartureAdvice | null, outlook: WeekdayTraffic | null = null, weekday = -1, showWeekdays = false): void {
+    public setDeparture(advice: DepartureAdvice | null, outlook: WeekdayTraffic | null = null, weekday = -1, canShowGraph = false): void {
         this.departure = advice
         this.outlook = outlook
         this.selectedWeekday = weekday
-        this.showWeekdays = showWeekdays
-        this.showPanel(this.departureNav, showWeekdays)
+        this.canShowGraph = canShowGraph
+        this.showPanel(this.showGraphRow, canShowGraph && !outlook)
+        this.showPanel(this.departureNav, canShowGraph && !!outlook)
         this.applyDepartureButtons()
         this.showPanel(this.departurePanel, !!advice)
         this.weekdayChart?.draw(advice ? outlook : null)
@@ -411,7 +416,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     // ─── Apply cached state to visuals (null-safe, never throws) ───────────
 
     private applyAll(): void {
-        this.setDeparture(this.departure, this.outlook, this.selectedWeekday, this.showWeekdays)
+        this.setDeparture(this.departure, this.outlook, this.selectedWeekday, this.canShowGraph)
         if (this.labelDataA) this.applyLabel(this.labelA, this.labelDataA)
         if (this.labelDataB) this.applyLabel(this.labelB, this.labelDataB)
         this.applyProblem()
@@ -480,7 +485,8 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     }
 
     private applyDepartureButtons(): void {
-        this.departureButtons.forEach((button, index) => { button.inactive = !this.inputEnabled || index - 1 === this.selectedWeekday })
+        this.graphToggleButtons.forEach(button => { button.inactive = !this.inputEnabled })
+        this.departureButtons.forEach((button, index) => { button.inactive = !this.inputEnabled || index === this.selectedWeekday })
     }
 
     private applyInputEnabled(): void {
@@ -603,12 +609,18 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             line.horizontalOverflow = HorizontalOverflow.Shrink
         })
         const navigation = obj(content, "DepartureNavigation", new vec3(0, -6.65, 0))
-        this.departureNav = flexRow(navigation, width - 2, 3.4, {gap: 0.35, justify: FlexJustify.Center})
-        this.departureButtons = ["Now", ...WEEKDAYS].map((label, index) => {
-            const day = index - 1
-            const {button} = addButton(this.departureNav, label, 5, 3.4,
-                () => this.departureDayEvent.invoke(day), {variant: {shape: "Rectangle", style: "Secondary"}, padX: 0.25})
-            button.getSceneObject().name = day < 0 ? BUTTON_NAMES.departureNow : BUTTON_NAMES.departureWeekdayPrefix + label
+        const buttonOptions = {variant: {shape: "Rectangle", style: "Secondary"} as const, padX: 0.25}
+        this.showGraphRow = flexRow(navigation, width - 2, 3.4, {justify: FlexJustify.Center})
+        const show = addButton(this.showGraphRow, "Show traffic graph", 17, 3.4, () => this.departureGraphToggle.invoke(true), buttonOptions)
+        show.button.getSceneObject().name = BUTTON_NAMES.showDepartureGraph
+
+        this.departureNav = flexRow(navigation, width - 2, 3.4, {gap: 0.3, justify: FlexJustify.Center})
+        const hide = addButton(this.departureNav, "Hide graph", 9.6, 3.4, () => this.departureGraphToggle.invoke(false), buttonOptions)
+        hide.button.getSceneObject().name = BUTTON_NAMES.hideDepartureGraph
+        this.graphToggleButtons = [show.button, hide.button]
+        this.departureButtons = WEEKDAYS.map((label, day) => {
+            const {button} = addButton(this.departureNav, label, 4.6, 3.4, () => this.departureDayEvent.invoke(day), buttonOptions)
+            button.getSceneObject().name = BUTTON_NAMES.departureWeekdayPrefix + label
             return button
         })
         this.departurePanel = panel

@@ -22,7 +22,7 @@
  * contract log lines). Splitting it would scatter the one-way render rule.
  */
 
-import { branchAdvice, departureFor, isCollectedProfile, sampleCount, TrafficHistory, weekdayTraffic, WEEKDAYS } from "./TrafficInsightDeparture";
+import { branchAdvice, defaultTrafficWeekday, departureFor, isCollectedProfile, sampleCount, TrafficHistory, weekdayTraffic, WEEKDAYS } from "./TrafficInsightDeparture";
 import { TrafficInsightRideSimulatorUI } from "./TrafficInsightRideSimulatorUI";
 import { TrafficInsightTrafficLensUI } from "./TrafficInsightTrafficLensUI";
 import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
@@ -186,6 +186,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
     trafficProfileUrl: string = "";
 
     private weekday = -1;
+    private departureGraphOpen = false;
     private nextTrafficRefresh = 0;
     private trafficPending = false;
     private history: TrafficHistory = null;
@@ -292,10 +293,15 @@ export class TrafficInsightMain extends BaseScriptComponent {
         );
         this.roadView.onLineHover.add((e: { route: RouteId; on: boolean }) => this.aim(e.route, e.on));
 
-        this.lensUI.onDepartureDay.add(day => this.handle(day < 0 ? BUTTON_NAMES.departureNow :
-            BUTTON_NAMES.departureWeekdayPrefix + WEEKDAYS[day], () => {
+        this.lensUI.onDepartureGraphToggle.add(open => this.handle(open ? BUTTON_NAMES.showDepartureGraph : BUTTON_NAMES.hideDepartureGraph, () => {
             const core = this.sm.getCore();
             if (!visibilityFor(core).departureCard || core.office === "branch") return { changed: false };
+            this.departureGraphOpen = open;
+            if (open && this.weekday < 0) this.weekday = defaultTrafficWeekday(this.history, this.planningMinute);
+            return { changed: true };
+        }));
+        this.lensUI.onDepartureDay.add(day => this.handle(BUTTON_NAMES.departureWeekdayPrefix + WEEKDAYS[day], () => {
+            if (!this.departureGraphOpen) return { changed: false };
             this.weekday = day;
             return { changed: true };
         }));
@@ -359,6 +365,10 @@ export class TrafficInsightMain extends BaseScriptComponent {
         }
 
         const after = this.sm.getCore();
+        if (after.trip !== before.trip || after.office !== before.office) {
+            this.departureGraphOpen = false;
+            this.weekday = -1;
+        }
         if (after.state !== before.state) {
             this.glanceTrigger = spentGlance();
             this.glanceOpacity = 0;
@@ -529,11 +539,14 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.lensUI.setInputEnabled(inputOk);
         const times = core.departure && core.departure.minutes;
         const trip = core.trip;
-        const showWeekdays = vis.departureCard && core.office !== "branch" && trip !== "none";
-        if (!showWeekdays) this.weekday = -1;
-        const outlook = showWeekdays && this.weekday >= 0
+        const canShowGraph = vis.departureCard && core.office !== "branch" && trip !== "none";
+        if (!canShowGraph) {
+            this.weekday = -1;
+            this.departureGraphOpen = false;
+        }
+        const outlook = canShowGraph && this.departureGraphOpen
             ? weekdayTraffic(this.history, trip, this.weekday, this.planningMinute) : null;
-        this.lensUI.setDeparture(vis.departureCard ? core.departure : null, outlook, this.weekday, showWeekdays);
+        this.lensUI.setDeparture(vis.departureCard ? core.departure : null, outlook, this.weekday, canShowGraph);
         if (vis.labelA && core.trip !== "none") {
             const phase = core.state === "Stopped" ? "stopped" : "planning";
             const progress = core.state === "Stopped" ? core.progress : 0;
