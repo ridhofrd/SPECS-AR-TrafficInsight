@@ -52,7 +52,7 @@ stateDiagram-v2
 
 ## Traffic Insight departure planning
 
-![Interactive Preview at 17:30 in the sample return trip. B now arrives at 18:15. Waiting until 18:00 for A arrives at 18:36.](docs/media/traffic-insight-now.png)
+![The Now card in Interactive Preview shows a busy 17:45 return trip and the Show traffic graph button.](docs/media/traffic-insight-now.png)
 
 **Now** uses the latest paired traffic estimates for both routes and compares them with a typical lighter departure within the next hour. Fresh estimates count for up to 20 minutes. When they expire, the card labels its estimates as typical traffic. Each available option shows ride duration and estimated arrival time, so a shorter ride can still get you there later. Pinch either route to leave immediately. The estimate for the route you picked carries into the riding peek, **Where am I?**, and the stopped route comparison.
 
@@ -71,15 +71,15 @@ In Interactive Preview, pick **Go to office > Main office**. While the planning 
 
 ### Plan for another weekday
 
-![Interactive Preview showing typical travel minutes for routes A and B across the selected weekday.](docs/media/traffic-insight-weekday.png)
+![The Sunday graph in Interactive Preview shows typical travel minutes for routes A and B, day buttons, and the Hide graph control.](docs/media/traffic-insight-weekday.png)
 
-Choose **Mon** through **Sun** to see a graph for that day. The horizontal axis shows Barcelona departure time. The vertical axis shows typical ride minutes for route A in blue and route B in green. Lower points mean shorter rides. Both axes stay fixed as you switch days for the same commute direction. Missing intervals appear as gaps. Each plotted slot requires observations from at least three matching dates. Choose **Now** to return to current departure advice. The route cards below the graph always show the estimates for leaving now.
+Select **Show traffic graph**, then choose **Mon** through **Sun** to see that day's graph. The horizontal axis shows Barcelona departure time. The vertical axis shows typical ride minutes for route A in blue and route B in green. Lower points mean shorter rides. Both axes stay fixed as you switch days for the same commute direction. Missing intervals appear as gaps. Each plotted slot requires observations from at least three matching dates. Select **Hide graph** to return to current departure advice. Reopening the graph restores the weekday you last viewed for this plan. The route cards below the graph always show the estimates for leaving now.
 
 ### Use collected traffic history
 
 The independent collector can run while Lens Studio is closed. It records traffic-aware motorcycle trip estimates every 15 minutes and groups them by direction, Barcelona weekday and local time. A slot needs at least three matching dates before it can inform a recommendation. Live collection requires a TomTom API key and an HTTPS URL for the exported profile. During planning the Lens refreshes that profile at most once per minute. [Collector setup and route sources](tools/traffic-history/README.md)
 
-**Preview verification.** LEAF C15 passed in Interactive Preview on 2026-11-24. The Now screenshot shows a busy return trip, and the graph screenshot shows a sample Wednesday. [See the 17:00 good-time sample](docs/media/traffic-insight-departure.png).
+**Preview verification.** LEAF C15 passed in Interactive Preview on 2026-11-24. The Now screenshot shows a busy return trip, and the graph screenshot shows a sample Sunday. [See the 17:00 good-time sample](docs/media/traffic-insight-departure.png).
 
 ## Walkthrough
 
@@ -209,7 +209,7 @@ All seven photographic source files passed SHA-256 verification. Earlier local r
 | C12 | No duration cap, pitch/yaw look-away and re-entry, explicit Hide route and re-arming | Pass |
 | C13 | Shared remaining estimates and hazard boundaries; actual caption button; no visual or progress change | Pass |
 | C14 | Blocked states, immediate alert/stop/arrival dismissal and no automatic reopening | Pass |
-| C15 | Recent traffic, historical fallback, weekday route graphs and rider override | Pass (2026-11-24) |
+| C15 | Recent traffic, historical fallback, weekday graph open, hide, restore and rider override | Pass (2026-11-24) |
 
 Sound audibility, hardware hand tracking, daylight readability and real riding comfort are unverified. Logger checks still report existing SDK deprecation and renderer batching warnings; no runtime exceptions were observed during verification.
 
