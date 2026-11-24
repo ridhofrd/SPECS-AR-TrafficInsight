@@ -22,6 +22,7 @@
  * contract log lines). Splitting it would scatter the one-way render rule.
  */
 
+import { branchAdvice, departureFor, sampleCount, TrafficHistory } from "./TrafficInsightDeparture";
 import { TrafficInsightRideSimulatorUI } from "./TrafficInsightRideSimulatorUI";
 import { TrafficInsightTrafficLensUI } from "./TrafficInsightTrafficLensUI";
 import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
@@ -180,9 +181,20 @@ export class TrafficInsightMain extends BaseScriptComponent {
             rearmSec: this.glanceRearmSec, fadeInSec: this.glanceFadeInSec, fadeOutSec: this.glanceFadeOutSec };
     }
 
+    private history: TrafficHistory = null;
+    private sampleTime = 0;
+    private planningMinute = -1;
+
     onAwake(): void {
         TrafficInsightMain.instance = this;
-        this.sm = new TrafficInsightStateMachine();
+        try {
+            const asset = requireAsset("../TrafficHistory.json") as JsonAsset;
+            this.history = JSON.parse(asset.getString());
+        } catch (error) { tiWarn("Traffic history unavailable: " + error); }
+        this.sm = new TrafficInsightStateMachine((trip, office) => {
+            this.planningMinute = Math.floor(Date.now() / 60000);
+            return office === "branch" ? branchAdvice() : departureFor(this.history, trip, this.planningMinute, this.sampleTime);
+        });
         this.refsOk = this.validateInputs();
         if (!this.refsOk) {
             return;
@@ -199,6 +211,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             return null;
         }
         return {
+            departure: core.departure,
             glance: core.glance,
             glanceText: this.started && this.glanceStrip ? this.glanceStrip.getText() : core.glanceText,
             glanceSource: core.glanceSource,
@@ -244,6 +257,12 @@ export class TrafficInsightMain extends BaseScriptComponent {
                 this.sm.answerOffice(e.office)
             )
         );
+        ui.onSampleTime.add(() => this.handle(BUTTON_NAMES.sampleTime, () => {
+            const core = this.sm.getCore();
+            if (!this.canChangeSample(core)) return { changed: false };
+            this.sampleTime = (this.sampleTime + 1) % sampleCount;
+            return this.sm.refreshDeparture();
+        }));
         ui.onRide.add(() => this.handle(BUTTON_NAMES.ride, () => this.sm.ride(this.rideStep)));
         ui.onStopped.add(() => this.handle(BUTTON_NAMES.stopped, () => this.sm.stopped()));
         ui.onWhereAmI.add(() => this.handle(BUTTON_NAMES.whereAmI, () => this.sm.whereAmI()));
@@ -363,9 +382,18 @@ export class TrafficInsightMain extends BaseScriptComponent {
         this.logVisible(this.sm.getCore());
     }
 
+    private canChangeSample(core: StateCore): boolean {
+        return !!this.history && this.history.source === "sample" && core.office !== "branch" &&
+            core.state === "Planning" && core.planningStep === "map";
+    }
+
     private onUpdate(): void {
         if (!this.started) {
             return;
+        }
+        if (this.history && this.history.source === "collected" && this.planningMinute !== Math.floor(Date.now() / 60000)) {
+            this.planningMinute = Math.floor(Date.now() / 60000);
+            if (this.sm.refreshDeparture().changed) this.render();
         }
         if (this.confirmActive && getTime() - this.confirmStartTime >= Math.max(0.3, this.confirmDurationSec)) {
             this.confirmActive = false;
@@ -411,7 +439,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             (this.glanceTrigger.phase !== "Ready" || core.glance || this.headPitch() - this.glanceBaselineDeg >= this.glanceHideDeg));
         this.simulatorUI.setGlanceVisible(core.glance);
         const facts = core.trip !== "none" && core.activeRoute !== "none"
-            ? glanceFacts(core.trip, core.activeRoute, core.progress, core.alertFired) : null;
+            ? glanceFacts(core.trip, core.activeRoute, core.progress, core.alertFired, core.departure && core.departure.minutes) : null;
         this.glanceStrip.applyView(facts, visibilityFor(core).glanceStrip, this.glanceOpacity);
     }
 
@@ -440,6 +468,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         const routeChoiceOk =
             (core.state === "Planning" && core.planningStep === "map") || core.state === "Stopped";
         this.simulatorUI.setRouteChoiceEnabled(routeChoiceOk);
+        this.simulatorUI.setSampleTimeEnabled(this.canChangeSample(core));
         this.simulatorUI.setInputEnabled(inputOk);
 
         // Virtual table (a plain mesh, no scripts, so enabling it is safe)
@@ -459,11 +488,13 @@ export class TrafficInsightMain extends BaseScriptComponent {
 
         // Lens layer cards
         this.lensUI.setInputEnabled(inputOk);
+        const times = core.departure && core.departure.minutes;
+        this.lensUI.setDeparture(vis.departureCard ? core.departure : null);
         if (vis.labelA && core.trip !== "none") {
             const phase = core.state === "Stopped" ? "stopped" : "planning";
             const progress = core.state === "Stopped" ? core.progress : 0;
-            const a = routeLabel(core.trip, phase, "A", progress, core.activeRoute);
-            const b = routeLabel(core.trip, phase, "B", progress, core.activeRoute);
+            const a = routeLabel(core.trip, phase, "A", progress, core.activeRoute, times);
+            const b = routeLabel(core.trip, phase, "B", progress, core.activeRoute, times);
             this.lensUI.showRouteLabels(a, b);
             this.labelTextA = labelToText(a);
             this.labelTextB = labelToText(b);
@@ -473,14 +504,14 @@ export class TrafficInsightMain extends BaseScriptComponent {
             this.labelTextB = "";
         }
         if (vis.problemCard && core.trip !== "none" && core.alertKind !== "none") {
-            this.problemText = problemCardText(core.trip, core.progress);
+            this.problemText = problemCardText(core.trip, core.progress, times);
             this.lensUI.showProblemCard(core.alertKind, this.problemText);
         } else {
             this.lensUI.hideProblemCard();
             this.problemText = "";
         }
         if (vis.progressCard && core.trip !== "none") {
-            this.progressText = progressCardText(core.trip, core.activeRoute === "B" ? "B" : "A", core.progress);
+            this.progressText = progressCardText(core.trip, core.activeRoute === "B" ? "B" : "A", core.progress, times);
             this.lensUI.showProgressCard(this.progressText);
         } else {
             this.lensUI.hideProgressCard();
@@ -510,6 +541,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         const lens = this.lensUI.getVisibility();
         const road = this.roadView.getVisibility();
         return {
+            departureCard: lens.departureCard,
             glanceStrip: !!this.glanceStrip && this.glanceStrip.isVisible(),
             table: this.table.isEnabledInHierarchy,
             progressMarks: map.progressMarks,

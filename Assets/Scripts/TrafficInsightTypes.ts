@@ -136,6 +136,7 @@ export interface RoadViewState {
 
 /** Visibility flags of everything the LEAF tests assert on. */
 export interface LensVisibility {
+    departureCard: boolean;
     glanceStrip: boolean;
     /** The virtual table under the map: shown for the whole Planning state only. */
     table: boolean;
@@ -176,6 +177,7 @@ export interface DepartureAdvice {
 
 /** Domain state owned by TrafficInsightStateMachine. */
 export interface StateCore {
+    departure: DepartureAdvice | null;
     glance: boolean;
     glanceText: string;
     glanceSource: "lookDown" | "none";

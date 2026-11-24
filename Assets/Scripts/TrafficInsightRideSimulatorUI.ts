@@ -78,7 +78,7 @@ const CAPTION_H = 5.5
 const CAPTION_PLACEHOLDER = "Captions appear here"
 
 /** Which gate a button obeys besides the global input flag. */
-type ButtonGroup = "trip" | "ride" | "route" | "dialog" | "glance"
+type ButtonGroup = "trip" | "ride" | "route" | "dialog" | "glance" | "sample"
 
 interface ButtonSlot {
   name: string
@@ -142,6 +142,16 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     this.applyButtonStates()
   }
 
+  private readonly sampleTimeEvent = new Event<void>()
+  public get onSampleTime(): PublicApi<void> { return this.sampleTimeEvent.publicApi() }
+  private sampleEnabled = false
+  private sampleRow: SceneObject | null = null
+  public setSampleTimeEnabled(enabled: boolean): void {
+    if (this.sampleEnabled === enabled) return
+    this.sampleEnabled = enabled
+    this.applyButtonStates()
+  }
+
   private readonly chooseRouteEvent = new Event<{route: RouteId}>()
   public get onChooseRoute(): PublicApi<{route: RouteId}> {
     return this.chooseRouteEvent.publicApi()
@@ -173,6 +183,7 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
   private arrivedFlag: ElementContent | null = null
   private captionText: Text | null = null
   private readonly slots: ButtonSlot[] = [
+    {name: BUTTON_NAMES.sampleTime, group: "sample", button: null, content: null},
     {name: BUTTON_NAMES.goToOffice, group: "trip", button: null, content: null},
     {name: BUTTON_NAMES.goHome, group: "trip", button: null, content: null},
     {name: BUTTON_NAMES.ride, group: "ride", button: null, content: null},
@@ -407,6 +418,10 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
     this.makeButton(askRow, BUTTON_NAMES.whereAmI, "Where am I?", BTN_W, BTN_H, undefined, () => this.whereAmIEvent.invoke())
     this.makeButton(askRow, BUTTON_NAMES.hideRoute, "Hide route", BTN_W, BTN_H, undefined, () => this.hideRouteEvent.invoke())
 
+    this.sampleRow = flexRow(column, ROW_W, BTN_H, {justify: FlexJustify.Center})
+    this.makeButton(this.sampleRow, BUTTON_NAMES.sampleTime, "Change sample time", ROW_W, BTN_H,
+      undefined, () => this.sampleTimeEvent.invoke())
+
     // 8. Caption (wrapped) beside the closed-caption icon
     const captionRow = flexRow(column, ROW_W, CAPTION_H, {
       gap: ROW_ICON_GAP,
@@ -591,10 +606,11 @@ export class TrafficInsightRideSimulatorUI extends BaseScriptComponent {
 
   private applyButtonStates(): void {
     // Controls behind a visible dialog go inactive (UIKit has no modal dialog component).
+    if (this.sampleRow) this.sampleRow.enabled = this.sampleEnabled
     const dialogBlocks = this.clarifyVisible && this.dialogPanel !== null
     for (const slot of this.slots) {
       if (!slot.button || isNull(slot.button)) continue
-      const rowFlag = slot.group === "route" ? this.routeChoiceEnabled : slot.group === "glance" ? this.glanceVisible : true
+      const rowFlag = slot.group === "route" ? this.routeChoiceEnabled : slot.group === "glance" ? this.glanceVisible : slot.group === "sample" ? this.sampleEnabled : true
       const notBlocked = !dialogBlocks || slot.group === "dialog"
       const inactive = !(this.inputEnabled && rowFlag && notBlocked)
       slot.button.inactive = inactive

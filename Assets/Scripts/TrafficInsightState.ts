@@ -12,6 +12,8 @@
 
 import {
     AudioCue,
+    DepartureAdvice,
+    TripId,
     IntentResult,
     LensVisibility,
     MapView,
@@ -66,16 +68,27 @@ export class TrafficInsightStateMachine {
     private lastCaption: string = CAPTIONS.idle;
     private lastAudioCue: AudioCue = "none";
 
-    constructor() {}
+    private departure: DepartureAdvice = null;
+
+    constructor(private readonly lookup?: (trip: TripId, office: OfficeOrNone) => DepartureAdvice) {}
+
+    refreshDeparture(): IntentResult {
+        if (!this.lookup || this.trip === "none" || this.state !== "Planning" || this.planningStep !== "map") return this.idleResult();
+        this.departure = this.lookup(this.trip, this.office);
+        return { changed: true };
+    }
+
+    private get times() { return this.departure && this.departure.minutes; }
 
     /** Fresh copy every call. */
     getCore(): StateCore {
         const recommendedRoute: RouteOrNone =
-            this.trip === "none" ? "none" : recommend(this.trip, this.alertFired ? "stopped" : "planning");
+            this.trip === "none" ? "none" : recommend(this.trip, this.alertFired ? "stopped" : "planning", this.times);
         return {
+            departure: this.departure,
             glance: this.glance,
             glanceText: this.glance && this.trip !== "none" && this.activeRoute !== "none"
-                ? glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired).text : "",
+                ? glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired, this.times).text : "",
             glanceSource: this.glance ? "lookDown" : "none",
             state: this.state,
             planningStep: this.planningStep,
@@ -114,11 +127,14 @@ export class TrafficInsightStateMachine {
         if (this.state === "Riding" || this.state === "Stopped") {
             return this.apply({ changed: false, caption: CAPTIONS.tripBlocked });
         }
+        const fromBranch = this.office === "branch" && (this.state === "Arrived" && this.trip === "morning" ||
+            this.state === "Planning" && this.trip === "evening");
         this.resetTrip();
         this.trip = "evening";
-        this.office = "none";
+        this.office = fromBranch ? "branch" : "none";
         this.state = "Planning";
         this.planningStep = "map";
+        this.refreshDeparture();
         return this.apply({ changed: true, caption: planningMapCaption("evening", "none") });
     }
 
@@ -127,6 +143,7 @@ export class TrafficInsightStateMachine {
         this.trip = "morning";
         this.office = office;
         this.planningStep = "map";
+        this.refreshDeparture();
         return this.apply({ changed: true, caption: planningMapCaption("morning", office) });
     }
 
@@ -197,7 +214,7 @@ export class TrafficInsightStateMachine {
             this.state = "Alerted";
             this.alertFired = true;
             this.alertKind = def.alertKind;
-            return this.apply({ changed: true, caption: alertLine(trip, this.progress), cue: CUES.alert, speak: true });
+            return this.apply({ changed: true, caption: alertLine(trip, this.progress, this.times), cue: CUES.alert, speak: true });
         }
         if (p >= 1 - EPS) {
             this.progress = 1;
@@ -283,7 +300,7 @@ export class TrafficInsightStateMachine {
             return this.apply({ changed: false, caption: "Ask while riding." });
         }
         return this.apply({ changed: true,
-            caption: glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired).sentence, speak: true });
+            caption: glanceFacts(this.trip, this.activeRoute, this.progress, this.alertFired, this.times).sentence, speak: true });
     }
 
     /** Records a cue played outside an intent (Main records ButtonClick before an intent). */
@@ -303,6 +320,7 @@ export class TrafficInsightStateMachine {
     }
 
     private resetTrip(): void {
+        this.departure = null;
         this.progress = 0;
         this.activeRoute = "none";
         this.alertFired = false;
@@ -328,6 +346,7 @@ export class TrafficInsightStateMachine {
 
 function hiddenVisibility(): LensVisibility {
     return {
+        departureCard: false,
         glanceStrip: false,
         table: false,
         progressMarks: false,
@@ -360,6 +379,7 @@ export function visibilityFor(core: StateCore): LensVisibility {
         if (core.planningStep === "clarify") {
             v.clarifyQuestion = true;
         } else if (core.planningStep === "map") {
+            v.departureCard = !!core.departure;
             v.map = v.routeA = v.routeB = v.dotA = v.dotB = v.labelA = v.labelB = true;
         }
     } else if (core.state === "Stopped") {

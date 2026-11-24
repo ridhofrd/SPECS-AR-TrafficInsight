@@ -31,7 +31,7 @@ import {
     makeCardRect,
 } from "./UIKitHelpers"
 import {tiLog, tiWarn, tiError, ROOT_NAMES, BUTTON_NAMES} from "./TrafficInsightSceneContracts"
-import {ProblemKind, RouteLabelData} from "./TrafficInsightTypes"
+import {DepartureAdvice, ProblemKind, RouteLabelData} from "./TrafficInsightTypes"
 import {CAPTIONS, labelToText} from "./TrafficInsightTripData"
 
 // ─── Palette (additive display: mid-tone plates, bright text, no near-black) ─
@@ -156,6 +156,9 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     }
 
     // ─── Cached pushed state (valid from onAwake, before the build) ────────
+    private departure: DepartureAdvice | null = null
+    private departurePanel: SceneObject | null = null
+    private departureLines: Text[] = []
     private visLabelA = false
     private visLabelB = false
     private visProblemCard = false
@@ -225,6 +228,15 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.setLabelB(true)
     }
 
+    public setDeparture(advice: DepartureAdvice | null): void {
+        this.departure = advice
+        this.showPanel(this.departurePanel, !!advice)
+        if (!advice || !this.departureLines.length) return
+        const lines = [advice.context, advice.headline, advice.now, advice.later]
+        this.departureLines.forEach((line, i) => { line.text = lines[i] })
+        this.departureLines[1].textFill.color = advice.status === "busy" ? AMBER : advice.status === "good" ? MINT : TEXT_PRIMARY
+    }
+
     public hideRouteLabels(): void {
         this.setLabelA(false)
         this.setLabelB(false)
@@ -279,6 +291,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     }
 
     public hideAll(): void {
+        this.setDeparture(null)
         this.setLabelA(false)
         this.setLabelB(false)
         this.setProblemCard(false)
@@ -288,6 +301,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     }
 
     public getVisibility(): {
+        departureCard: boolean
         labelA: boolean
         labelB: boolean
         problemCard: boolean
@@ -296,6 +310,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         alertIcon: boolean
     } {
         return {
+            departureCard: !!this.departurePanel && this.departurePanel.isEnabledInHierarchy,
             labelA: this.visLabelA,
             labelB: this.visLabelB,
             problemCard: this.visProblemCard,
@@ -378,6 +393,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     // ─── Apply cached state to visuals (null-safe, never throws) ───────────
 
     private applyAll(): void {
+        this.setDeparture(this.departure)
         if (this.labelDataA) this.applyLabel(this.labelA, this.labelDataA)
         if (this.labelDataB) this.applyLabel(this.labelB, this.labelDataB)
         this.applyProblem()
@@ -498,6 +514,9 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
                 this.labelB = this.buildLabel(this.panelLabelB, MINT)
             }
         })
+        this.safeBuild("departureCard", () => {
+            if (rootA && rootB) this.buildDeparture(rootA, rootB)
+        })
         this.safeBuild("problemCard", () => {
             if (rootProblem) {
                 this.panelProblem = this.panelOf(rootProblem)
@@ -533,6 +552,31 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         } catch (e) {
             tiError("TrafficInsightTrafficLensUI: build " + surface + " failed: " + e)
         }
+    }
+
+    private buildDeparture(rootA: SceneObject, rootB: SceneObject): void {
+        const center = rootA.getTransform().getWorldPosition().add(rootB.getTransform().getWorldPosition()).uniformScale(0.5)
+        const width = 38, height = 10
+        const panel = obj(rootA.getParent(), "DepartureCard")
+        panel.getTransform().setWorldPosition(center.add(new vec3(0, (LABEL_H + height) / 2 + 2, 0)))
+        this.canvases.push(this.ensureCanvas(panel, width, height))
+        const plate = makeCardRect(obj(panel, "Backing"), width, height, {
+            color: SLATE_PLATE, border: true, cornerRadius: CARD_CORNER,
+        })
+        plate.borderColor = SKY
+        plate.borderSize = CARD_BORDER
+        const column = flexColumn(contentHost(panel), width - 2, height - 1, {gap: 0.2, justify: FlexJustify.Center})
+        this.departureLines = [
+            dynamicText(column, "", "Caption", width - 2, 1.7, TEXT_SECONDARY),
+            dynamicText(column, "", "Callout", width - 2, 2.2, TEXT_PRIMARY),
+            dynamicText(column, "", "Body", width - 2, 1.9, TEXT_PRIMARY),
+            dynamicText(column, "", "Body", width - 2, 1.9, TEXT_PRIMARY),
+        ]
+        this.departureLines.forEach(line => {
+            line.horizontalAlignment = HorizontalAlignment.Left
+            line.horizontalOverflow = HorizontalOverflow.Shrink
+        })
+        this.departurePanel = panel
     }
 
     /** Route label card: plate + [star | title] + time / fuel / weather. */
