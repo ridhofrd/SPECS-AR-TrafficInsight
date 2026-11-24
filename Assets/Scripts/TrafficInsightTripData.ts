@@ -20,6 +20,7 @@ import {
     ProblemKind,
     ProblemSpan,
     RouteId,
+    RouteMinutes,
     RouteOrNone,
     RouteLabelData,
     SfxCue,
@@ -259,21 +260,22 @@ export function slicePolyline(points: MapPoint[], fromFraction: number, toFracti
     return out;
 }
 
-export function routeStats(trip: TripId, phase: TripPhase, route: RouteId): RouteStats {
+export function routeStats(trip: TripId, phase: TripPhase, route: RouteId, times?: RouteMinutes): RouteStats {
     const def = getTrip(trip);
     const table = phase === "stopped" ? def.stopped : def.planning;
-    return route === "A" ? table.A : table.B;
+    const stats = table[route];
+    return times ? { ...stats, timeMin: times[route] + stats.deltaMin } : stats;
 }
 
 /** Costs from the actual rider position, not a second whole-trip estimate. */
-export function remainingStats(trip: TripId, phase: TripPhase, route: RouteId, progress: number): RouteStats {
-    const planned = getTrip(trip).planning[route];
-    const updated = routeStats(trip, phase, route);
+export function remainingStats(trip: TripId, phase: TripPhase, route: RouteId, progress: number, times?: RouteMinutes): RouteStats {
+    const planned = routeStats(trip, "planning", route, times);
+    const updated = routeStats(trip, phase, route, times);
     const problem = getTrip(trip).problem;
     const passedProblem = clamp01((progress - problem.fromFraction) / (problem.toFraction - problem.fromFraction));
     const delay = Math.max(0, updated.timeMin - planned.timeMin) * (1 - passedProblem);
     return {
-        timeMin: Math.max(0, planned.timeMin - plannedMinutesAt(trip, route, progress) + delay),
+        timeMin: Math.max(0, planned.timeMin - plannedMinutesAt(trip, route, progress, times) + delay),
         deltaMin: delay,
         fuelL: Math.max(0, planned.fuelL - sharedLegValueAt(trip, progress, planned.fuelL, 0.05)),
         weather: updated.weather,
@@ -281,11 +283,11 @@ export function remainingStats(trip: TripId, phase: TripPhase, route: RouteId, p
 }
 
 /** One account of the remaining trip, shared by the glance and voice/caption. */
-export function glanceFacts(trip: TripId, route: RouteId, progress: number, hazardKnown: boolean): GlanceFacts {
+export function glanceFacts(trip: TripId, route: RouteId, progress: number, hazardKnown: boolean, times?: RouteMinutes): GlanceFacts {
     const def = getTrip(trip);
     const p = clamp01(progress);
     const phase = hazardKnown ? "stopped" : "planning";
-    const remaining = remainingStats(trip, phase, route, p).timeMin;
+    const remaining = remainingStats(trip, phase, route, p, times).timeMin;
     const minutesLeft = Math.round(remaining);
     const span = problemSpan(trip);
     const affected = hazardKnown && route === span.route && p < span.toFraction;
@@ -293,7 +295,7 @@ export function glanceFacts(trip: TripId, route: RouteId, progress: number, haza
     if (affected) {
         const before = p < span.fromFraction;
         const target = before ? span.fromFraction : span.toFraction;
-        const minutes = Math.max(1, Math.round(remaining - remainingStats(trip, phase, route, target).timeMin));
+        const minutes = Math.max(1, Math.round(remaining - remainingStats(trip, phase, route, target, times).timeMin));
         const name = span.kind === "rain" ? "Rain" : "Crash";
         next = name + (before ? " in " : span.kind === "rain" ? " ends in " : " clears in ") + minutes + " min";
     }
@@ -307,9 +309,9 @@ export function glanceFacts(trip: TripId, route: RouteId, progress: number, haza
 }
 
 /** Recommended route: least time, then least fuel; ties go to A. */
-export function recommend(trip: TripId, phase: TripPhase): RouteId {
-    const a = routeStats(trip, phase, "A");
-    const b = routeStats(trip, phase, "B");
+export function recommend(trip: TripId, phase: TripPhase, times?: RouteMinutes): RouteId {
+    const a = routeStats(trip, phase, "A", times);
+    const b = routeStats(trip, phase, "B", times);
     if (a.timeMin !== b.timeMin) {
         return a.timeMin < b.timeMin ? "A" : "B";
     }
@@ -320,12 +322,12 @@ export function recommend(trip: TripId, phase: TripPhase): RouteId {
 }
 
 /** Label card data for one route in one phase. */
-export function routeLabel(trip: TripId, phase: TripPhase, route: RouteId, progress: number = 0, activeRoute: RouteOrNone = "none"): RouteLabelData {
-    const stats = remainingStats(trip, phase, route, progress);
-    const recommended = recommend(trip, phase) === route;
+export function routeLabel(trip: TripId, phase: TripPhase, route: RouteId, progress: number = 0, activeRoute: RouteOrNone = "none", times?: RouteMinutes): RouteLabelData {
+    const stats = remainingStats(trip, phase, route, progress, times);
+    const recommended = recommend(trip, phase, times) === route;
     const stopped = phase === "stopped";
     const rainy = stopped && trip === "evening" && route === getTrip(trip).problem.route;
-    const fastest = remainingStats(trip, phase, recommend(trip, phase), progress);
+    const fastest = remainingStats(trip, phase, recommend(trip, phase, times), progress, times);
     const extra = Math.round(stats.timeMin - fastest.timeMin);
     const weather = rainy ? "Heavy rain, " + RAIN.temperatureC + " °C" : stats.weather;
     return {
@@ -354,25 +356,25 @@ export function problemSpan(trip: TripId): ProblemSpan {
     };
 }
 
-export function problemCardText(trip: TripId, progress: number = getTrip(trip).alertAtProgress): string {
+export function problemCardText(trip: TripId, progress: number = getTrip(trip).alertAtProgress, times?: RouteMinutes): string {
     const def = getTrip(trip);
     if (def.alertKind === "crash") return "Route A: crash ahead\nTraffic stalled · +18 min delay";
-    const minutes = minutesToProblem(trip, progress);
+    const minutes = minutesToProblem(trip, progress, times);
     return "Route A: rain in " + minutes + " min\nkm " + def.problem.km + " · " + RAIN.temperatureC + " °C\n" + RAIN.intensity + ", " + RAIN.type;
 }
 
-export function alertLine(trip: TripId, progress: number = getTrip(trip).alertAtProgress): string {
+export function alertLine(trip: TripId, progress: number = getTrip(trip).alertAtProgress, times?: RouteMinutes): string {
     const def = getTrip(trip);
     if (def.alertKind === "crash") {
         return "Crash ahead on your route, traffic is stalled. Pull over to see options.";
     }
-    const minutes = minutesToProblem(trip, progress);
+    const minutes = minutesToProblem(trip, progress, times);
     return "Rain on your route in " + minutes + " minutes. Pull over to see options.";
 }
 
-function minutesToProblem(trip: TripId, progress: number): number {
+function minutesToProblem(trip: TripId, progress: number, times?: RouteMinutes): number {
     const problem = getTrip(trip).problem;
-    return Math.max(1, Math.round(plannedMinutesAt(trip, problem.route, problem.fromFraction) - plannedMinutesAt(trip, problem.route, progress)));
+    return Math.max(1, Math.round(plannedMinutesAt(trip, problem.route, problem.fromFraction, times) - plannedMinutesAt(trip, problem.route, progress, times)));
 }
 
 /** Both options share the same approach and final road, in both travel directions. */
@@ -386,8 +388,10 @@ export function sharedApproachFraction(trip: TripId): number {
  * spent on its branch. Changing routes before the fork cannot change time
  * already ridden. These are simulation estimates, not a real routing service.
  */
-export function plannedMinutesAt(trip: TripId, route: RouteId, progress: number): number {
-    return sharedLegValueAt(trip, progress, getTrip(trip).planning[route].timeMin, 4);
+export function plannedMinutesAt(trip: TripId, route: RouteId, progress: number, times?: RouteMinutes): number {
+    const total = times ? times[route] : getTrip(trip).planning[route].timeMin;
+    const shared = times ? Math.min(4, times.A / 2, times.B / 2) : 4;
+    return sharedLegValueAt(trip, progress, total, shared);
 }
 
 function sharedLegValueAt(trip: TripId, progress: number, total: number, shared: number): number {
@@ -408,8 +412,8 @@ export function progressLabel(trip: TripId): string {
 }
 
 /** Rider identity and elapsed sample minutes, separate from the costs still ahead. */
-export function progressCardText(trip: TripId, route: RouteId, progress: number): string {
-    return "You are here · " + route + "\n" + Math.round(plannedMinutesAt(trip, route, progress)) + " min ridden";
+export function progressCardText(trip: TripId, route: RouteId, progress: number, times?: RouteMinutes): string {
+    return "You are here · " + route + "\n" + Math.round(plannedMinutesAt(trip, route, progress, times)) + " min ridden";
 }
 
 /** "Main office trip: pick a route." / "Branch office trip: ..." / "Home trip: ..." */

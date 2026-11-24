@@ -164,6 +164,16 @@ export interface LensVisibility {
     clarifyQuestion: boolean;
 }
 
+export interface RouteMinutes { A: number; B: number }
+export interface DepartureAdvice {
+    status: "good" | "busy" | "unknown";
+    context: string;
+    headline: string;
+    now: string;
+    later: string;
+    minutes: RouteMinutes | null;
+}
+
 /** Domain state owned by TrafficInsightStateMachine. */
 export interface StateCore {
     glance: boolean;
