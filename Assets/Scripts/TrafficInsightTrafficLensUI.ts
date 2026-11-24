@@ -31,7 +31,8 @@ import {
     makeCardRect,
 } from "./UIKitHelpers"
 import {tiLog, tiWarn, tiError, ROOT_NAMES, BUTTON_NAMES} from "./TrafficInsightSceneContracts"
-import {WEEKDAYS} from "./TrafficInsightDeparture"
+import {TrafficInsightWeekdayChart} from "./TrafficInsightWeekdayChart"
+import {WEEKDAYS, WeekdayTraffic} from "./TrafficInsightDeparture"
 import {DepartureAdvice, ProblemKind, RouteLabelData} from "./TrafficInsightTypes"
 import {CAPTIONS, labelToText} from "./TrafficInsightTripData"
 
@@ -162,7 +163,9 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
     private departure: DepartureAdvice | null = null
     private departureNav: SceneObject | null = null
     private departureButtons: Button[] = []
-    private outlook: string[] | null = null
+    private outlook: WeekdayTraffic | null = null
+    private weekdayChart: TrafficInsightWeekdayChart | null = null
+    private departureNow: SceneObject | null = null
     private selectedWeekday = -1
     private showWeekdays = false
     private departurePanel: SceneObject | null = null
@@ -236,7 +239,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.setLabelB(true)
     }
 
-    public setDeparture(advice: DepartureAdvice | null, outlook: string[] | null = null, weekday = -1, showWeekdays = false): void {
+    public setDeparture(advice: DepartureAdvice | null, outlook: WeekdayTraffic | null = null, weekday = -1, showWeekdays = false): void {
         this.departure = advice
         this.outlook = outlook
         this.selectedWeekday = weekday
@@ -244,10 +247,12 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         this.showPanel(this.departureNav, showWeekdays)
         this.applyDepartureButtons()
         this.showPanel(this.departurePanel, !!advice)
-        if (!advice || !this.departureLines.length) return
-        const lines = outlook || [advice.context, advice.headline, advice.now, advice.later]
+        this.weekdayChart?.draw(advice ? outlook : null)
+        this.showPanel(this.departureNow, !!advice && !outlook)
+        if (!advice || outlook || !this.departureLines.length) return
+        const lines = [advice.context, advice.headline, advice.now, advice.later]
         this.departureLines.forEach((line, i) => { line.text = lines[i] })
-        this.departureLines[1].textFill.color = outlook ? TEXT_PRIMARY : advice.status === "busy" ? AMBER : advice.status === "good" ? MINT : TEXT_PRIMARY
+        this.departureLines[1].textFill.color = advice.status === "busy" ? AMBER : advice.status === "good" ? MINT : TEXT_PRIMARY
     }
 
     public hideRouteLabels(): void {
@@ -574,7 +579,7 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
 
     private buildDeparture(rootA: SceneObject, rootB: SceneObject): void {
         const center = rootA.getTransform().getWorldPosition().add(rootB.getTransform().getWorldPosition()).uniformScale(0.5)
-        const width = 46, height = 15
+        const width = 46, height = 18.5
         const panel = obj(rootA.getParent(), "DepartureCard")
         panel.getTransform().setWorldPosition(center.add(new vec3(0, (LABEL_H + height) / 2 + 2, 0)))
         this.canvases.push(this.ensureCanvas(panel, width, height))
@@ -583,7 +588,10 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
         })
         plate.borderColor = SKY
         plate.borderSize = CARD_BORDER
-        const column = flexColumn(contentHost(panel), width - 2, height - 1, {gap: 0.2, justify: FlexJustify.Center})
+        const content = contentHost(panel)
+        this.weekdayChart = new TrafficInsightWeekdayChart(content, SKY, MINT)
+        this.departureNow = obj(content, "DepartureNow", new vec3(0, 2.1, 0))
+        const column = flexColumn(this.departureNow, width - 2, 9.5, {gap: 0.35, justify: FlexJustify.Center})
         this.departureLines = [
             dynamicText(column, "", "Caption", width - 2, 1.7, TEXT_SECONDARY),
             dynamicText(column, "", "Callout", width - 2, 2.2, TEXT_PRIMARY),
@@ -594,7 +602,8 @@ export class TrafficInsightTrafficLensUI extends BaseScriptComponent {
             line.horizontalAlignment = HorizontalAlignment.Left
             line.horizontalOverflow = HorizontalOverflow.Shrink
         })
-        this.departureNav = flexRow(column, width - 2, 3.4, {gap: 0.35, justify: FlexJustify.Center})
+        const navigation = obj(content, "DepartureNavigation", new vec3(0, -6.65, 0))
+        this.departureNav = flexRow(navigation, width - 2, 3.4, {gap: 0.35, justify: FlexJustify.Center})
         this.departureButtons = ["Now", ...WEEKDAYS].map((label, index) => {
             const day = index - 1
             const {button} = addButton(this.departureNav, label, 5, 3.4,

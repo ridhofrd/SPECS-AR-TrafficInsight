@@ -32,33 +32,54 @@ function tripTitle(trip: TripId): string {
     return trip === "morning" ? "Nou Barris → Zona Franca" : "Zona Franca → Nou Barris";
 }
 
-export function weekdayOutlook(history: TrafficHistory, trip: TripId, weekday: number, now: number): string[] {
-    const day = WEEKDAYS[weekday];
+export interface WeekdayTraffic {
+    title: string;
+    source: string;
+    slots: { minute: number; times: RouteMinutes }[];
+    timeTicks: number[];
+    minuteTicks: number[];
+}
+
+/** Axes are shared across all weekdays for this trip direction. */
+export function weekdayTraffic(history: TrafficHistory, trip: TripId, weekday: number, now: number): WeekdayTraffic {
     const sample = history && history.source === "sample";
     const base = trip === "morning" ? 450 : 1020;
     const demo = sample ? sampleFrames(trip, base) : null;
-    const source = sample ? "Sample history" : "Historical typical travel times";
-    const slots: {minute: number; route: string; duration: number}[] = [];
-    const shift = weekday === 1 ? 0 : weekday >= 5 ? 60 : weekday % 2 === 0 ? 15 : -15;
-    for (let minute = 0; minute < 1440; minute += SLOT) {
-        const example = demo && demo[minute - shift] && demo[minute - shift][trip];
-        const bin = example ? {A: example.A + weekday - 1, B: example.B + weekday - 1, days: example.days}
-            : !sample && isCollectedProfile(history) && now < history.validUntil && history.week
-                ? history.week[[trip, day, minute].join("/")] : null;
-        if (!validBin(bin)) continue;
-        const route = recommend(trip, "planning", bin);
-        slots.push({minute, route, duration: bin[route]});
-    }
-    const context = source + " · " + day + " · " + tripTitle(trip);
-    if (slots.length < 2) return [context, "Still learning this weekday", "Each estimate needs at least three matching dates.", "Route cards below still apply to leaving now."];
-    const lighter = slots.reduce((a, b) => a.duration <= b.duration ? a : b);
-    const busiest = slots.reduce((a, b) => a.duration >= b.duration ? a : b);
-    const describe = (window: typeof lighter) => clock(window.minute) + "–" + clock(window.minute + SLOT) + " · route " + window.route + " · " + window.duration + " min";
-    if (lighter.duration === busiest.duration) {
-        return [context, "Similar ride times across sampled slots", describe(lighter), "Route cards below still apply to leaving now."];
-    }
-    return [context, "Lighter window · " + describe(lighter), "Busiest sampled · " + describe(busiest), "Route cards below still apply to leaving now."];
+    const week = isCollectedProfile(history) && now < history.validUntil ? history.week : null;
+    const slots: WeekdayTraffic["slots"] = [];
+    let earliest = 1440, latest = 0, longest = 0;
+
+    WEEKDAYS.forEach((day, index) => {
+        const shift = index === 1 ? 0 : index >= 5 ? 60 : index % 2 === 0 ? 15 : -15;
+        for (let minute = 0; minute < 1440; minute += SLOT) {
+            const example = demo && demo[minute - shift] && demo[minute - shift][trip];
+            const sampleOffset = index >= 5 ? -Math.round((Math.min(example?.A ?? 0, example?.B ?? 0) - 25) / 3) : index - 1;
+            const bin = example ? { A: example.A + sampleOffset, B: example.B + sampleOffset, days: example.days }
+                : week && week[trip + "/" + day + "/" + minute];
+            if (!validBin(bin)) continue;
+            earliest = Math.min(earliest, minute);
+            latest = Math.max(latest, minute + SLOT);
+            longest = Math.max(longest, bin.A, bin.B);
+            if (index === weekday) slots.push({ minute, times: {A: bin.A, B: bin.B} });
+        }
+    });
+
+    const hours = Math.max(1, Math.ceil((latest - earliest) / 360));
+    const step = (hours > 2 ? hours * 2 : hours) * 60;
+    const start = Math.floor(earliest / step) * step;
+    const end = Math.min(1440, Math.ceil(latest / step) * step);
+    const timeTicks: number[] = [];
+    for (let minute = start; minute <= end; minute += step) timeTicks.push(minute);
+    if (timeTicks.length && timeTicks[timeTicks.length - 1] < end) timeTicks.push(end);
+    const rideStep = Math.max(10, Math.ceil(longest / 30) * 10);
+    return {
+        title: WEEKDAYS[weekday] + " · Typical travel time",
+        source: sample ? "Sample history" : "Collected history",
+        slots, timeTicks, minuteTicks: [0, rideStep, rideStep * 2, rideStep * 3],
+    };
 }
+
+export const TRAFFIC_SLOT_MINUTES = SLOT;
 
 function clock(minute: number): string {
     const m = (minute % 1440 + 1440) % 1440;

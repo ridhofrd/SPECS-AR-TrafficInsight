@@ -22,7 +22,7 @@
  * contract log lines). Splitting it would scatter the one-way render rule.
  */
 
-import { branchAdvice, departureFor, isCollectedProfile, sampleCount, TrafficHistory, weekdayOutlook, WEEKDAYS } from "./TrafficInsightDeparture";
+import { branchAdvice, departureFor, isCollectedProfile, sampleCount, TrafficHistory, weekdayTraffic, WEEKDAYS } from "./TrafficInsightDeparture";
 import { TrafficInsightRideSimulatorUI } from "./TrafficInsightRideSimulatorUI";
 import { TrafficInsightTrafficLensUI } from "./TrafficInsightTrafficLensUI";
 import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
@@ -532,7 +532,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
         const showWeekdays = vis.departureCard && core.office !== "branch" && trip !== "none";
         if (!showWeekdays) this.weekday = -1;
         const outlook = showWeekdays && this.weekday >= 0
-            ? weekdayOutlook(this.history, trip, this.weekday, this.planningMinute) : null;
+            ? weekdayTraffic(this.history, trip, this.weekday, this.planningMinute) : null;
         this.lensUI.setDeparture(vis.departureCard ? core.departure : null, outlook, this.weekday, showWeekdays);
         if (vis.labelA && core.trip !== "none") {
             const phase = core.state === "Stopped" ? "stopped" : "planning";
