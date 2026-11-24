@@ -6,12 +6,13 @@
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
-> **Preview realism revision, 2026-11-22:** Home, street and office now have photographic surfaces, PBR shading and more detailed geometry. TypeScript compilation, runtime startup and all 14 LEAF scenarios passed, including the route-shaped peek and viewing-angle behavior.
-> Traffic Insight now supports historical motorcycle travel estimates for the Barcelona main-office commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated. No Spectacles hardware has been tested. The route peek uses a bent schematic map and has no duration cap while the viewing angle is held. The submission video is still outstanding.
+> **Preview realism revision, 2026-11-22.** Home, street and office now have photographic surfaces, PBR shading and more detailed geometry. TypeScript compilation, runtime startup and all 14 LEAF scenarios passed, including the route-shaped peek and viewing-angle behavior.
+> [Traffic Insight departure planning](#traffic-insight-departure-planning) adds a leave-now versus wait comparison for the Barcelona commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated. No Spectacles hardware has been tested.
 
 ## Contents
 
 - [What it does](#what-it-does)
+- [Traffic Insight departure planning](#traffic-insight-departure-planning)
 - [Walkthrough](#walkthrough)
 - [Preview surroundings](#preview-surroundings)
 - [Tests](#tests)
@@ -49,26 +50,36 @@ stateDiagram-v2
     Arrived --> Planning: start another trip
 ```
 
+## Traffic Insight departure planning
+
+The card above the route choices compares **leaving now** with a **lighter departure within the next hour**. Each available option shows ride duration and estimated arrival time, so a shorter ride can still get you there later. Pinch either route to leave immediately. The estimate for the route you picked carries into the riding peek, **Where am I?**, and the stopped route comparison.
+
+The modeled commute connects Via Júlia metro station in Nou Barris with DFactory in the Zona Franca industrial estate. Route A passes through Passeig de Colom. Route B passes through Plaça d'Espanya. **Main office** uses this outbound commute, and **Go home** from the main office uses its return direction. The branch office shows a sample estimate and indicates that it has no traffic history.
+
+### Try the four departure scenarios
+
+In Interactive Preview, pick **Go to office > Main office**. While the planning map is open, use **Change sample time** to cycle through the labeled Tuesday examples.
+
+| Barcelona time | Traffic Insight | Leave now | Wait |
+| --- | --- | --- | --- |
+| 07:30 | Good time to go | A takes 34 min. Arrive 08:04. | No departure in the next hour saves five minutes of riding. |
+| 08:00 | Busy. B saves 13 min over A. | B takes 43 min. Arrive 08:43. | Leave at 08:30 on A. Ride 34 min and arrive 09:04. |
+| 08:15 | Busy. A is still quickest. | A takes 53 min. Arrive 09:08. | Leave at 08:30 on A. Ride 34 min and arrive 09:04. |
+| 09:30 | Still learning this departure time | Both routes remain selectable using sample estimates. | No departure recommendation. |
+
+### Use collected traffic history
+
+The independent collector can run while Lens Studio is closed. It records traffic-aware motorcycle trip estimates every 15 minutes and groups them by direction, Barcelona weekday and local time. A slot needs at least three matching dates before it can inform a recommendation. Live collection requires a TomTom API key. [Collector setup and route sources](tools/traffic-history/README.md)
+
+**Preview verification.** The departure-card screenshot and LEAF C15 run are pending a connected Lens Studio session. The screenshot in the walkthrough below shows the previous planning layout.
+
 ## Walkthrough
 
 ### Planning: where am I going, and which option is fastest?
 
-![The map on the table with Home as Start, Office as Destination, labelled A/B dots and explicit total estimates.](docs/media/realistic-home-planning.png)
+![Planning map from the previous Preview revision showing Home as Start, Office as Destination, and the route cards.](docs/media/realistic-home-planning.png)
 
-**Go to office** asks which office, then displays the map. **Go home** opens the evening trip. The main-office commute runs between Via Júlia in Nou Barris and DFactory in Zona Franca. Branch office uses the sample trip estimates and shows that it has no traffic history.
-
-The departure card compares leaving now with a lighter departure in the next hour. Each option shows ride duration and arrival time. A route pinch leaves immediately, including during a busy period. The chosen estimate carries through to the route peek, stopped cards and **Where am I?**.
-
-In the bundled Preview, use **Change sample time** while the map is open. The morning examples illustrate the decision.
-
-| Tuesday departure | What the rider sees |
-| --- | --- |
-| 07:30 | Good time to go. A takes 34 minutes. |
-| 08:00 | Busy. B takes 43 minutes and arrives at 08:43. Waiting until 08:30 gives a 34-minute ride on A and arrival at 09:04. |
-| 08:15 | Busy on both corridors. A takes 53 minutes and arrives at 09:08. Leaving at 08:30 would arrive four minutes earlier. |
-| 09:30 | Too little history to recommend a time. Either route can still be selected using the sample estimates. |
-
-The photo above shows the planning map from the previous Preview revision. An updated capture and in-editor verification of the departure card are pending. The collector can run with Lens Studio closed and export weekday estimates for both directions. [Collector setup and data sources](tools/traffic-history/README.md)
+**Go to office** asks which office, then displays the map. **Go home** opens the return trip.
 
 The map is a **heading-up schematic**: the start is near the rider and the destination is ahead in either trip. Labels change from Home to Office to Office to Home. This is an illustrative layout, not a north-up geographic map.
 
