@@ -49,6 +49,7 @@
     glanceShowDeg: false
     glanceShowYawDeg: false
     glanceStrip: false
+    internetModule: false
     lensUI: false
     previewContext: false
     rideStep: false
@@ -56,6 +57,7 @@
     routeMap: false
     simulatorUI: false
     table: false
+    trafficProfileUrl: false
     verboseLogs: false
   ScriptTypesHidden:
     {}
@@ -94,6 +96,8 @@
       alertFadeSec: 0.500000
       confirmDurationSec: 1.200000
       verboseLogs: true
+      internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
+      trafficProfileUrl: ""
   ScriptTypes:
     -
       {}
@@ -126,3 +130,5 @@
     - '// @input float alertFadeSec = 0.5 {"widget":"slider", "min":0.1, "max":1.5, "step":0.05}'
     - '// @input float confirmDurationSec = 1.2 {"widget":"slider", "min":0.3, "max":3, "step":0.1}'
     - // @input bool verboseLogs = true
+    - // @input Asset.InternetModule internetModule
+    - '// @input string trafficProfileUrl {"hint":"HTTPS URL of the exported traffic profile. Leave blank for bundled Preview data."}'

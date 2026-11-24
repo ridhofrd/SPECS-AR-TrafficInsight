@@ -22,7 +22,7 @@
  * contract log lines). Splitting it would scatter the one-way render rule.
  */
 
-import { branchAdvice, departureFor, sampleCount, TrafficHistory } from "./TrafficInsightDeparture";
+import { branchAdvice, departureFor, isCollectedProfile, sampleCount, TrafficHistory, weekdayOutlook, WEEKDAYS } from "./TrafficInsightDeparture";
 import { TrafficInsightRideSimulatorUI } from "./TrafficInsightRideSimulatorUI";
 import { TrafficInsightTrafficLensUI } from "./TrafficInsightTrafficLensUI";
 import { TrafficInsightRouteMap } from "./TrafficInsightRouteMap";
@@ -181,6 +181,13 @@ export class TrafficInsightMain extends BaseScriptComponent {
             rearmSec: this.glanceRearmSec, fadeInSec: this.glanceFadeInSec, fadeOutSec: this.glanceFadeOutSec };
     }
 
+    @input @allowUndefined internetModule: InternetModule;
+    @input @hint("HTTPS URL of the exported traffic profile. Leave blank for bundled Preview data.")
+    trafficProfileUrl: string = "";
+
+    private weekday = -1;
+    private nextTrafficRefresh = 0;
+    private trafficPending = false;
     private history: TrafficHistory = null;
     private sampleTime = 0;
     private planningMinute = -1;
@@ -191,6 +198,7 @@ export class TrafficInsightMain extends BaseScriptComponent {
             const asset = requireAsset("../TrafficHistory.json") as JsonAsset;
             this.history = JSON.parse(asset.getString());
         } catch (error) { tiWarn("Traffic history unavailable: " + error); }
+        if (this.trafficProfileUrl && this.history && this.history.source === "sample") this.history = null;
         this.sm = new TrafficInsightStateMachine((trip, office) => {
             this.planningMinute = Math.floor(Date.now() / 60000);
             return office === "branch" ? branchAdvice() : departureFor(this.history, trip, this.planningMinute, this.sampleTime);
@@ -284,6 +292,13 @@ export class TrafficInsightMain extends BaseScriptComponent {
         );
         this.roadView.onLineHover.add((e: { route: RouteId; on: boolean }) => this.aim(e.route, e.on));
 
+        this.lensUI.onDepartureDay.add(day => this.handle(day < 0 ? BUTTON_NAMES.departureNow :
+            BUTTON_NAMES.departureWeekdayPrefix + WEEKDAYS[day], () => {
+            const core = this.sm.getCore();
+            if (!visibilityFor(core).departureCard || core.office === "branch") return { changed: false };
+            this.weekday = day;
+            return { changed: true };
+        }));
         this.lensUI.onProceed.add(() => this.handle(BUTTON_NAMES.proceed, () => this.sm.proceed()));
         this.lensUI.onRaincoatOn.add(() => this.handle(BUTTON_NAMES.raincoatOn, () => this.sm.raincoatOn()));
 
@@ -391,9 +406,14 @@ export class TrafficInsightMain extends BaseScriptComponent {
         if (!this.started) {
             return;
         }
-        if (this.history && this.history.source === "collected" && this.planningMinute !== Math.floor(Date.now() / 60000)) {
-            this.planningMinute = Math.floor(Date.now() / 60000);
+        const minute = Math.floor(Date.now() / 60000);
+        if ((this.trafficProfileUrl || (this.history && this.history.source === "collected")) && this.planningMinute !== minute) {
+            this.planningMinute = minute;
             if (this.sm.refreshDeparture().changed) this.render();
+        }
+        if (this.trafficProfileUrl && getTime() >= this.nextTrafficRefresh && !this.trafficPending) {
+            const core = this.sm.getCore();
+            if (visibilityFor(core).departureCard && core.office !== "branch") this.refreshTraffic();
         }
         if (this.confirmActive && getTime() - this.confirmStartTime >= Math.max(0.3, this.confirmDurationSec)) {
             this.confirmActive = false;
@@ -421,6 +441,25 @@ export class TrafficInsightMain extends BaseScriptComponent {
             this.lensUI.hideAlertIcon();
             this.applyResult(before, res);
         }
+    }
+
+    private async refreshTraffic(): Promise<void> {
+        this.nextTrafficRefresh = getTime() + 60;
+        if (!this.internetModule || !/^https:\/\//i.test(this.trafficProfileUrl)) {
+            tiWarn("Traffic profile requires an Internet Module and HTTPS URL");
+            return;
+        }
+        this.trafficPending = true;
+        try {
+            const response = await this.internetModule.fetch(this.trafficProfileUrl);
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const profile = await response.json() as TrafficHistory;
+            if (!isCollectedProfile(profile)) throw new Error("unexpected traffic profile");
+            this.history = profile;
+            if (this.sm.refreshDeparture().changed) this.render();
+        } catch (error) {
+            tiWarn("Traffic profile refresh failed: " + error);
+        } finally { this.trafficPending = false; }
     }
 
     private updateGlance(): void {
@@ -489,7 +528,12 @@ export class TrafficInsightMain extends BaseScriptComponent {
         // Lens layer cards
         this.lensUI.setInputEnabled(inputOk);
         const times = core.departure && core.departure.minutes;
-        this.lensUI.setDeparture(vis.departureCard ? core.departure : null);
+        const trip = core.trip;
+        const showWeekdays = vis.departureCard && core.office !== "branch" && trip !== "none";
+        if (!showWeekdays) this.weekday = -1;
+        const outlook = showWeekdays && this.weekday >= 0
+            ? weekdayOutlook(this.history, trip, this.weekday, this.planningMinute) : null;
+        this.lensUI.setDeparture(vis.departureCard ? core.departure : null, outlook, this.weekday, showWeekdays);
         if (vis.labelA && core.trip !== "none") {
             const phase = core.state === "Stopped" ? "stopped" : "planning";
             const progress = core.state === "Stopped" ? core.progress : 0;

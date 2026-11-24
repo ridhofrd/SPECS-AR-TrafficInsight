@@ -25,7 +25,7 @@
   VersionPrerelease: ""
   UpdateOrder: 0
   RunInEditor: false
-  ComponentUid: 00000000-0000-0000-0000-000000000000
+  ComponentUid: d3122e58-fa60-48fe-95f8-89a916346349
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:

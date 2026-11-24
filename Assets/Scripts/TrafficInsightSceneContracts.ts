@@ -46,6 +46,8 @@ export const BUTTON_NAMES = {
     ride: "RideButton",
     stopped: "StoppedButton",
     whereAmI: "WhereAmIButton",
+    departureNow: "DepartureNowButton",
+    departureWeekdayPrefix: "DepartureWeekdayButton",
     sampleTime: "SampleTimeButton",
     hideRoute: "HideRouteButton",
     chooseRouteA: "ChooseRouteAButton",
