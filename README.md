@@ -2,15 +2,22 @@
 
 **A commute co-pilot for motorcycle riders on Snap Spectacles.** Plan a trip in your space, receive a brief warning when your route is affected, and pull over to compare the options before continuing.
 
-![Planning: labelled start and destination, blue A and green B dots, and whole-trip time and fuel estimates.](docs/media/realistic-home-planning.png)
-
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
+
+## Demo video
+
+[![TrafficInsight demo showing the departure card and both routes in Lens Studio Preview.](docs/media/traffic-insight-demo-cover.jpg)](https://github.com/ridhofrd/SPECS-AR-TrafficInsight/raw/refs/heads/main/docs/media/traffic-insight-demo.mp4)
+
+[Watch or download the 50-second MP4](https://github.com/ridhofrd/SPECS-AR-TrafficInsight/raw/refs/heads/main/docs/media/traffic-insight-demo.mp4)
+
+Follow a sample return commute from departure planning and the weekday graph through the riding glance, a rain alert, rerouting, and arrival.
 
 > **Preview realism revision, 2026-11-22.** Home, street and office now have photographic surfaces, PBR shading and more detailed geometry. TypeScript compilation, runtime startup and all 14 LEAF scenarios passed, including the route-shaped peek and viewing-angle behavior.
 > [Traffic Insight departure planning](#traffic-insight-departure-planning) adds a leave-now versus wait comparison for the Barcelona commute. The default Preview uses labeled sample times. Movement, map geometry, hazards, weather and fuel are simulated. No Spectacles hardware has been tested.
 
 ## Contents
 
+- [Demo video](#demo-video)
 - [What it does](#what-it-does)
 - [Traffic Insight departure planning](#traffic-insight-departure-planning)
 - [Walkthrough](#walkthrough)
@@ -390,7 +397,8 @@ Problems that came up while setting up and building this project on Windows 11. 
 - [x] Preview realism: photographic surfaces, PBR shading and more detailed home, street and office geometry
 - [x] Add Barcelona weekday departure advice and an independent traffic collector
 - [x] Run C15 and capture the departure card in Interactive Preview
-- [ ] Demo video and Devpost submission (deadline: Dec 7, 5:00 PM ET)
+- [x] Record the Lens Studio demo and attach the MP4 to the README
+- [ ] Devpost submission (deadline: Dec 7, 5:00 PM ET)
 
 ## The hackathon
 
