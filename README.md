@@ -2,9 +2,9 @@
 
 **TrafficInsight is an augmented-reality prototype for Snap Spectacles AR glasses.** It helps motorcycle commuters decide when to leave and which route to take. Before departure, the wearer can compare traffic and pinch a route on a map placed above the table.
 
-![Concept illustration of black AR glasses, a motorcycle helmet, and a paper map with two marked routes on a table in a Barcelona apartment.](docs/media/ar-glasses-commute-planning.png)
+![Black AR glasses on a table beside a helmet. A two-route map and a traffic graph are illustrated inside the lenses.](docs/media/ar-glasses-commute-planning.png)
 
-*Concept illustration of the pre-ride setting. The demo and screenshots below show the wearer’s view in Lens Studio’s Spectacles simulator. Hardware testing is pending.*
+*Concept illustration showing the route map and traffic graph inside the lenses. The demo and screenshots below show the prototype in Lens Studio’s Spectacles simulator. Hardware testing is pending.*
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
