@@ -35,6 +35,8 @@ test('partial responses and repeated runs never produce an unpaired or duplicate
             if (dir === 'morning' && route === 'B') throw Error('timeout');
             return 1800;
         }), /morning/);
+        assert.deepEqual(forecast(db, now + 3).live, { evening: { slot: now, A: 30, B: 30 } });
+        assert.deepEqual(forecast(db, now + 21).live, {});
         const calls = [];
         await collect(db, now + 4, async (dir, route) => { calls.push(dir + route); return 2700; });
         await collect(db, now + 8, async () => assert.fail('unnecessary request'));
@@ -54,6 +56,8 @@ test('three same-weekday dates produce direction-specific medians at Barcelona t
                 60 * ([30, 80, 40][i] + (route === 'B' ? 8 : 0) + (dir === 'evening' ? 5 : 0)));
         }
         const profile = forecast(db, now);
+        assert.deepEqual(profile.live, {});
+        assert.deepEqual(profile.week['morning/Tue/480'], { A: 40, B: 48, days: 3 });
         assert.deepEqual(profile.frames[now].morning, { A: 40, B: 48, days: 3 });
         assert.deepEqual(profile.frames[now].evening, { A: 45, B: 53, days: 3 });
         assert.equal(profile.frames[now+15].morning, undefined);

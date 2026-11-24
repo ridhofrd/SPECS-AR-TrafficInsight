@@ -72,9 +72,17 @@ function median(values) {
 export function forecast(db, now) {
     // One vote per local date even when a clock hour repeats in October.
     const grouped = new Map();
+    const live = {};
     const rows = db.prepare('SELECT * FROM observations WHERE corridor=? AND slot>=? AND slot<=?')
         .all(corridor, now - 12 * 7 * 1440, now);
     for (const row of rows) {
+        if (row.slot >= now - 20 && (!live[row.direction] || live[row.direction].slot < row.slot)) {
+            live[row.direction] = {
+                slot: row.slot,
+                A: Math.max(1, Math.round(row.aSeconds / 60)),
+                B: Math.max(1, Math.round(row.bSeconds / 60)),
+            };
+        }
         const { date, day, minute } = localSlot(row.slot);
         const key = [row.direction, day, minute].join('/');
         if (!grouped.has(key)) grouped.set(key, new Map());
@@ -90,6 +98,7 @@ export function forecast(db, now) {
         const minutes = route => Math.max(1, Math.round(median(samples.map(s => median(s[route]))) / 60));
         bins.set(key, { A: minutes('A'), B: minutes('B'), days: samples.length });
     }
+    const week = Object.fromEntries(bins);
     const frames = {};
     const start = now - now % 15;
     // The last day supplies clock labels for journeys crossing the publication window.
@@ -98,32 +107,41 @@ export function forecast(db, now) {
         for (const direction of directions) frame[direction] = bins.get([direction, frame.day, frame.minute].join('/'));
         frames[t] = frame;
     }
-    return { version: 1, corridor, source: 'collected', validUntil: start + 7 * 1440, frames };
+    return { version: 1, corridor, source: 'collected', validUntil: start + 7 * 1440, live, week, frames };
 }
 
-function publish(db) {
+function publish(db, output) {
     const profile = forecast(db, Math.floor(Date.now() / 60000));
-    const temp = asset + '.' + randomUUID() + '.tmp';
+    mkdirSync(dirname(output), {recursive: true});
+    const temp = output + '.' + randomUUID() + '.tmp';
     writeFileSync(temp, JSON.stringify(profile) + '\n');
-    renameSync(temp, asset);
+    renameSync(temp, output);
 }
 
 async function run() {
     const args = process.argv.slice(2);
+    const outputOption = args.find(arg => arg.startsWith('--output='));
+    if (outputOption) args.splice(args.indexOf(outputOption), 1);
+    const output = outputOption ? resolve(outputOption.slice('--output='.length)) : asset;
     if (args.some(a => !['--watch', '--publish', '--export-only'].includes(a)) ||
-        (args.includes('--export-only') && args.includes('--watch'))) throw new Error('Use [--watch] [--publish] or --export-only');
+        (args.includes('--export-only') && args.includes('--watch')) || outputOption === '--output=') {
+        throw new Error('Use [--watch] [--publish] or --export-only, with optional --output=PATH');
+    }
     const exportOnly = args.includes('--export-only');
     const key = process.env.TOMTOM_API_KEY;
     if (!exportOnly && !key) throw new Error('Set TOMTOM_API_KEY in the collector environment.');
     mkdirSync(dirname(database), {recursive: true});
     const db = openHistory(database);
     try {
-        if (exportOnly) { publish(db); return; }
+        if (exportOnly) { publish(db, output); return; }
         do {
             let failed = false;
             try {
-                await collect(db, Math.floor(Date.now() / 60000), (dir, route) => duration(dir, route, key));
-                if (args.includes('--publish')) publish(db);
+                try {
+                    await collect(db, Math.floor(Date.now() / 60000), (dir, route) => duration(dir, route, key));
+                } finally {
+                    if (args.includes('--publish')) publish(db, output);
+                }
                 console.log(new Date().toISOString(), 'Collection complete.');
             } catch (error) {
                 if (!args.includes('--watch')) throw error;
