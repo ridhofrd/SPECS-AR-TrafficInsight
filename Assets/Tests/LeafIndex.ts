@@ -1,7 +1,7 @@
 /**
  * LeafIndex.ts — registers the TrafficInsight LEAF scenarios.
  * One scenario per done criterion in devpost/design-brief.md; ids match the
- * criteria (C1-C14). Attached to the root SceneObject "LeafIndex".
+ * criteria (C1-C15). Attached to the root SceneObject "LeafIndex".
  */
 
 import { scenariosIndex } from "Leaf.lspkg/Scenarios/decorator/ScenarioIndexDecorator";
@@ -19,6 +19,7 @@ import { JourneyContextScenario } from "./JourneyContextScenario";
 import { GlanceLookDownScenario } from "./GlanceLookDownScenario";
 import { GlanceViewingAngleScenario } from "./GlanceViewingAngleScenario";
 import { WhereAmIScenario } from "./WhereAmIScenario";
+import { DepartureInsightScenario } from "./DepartureInsightScenario";
 import { GlancePriorityScenario } from "./GlancePriorityScenario";
 
 @component
@@ -45,5 +46,6 @@ export class LeafIndex extends BaseScriptComponent {
         { id: "C12", typename: GlanceViewingAngleScenario.getTypeName() },
         { id: "C13", typename: WhereAmIScenario.getTypeName() },
         { id: "C14", typename: GlancePriorityScenario.getTypeName() },
+        { id: "C15", typename: DepartureInsightScenario.getTypeName() },
     ];
 }

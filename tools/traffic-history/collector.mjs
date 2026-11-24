@@ -36,12 +36,12 @@ export function openHistory(path) {
     return db;
 }
 
-async function duration(direction, route, key) {
+export async function duration(direction, route, key, request = fetch) {
     const points = direction === 'morning' ? [home, via[route], office] : [office, via[route], home];
     const url = new URL('https://api.tomtom.com/routing/1/calculateRoute/' + points.join(':') + '/json');
     url.search = new URLSearchParams({ key, traffic: 'true', travelMode: 'motorcycle',
         routeType: 'fastest', routeRepresentation: 'summaryOnly', departAt: 'now' });
-    const response = await fetch(url, {signal: AbortSignal.timeout(20000)});
+    const response = await request(url, {signal: AbortSignal.timeout(20000)});
     if (!response.ok) throw new Error('routing provider returned HTTP ' + response.status);
     const seconds = (await response.json()).routes?.[0]?.summary?.travelTimeInSeconds;
     if (!Number.isSafeInteger(seconds) || seconds <= 0) throw new Error('missing travel time');

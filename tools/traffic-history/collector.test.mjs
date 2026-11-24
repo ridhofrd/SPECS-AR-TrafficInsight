@@ -1,8 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { collect, forecast, localSlot, openHistory } from './collector.mjs';
+import { collect, duration, forecast, localSlot, openHistory } from './collector.mjs';
 
 const minute = iso => Date.parse(iso) / 60000;
+
+test('the provider request keeps corridor identity when reversed and reads traffic-aware motorcycle times', async () => {
+    const urls = [];
+    const request = async url => {
+        urls.push(url);
+        return { ok: true, json: async () => ({ routes: [{summary: {travelTimeInSeconds: 1932}}] }) };
+    };
+    for (const route of ['A', 'B']) {
+        for (const direction of ['morning', 'evening']) {
+            assert.equal(await duration(direction, route, 'test', request), 1932);
+        }
+    }
+    const waypoints = urls.map(url => url.pathname.split('/')[4].split(':'));
+    assert.deepEqual(waypoints[0], [...waypoints[1]].reverse());
+    assert.deepEqual(waypoints[2], [...waypoints[3]].reverse());
+    assert.notEqual(waypoints[0][1], waypoints[2][1]);
+    for (const url of urls) {
+        assert.equal(url.searchParams.get('traffic'), 'true');
+        assert.equal(url.searchParams.get('travelMode'), 'motorcycle');
+    }
+    await assert.rejects(duration('morning', 'A', 'test', async () => ({ ok: false, status: 429 })), /HTTP 429/);
+    await assert.rejects(duration('morning', 'A', 'test', async () => ({ ok: true, json: async () => ({routes: []}) })), /missing travel time/);
+});
 
 test('partial responses and repeated runs never produce an unpaired or duplicate comparison', async () => {
     const db = openHistory(':memory:');
