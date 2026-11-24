@@ -31,4 +31,4 @@ Each pair contains TomTom's estimated motorcycle travel times at collection time
 
 The planning card compares the quickest ride now with supported departures within the next hour on the same local day. A saving of at least five minutes of riding produces a busy-period suggestion. A good-time suggestion requires coverage of all four later slots. Each arrival clock includes the wait until departure. Missing or expired history gives no time-to-leave recommendation. The map still accepts either route.
 
-Run the collector regression checks with `node --test tools/traffic-history/collector.test.mjs`. These use temporary in-memory databases. The live TomTom request still needs an API key and the Lens card still needs an Interactive Preview run.
+Run the collector regression checks with `node --test tools/traffic-history/collector.test.mjs`. These use temporary in-memory databases. Live collection requires a TomTom API key. LEAF C15 passed in Interactive Preview on 2026-11-24. [Departure card and screenshots](../../README.md#traffic-insight-departure-planning)
