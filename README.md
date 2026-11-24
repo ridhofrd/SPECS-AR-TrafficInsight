@@ -52,9 +52,9 @@ stateDiagram-v2
 
 ## Traffic Insight departure planning
 
-![Interactive Preview at 17:30. Route B now arrives at 18:15. Waiting until 18:00 for a shorter ride on A arrives at 18:36.](docs/media/traffic-insight-busy-departure.png)
+![Interactive Preview at 17:45 in the sample return trip. A now arrives at 18:40. Leaving at 18:00 on A arrives at 18:36.](docs/media/traffic-insight-now.png)
 
-The card above the route choices compares **leaving now** with a **lighter departure within the next hour**. Each available option shows ride duration and estimated arrival time, so a shorter ride can still get you there later. Pinch either route to leave immediately. The estimate for the route you picked carries into the riding peek, **Where am I?**, and the stopped route comparison.
+**Now** uses the latest paired traffic estimates for both routes and compares them with a typical lighter departure within the next hour. Fresh estimates count for up to 20 minutes. When they expire, the card labels its estimates as typical traffic. Each available option shows ride duration and estimated arrival time, so a shorter ride can still get you there later. Pinch either route to leave immediately. The estimate for the route you picked carries into the riding peek, **Where am I?**, and the stopped route comparison.
 
 The modeled commute connects Via Júlia metro station in Nou Barris with DFactory in the Zona Franca industrial estate. Route A passes through Passeig de Colom. Route B passes through Plaça d'Espanya. **Main office** uses this outbound commute, and **Go home** from the main office uses its return direction. The branch office shows a sample estimate and indicates that it has no traffic history.
 
@@ -69,9 +69,15 @@ In Interactive Preview, pick **Go to office > Main office**. While the planning 
 | 08:15 | Busy. A is still quickest. | A takes 53 min. Arrive 09:08. | Leave at 08:30 on A. Ride 34 min and arrive 09:04. |
 | 09:30 | Still learning this departure time | Both routes remain selectable using sample estimates. | No departure recommendation. |
 
+### Plan for another weekday
+
+![Sunday in Interactive Preview with the historical sample's lighter and busiest departure windows.](docs/media/traffic-insight-weekday.png)
+
+Choose a day from **Mon** through **Sun** on the departure card. It shows the lighter and busiest sampled 15-minute windows for that direction, along with the quickest route and typical duration in each window. A slot requires observations from at least three matching dates. Choose **Now** to return to current departure advice. Route selections always start the ride using the current estimate.
+
 ### Use collected traffic history
 
-The independent collector can run while Lens Studio is closed. It records traffic-aware motorcycle trip estimates every 15 minutes and groups them by direction, Barcelona weekday and local time. A slot needs at least three matching dates before it can inform a recommendation. Live collection requires a TomTom API key. [Collector setup and route sources](tools/traffic-history/README.md)
+The independent collector can run while Lens Studio is closed. It records traffic-aware motorcycle trip estimates every 15 minutes and groups them by direction, Barcelona weekday and local time. A slot needs at least three matching dates before it can inform a recommendation. Live collection requires a TomTom API key and an HTTPS URL for the exported profile. During planning the Lens refreshes that profile at most once per minute. [Collector setup and route sources](tools/traffic-history/README.md)
 
 **Preview verification.** LEAF C15 passed in Interactive Preview on 2026-11-24. The screenshot above shows the busy return trip. [See the 17:00 good-time sample](docs/media/traffic-insight-departure.png).
 
@@ -203,7 +209,7 @@ All seven photographic source files passed SHA-256 verification. Earlier local r
 | C12 | No duration cap, pitch/yaw look-away and re-entry, explicit Hide route and re-arming | Pass |
 | C13 | Shared remaining estimates and hazard boundaries; actual caption button; no visual or progress change | Pass |
 | C14 | Blocked states, immediate alert/stop/arrival dismissal and no automatic reopening | Pass |
-| C15 | Departure advice, both busy-hour choices, sparse history and rider override | Pass (2026-11-24) |
+| C15 | Recent traffic, historical fallback, weekday outlook and rider override | Pass (2026-11-24) |
 
 Sound audibility, hardware hand tracking, daylight readability and real riding comfort are unverified. Logger checks still report existing SDK deprecation and renderer batching warnings; no runtime exceptions were observed during verification.
 

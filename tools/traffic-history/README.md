@@ -25,10 +25,20 @@ Observations are written to `.traffic-history/observations.sqlite`. With `--publ
 
 The committed asset selects the synthetic Tuesday scenarios. To use those scenarios again after a local export, set the contents of `Assets/TrafficHistory.json` to `{"version":1,"source":"sample"}` and restart Preview. The SQLite observations can be used for the next export.
 
+## Connect the live profile to the Lens
+
+Keep the TomTom key on the collector machine. Export its public, aggregate traffic profile to a path served over HTTPS. Give the profile URL a cache lifetime under one minute.
+
+```sh
+node tools/traffic-history/collector.mjs --watch --publish --output=/path/to/public/traffic-profile.json
+```
+
+In Lens Studio, add an Internet Module asset and assign it to **Internet Module** on the TrafficInsightMain component. Set **Traffic Profile Url** to the exported HTTPS endpoint. Use the Spectacles device type in Preview. A configured Lens checks the profile while the main-office planning map is open and refreshes it up to once a minute. The hosted endpoint has not been exercised with a live TomTom key in this project. If the service stops responding, the last valid profile remains usable until its estimates expire. [Snap Internet Access requirements](https://developers.snap.com/spectacles/about-spectacles-features/apis/internet-access)
+
 ## How the advice is calculated
 
 Each pair contains TomTom's estimated motorcycle travel times at collection time. Group observations by direction, Barcelona weekday and 15-minute local time across the last 12 weeks. Take the median across distinct local dates, giving each date one vote even when clocks repeat an hour. At least three dates must support both routes in a slot.
 
-The planning card compares the quickest ride now with supported departures within the next hour on the same local day. A saving of at least five minutes of riding produces a busy-period suggestion. A good-time suggestion requires coverage of all four later slots. Each arrival clock includes the wait until departure. Missing or expired history gives no time-to-leave recommendation. The map still accepts either route.
+The **Now** card uses the most recent complete A/B sample in that direction for up to 20 minutes. When the sample expires, the Lens labels the fallback as typical traffic. Each weekday view uses its own historical slots. The planning card compares the quickest ride now with supported departures within the next hour on the same local day. A saving of at least five minutes of riding produces a busy-period suggestion. A good-time suggestion requires coverage of all four later slots. Each arrival clock includes the wait until departure. Missing or expired history gives no time-to-leave recommendation. The map still accepts either route.
 
 Run the collector regression checks with `node --test tools/traffic-history/collector.test.mjs`. These use temporary in-memory databases. Live collection requires a TomTom API key. LEAF C15 passed in Interactive Preview on 2026-11-24. [Departure card and screenshots](../../README.md#traffic-insight-departure-planning)

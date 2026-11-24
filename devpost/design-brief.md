@@ -129,6 +129,8 @@ rules in the original revision-two plan and decision 0008.
 
 15. After a destination is chosen, show a departure card on the planning map. In a good window recommend the quickest current route. During a busy window show a lighter departure and the quickest choice if leaving now, including A when B offers no improvement. Compare ride times and arrival clocks. Let the rider leave on either route in one pinch. Suppress timing advice for sparse history. Hide the card during the ride and use the chosen estimate for the route peek, caption and stopped comparison. LEAF C15 exercises the labeled sample scenarios through the normal controls.
 
+The Now view uses a recent paired route sample when it is at most 20 minutes old. Label the historical fallback when fresh traffic is unavailable. Let the rider select any weekday and compare lighter and busier supported departure windows. Browsing a weekday keeps the route choices tied to leaving now. LEAF C15 verifies that separation.
+
 An independent collector samples each Barcelona corridor and direction every 15 minutes. Use weekday and local time to compare departures within the coming hour. At least three distinct matching dates support each estimate. The main-office commute connects Nou Barris and Zona Franca. The branch office uses its own fallback. [Collector and route details](../tools/traffic-history/README.md)
 
 ## Preview context (approved 2026-11-20)
