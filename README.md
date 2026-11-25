@@ -4,9 +4,9 @@
 
 Motorcyclists are the primary audience. The same pre-departure planning flow can help cyclists, car drivers, and other road users. The current Barcelona demo and traffic collector use motorcycle route estimates.
 
-![Black AR glasses on a table beside a full-face motorcycle helmet. A two-route map and a traffic graph are illustrated inside the lenses.](docs/media/ar-glasses-commute-planning.png)
+![Black AR glasses tilted toward a floating map showing two routes and a Rain ahead alert. A route map and a traffic graph appear in the lenses.](docs/media/traffic-insight-ar-hero.png)
 
-*Concept illustration showing the route map and traffic graph inside the lenses. The demo and screenshots below show the prototype in Lens Studio’s Spectacles simulator. Hardware testing is pending.*
+*Concept illustration of the glasses and a weather alert pinned to the affected route. The demo and screenshots below show the prototype in Lens Studio’s Spectacles simulator. Hardware testing is pending.*
 
 Built for **Learn AR with SPECS, Round 2**, using Lens Studio, CLAD, the Lens Studio MCP, Spectacles Interaction Kit and UI Kit.
 
