@@ -21,7 +21,7 @@
     - !<own> df5b9bee-1e25-4538-9944-cbc7a0ec72bc
     - !<own> 280e1cd8-3a33-4079-9862-830b1ac24fbe
     - !<own> 6465f6e2-281b-412c-87aa-5c23e1fc7e17
-    - !<own> d514169f-19d9-4a8b-ae3f-21a28fb7d984
+    - !<own> a3f09bff-0798-4256-a6cd-5b4006bec090
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -1167,6 +1167,22 @@
     []
   Components:
     []
+- !<ScriptComponent/454e0186-3ee8-464b-8069-f22d36964ed3>
+  PrefabRemaps:
+    []
+  Name: MessagingBridge
+  Enabled: true
+  ScriptAsset: !<reference> 9aa407db-2872-4afc-a162-cf7faf2a0f29
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/46b79537-a269-46f1-9483-500d7a4170d6>
   PrefabRemaps:
     []
@@ -2350,6 +2366,21 @@
   Components:
     - !<own> fa9bc580-df81-4654-9979-c1152e12e74d
     - !<own> c4b3ffd3-7929-4abc-8c93-1358be6000b9
+- !<SceneObject/a3f09bff-0798-4256-a6cd-5b4006bec090>
+  PrefabRemaps:
+    []
+  Name: LEAF Plugin Bridge
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 454e0186-3ee8-464b-8069-f22d36964ed3
 - !<SceneObject/a4b1ce71-4840-4493-bc52-58f3c13933e1>
   PrefabRemaps:
     []
@@ -2830,6 +2861,8 @@
     alertFadeSec: true
     confirmDurationSec: true
     verboseLogs: true
+    internetModule: true
+    trafficProfileUrl: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
@@ -2862,6 +2895,8 @@
       alertFadeSec: 0.500000
       confirmDurationSec: 1.200000
       verboseLogs: true
+      internetModule: !<reference.InternetModule> 00000000-0000-0000-0000-000000000000
+      trafficProfileUrl: ""
   ScriptTypes:
     "":
       {}
@@ -3159,21 +3194,6 @@
   ScriptTypes:
     "":
       {}
-- !<SceneObject/d514169f-19d9-4a8b-ae3f-21a28fb7d984>
-  PrefabRemaps:
-    []
-  Name: LEAF Plugin Bridge
-  Enabled: true
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> daeb14b1-9724-4c27-9a2e-b3aedeb2849e
 - !<SceneObject/d5f63266-b1ce-419f-847b-3c9f347b3ee2>
   PrefabRemaps:
     []
@@ -3284,22 +3304,6 @@
   BlendNormals: false
   BlendShapes:
     {}
-- !<ScriptComponent/daeb14b1-9724-4c27-9a2e-b3aedeb2849e>
-  PrefabRemaps:
-    []
-  Name: MessagingBridge
-  Enabled: true
-  ScriptAsset: !<reference> 9aa407db-2872-4afc-a162-cf7faf2a0f29
-  ScriptInputsDefault:
-    {}
-  ScriptTypesDefault:
-    {}
-  ScriptInputs:
-    "":
-      {}
-  ScriptTypes:
-    "":
-      {}
 - !<SceneObject/dcc36a33-e23d-48f3-8e96-f9c9fd3cd030>
   PrefabRemaps:
     []
